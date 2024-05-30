@@ -1,6 +1,6 @@
 <template>
   <main class="bg-gradient-to-tr from-rose-100 to-sky-100 dark:bg-gradient-to-tr dark:from-sky-950 dark:via-gray-800">
-    <nav class="flex justify-end items-center p-4 fixed w-full">
+    <nav class="flex justify-end items-center p-4 sticky w-full">
       <ToggleTheme />
     </nav>
     <slot />
