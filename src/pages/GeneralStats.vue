@@ -5,7 +5,7 @@
         class="stroke-slate-800 shadow-md p-2 rounded-lg size-8 bg-white">
         <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 15.75 3 12m0 0 3.75-3.75M3 12h18" />
       </svg>
-      <p class="px-4 py-2 w-full text-center">{{ opponent }}</p>
+      <p class="px-4 py-2 w-full text-center">{{ opponent?.opponent }}</p>
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
         class="stroke-slate-800 shadow-md p-2 rounded-lg size-8 bg-white">
         <path fill-rule="evenodd"
@@ -60,32 +60,18 @@
       <!-- <div class="row-span-1 p-4 rounded-lg bg-white col-span-3 h-1/5"></div> -->
     </div>
   </div>
-  <div class="flex bg-white w-screen h-16 rounded-lg items-center justify-around fixed bottom-0">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
-      class="size-6 shadow-md bg-cyan-500 fill-white p-1 rounded-lg">
-      <path fill-rule="evenodd"
-        d="M9.293 2.293a1 1 0 0 1 1.414 0l7 7A1 1 0 0 1 17 11h-1v6a1 1 0 0 1-1 1h-2a1 1 0 0 1-1-1v-3a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v3a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-6H3a1 1 0 0 1-.707-1.707l7-7Z"
-        clip-rule="evenodd" />
-    </svg>
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-6 fill-slate-800">
-      <path fill-rule="evenodd"
-        d="M1.5 5.625c0-1.036.84-1.875 1.875-1.875h17.25c1.035 0 1.875.84 1.875 1.875v12.75c0 1.035-.84 1.875-1.875 1.875H3.375A1.875 1.875 0 0 1 1.5 18.375V5.625ZM21 9.375A.375.375 0 0 0 20.625 9h-7.5a.375.375 0 0 0-.375.375v1.5c0 .207.168.375.375.375h7.5a.375.375 0 0 0 .375-.375v-1.5Zm0 3.75a.375.375 0 0 0-.375-.375h-7.5a.375.375 0 0 0-.375.375v1.5c0 .207.168.375.375.375h7.5a.375.375 0 0 0 .375-.375v-1.5Zm0 3.75a.375.375 0 0 0-.375-.375h-7.5a.375.375 0 0 0-.375.375v1.5c0 .207.168.375.375.375h7.5a.375.375 0 0 0 .375-.375v-1.5ZM10.875 18.75a.375.375 0 0 0 .375-.375v-1.5a.375.375 0 0 0-.375-.375h-7.5a.375.375 0 0 0-.375.375v1.5c0 .207.168.375.375.375h7.5ZM3.375 15h7.5a.375.375 0 0 0 .375-.375v-1.5a.375.375 0 0 0-.375-.375h-7.5a.375.375 0 0 0-.375.375v1.5c0 .207.168.375.375.375Zm0-3.75h7.5a.375.375 0 0 0 .375-.375v-1.5A.375.375 0 0 0 10.875 9h-7.5A.375.375 0 0 0 3 9.375v1.5c0 .207.168.375.375.375Z"
-        clip-rule="evenodd" />
-    </svg>
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-6 fill-slate-800">
-      <path
-        d="M4.5 6.375a4.125 4.125 0 1 1 8.25 0 4.125 4.125 0 0 1-8.25 0ZM14.25 8.625a3.375 3.375 0 1 1 6.75 0 3.375 3.375 0 0 1-6.75 0ZM1.5 19.125a7.125 7.125 0 0 1 14.25 0v.003l-.001.119a.75.75 0 0 1-.363.63 13.067 13.067 0 0 1-6.761 1.873c-2.472 0-4.786-.684-6.76-1.873a.75.75 0 0 1-.364-.63l-.001-.122ZM17.25 19.128l-.001.144a2.25 2.25 0 0 1-.233.96 10.088 10.088 0 0 0 5.06-1.01.75.75 0 0 0 .42-.643 4.875 4.875 0 0 0-6.957-4.611 8.586 8.586 0 0 1 1.71 5.157v.003Z" />
-    </svg>
-  </div>
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from "vue";
-import { getStats, getMatch } from "../firebase";
+import { computed, onMounted, ref, watch } from "vue";
+// import { getStats, getMatch } from "../firebase";
+import { useCollection, useDocument } from "vuefire";
+import { collection, doc, onSnapshot } from "firebase/firestore";
+import { db } from "../firebase";
 
 const score = ref([0, 0]);
 
-const opponent = ref("");
+const opponent = useDocument(doc(db, "live_matches", "59p51BXg0ndGKjFUYfeu"))
 
 const log = ref({ data: [] as number[], labels: [] as string[] });
 
@@ -276,30 +262,24 @@ let pointLog = computed(() => {
     },
   };
 });
-
-onMounted(() => {
-  getStats("59p51BXg0ndGKjFUYfeu").then((res) => {
-    // console.log(res.value);
-    let stats = res.value;
-    score.value = [
-      stats[stats.length - 1].score_us,
-      stats[stats.length - 1].score_them,
-    ];
-    log.value = {
-      labels: stats.map((s) => s.score_them + "-" + s.score_us),
-      data: stats.map((s) => s.score_us - s.score_them),
-    };
-    let grouped = Map.groupBy(stats.filter((s)=>s.to == 2 && s.action.type == 'error'), ({ action })=>action.area)
-    errorData.value = {
-      labels: Array.from(grouped.keys().map((k: number)=>areaLabels[k])),
-      data: Array.from(grouped.values()).map((v)=>v.length)
+// let rt = useCollection(collection(db, "live_matches", "59p51BXg0ndGKjFUYfeu", "stats"))
+const u = onSnapshot(collection(db, "live_matches", "59p51BXg0ndGKjFUYfeu", "stats"), (q)=>{
+  // console.log()
+  let stats = q.docs.map((d)=>d.data());
+    if (stats.length > 0) {
+      score.value = [
+        stats[stats.length - 1].score_us,
+        stats[stats.length - 1].score_them,
+      ];
+      log.value = {
+        labels: stats.map((s) => s.score_them + "-" + s.score_us),
+        data: stats.map((s) => s.score_us - s.score_them),
+      };
+      let grouped = Map.groupBy(stats.filter((s) => s.to == 2 && s.action.type == 'error'), ({ action }) => action.area)
+      errorData.value = {
+        labels: Array.from(grouped.keys(), (k: number) => areaLabels[k]),
+        data: Array.from(grouped.values(), (v) => v.length)
+      }
     }
-    // console.log(log.value);
-  });
-
-  getMatch("59p51BXg0ndGKjFUYfeu").then((res) => {
-    // console.log(res.value)
-    opponent.value = res.value?.opponent;
-  });
-});
+})
 </script>

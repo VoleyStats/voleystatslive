@@ -4,10 +4,10 @@ import App from './App.vue'
 import VueApexCharts from "vue3-apexcharts"
 import router from './router.ts'
 import {firebaseApp} from "./firebase.ts";
-import { VueFire, VueFireFirestoreOptionsAPI } from "vuefire"
+import { VueFire, VueFireDatabaseOptionsAPI, VueFireFirestoreOptionsAPI } from "vuefire"
 
 createApp(App).use(VueApexCharts).use(router).use(VueFire, {
     firebaseApp,
-    modules: [VueFireFirestoreOptionsAPI()]
+    modules: [VueFireFirestoreOptionsAPI(), VueFireDatabaseOptionsAPI()]
 }).mount('#app')
-// app.config.devtools = true
+App.config.devtools = true
