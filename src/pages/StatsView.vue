@@ -1,8 +1,17 @@
 <template>
-    <div v-if="tab.valueOf() === 1" class="bg-red-500">
-        <GeneralStats  class="h-screen"/>
+  <div class=" w-screen h-16 rounded-lg text-center p-4">
+    <p class="text-white">
+      {{ opponent?.opponent }}
+    </p>
+<!-- Suggested code may be subject to a license. Learn more: ~LicenseLog:611877287. -->
+    <div class="bg-white dark:bg-opacity-10 flex w-full rounded-lg p-2 content-between justify-around">
+      <div v-for="n in opponent?.n_sets">Set {{ n }}</div>
     </div>
-    <div v-else-if="tab.valueOf() === 2" class="bg-white text-black">
+  </div>
+    <!-- <div v-if="tab === 1" > -->
+        <GeneralStats :id = "matchId" :setNumber = "setNumber" v-if="tab === 1" class="h-fit pb-20"/>
+    <!-- </div> -->
+    <div v-else-if="tab === 2" class="bg-white text-black">
         tab 2
     </div>
     <div v-else class="bg-white text-black">
@@ -32,7 +41,14 @@
 
 <script lang="ts" setup>
 import { ref } from 'vue';
-
+import GeneralStats from './GeneralStats.vue';
+import { useDocument } from 'vuefire';
+import { db } from '../firebase';
+import { doc } from 'firebase/firestore';
+import { useRoute } from 'vue-router';
+const matchId = useRoute().params.id as string
+const setNumber = ref(1 as number)
+const opponent = useDocument(doc(db, "live_matches", matchId))
     const tab = ref(1 as number)
     const changeTab = (newTab: number)=>{
         tab.value = newTab
