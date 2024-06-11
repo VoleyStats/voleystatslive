@@ -5,7 +5,7 @@
       <div
         class="bg-white h-40 dark:bg-opacity-10 border border-slate-700 p-4 rounded-lg col-span-2 sm:col-span-2 flex flex-col items-center justify-around sm:order-2 text-4xl md:text-7xl"
       >
-        <p class="text-xl text-center w-full mb-2">Marker</p>
+        <p class="text-xl text-center w-full mb-2">Marcador</p>
 
         <div class="w-full h-full flex items-center gap-2">
           <div
@@ -14,7 +14,7 @@
             <p>
               {{ score[1] }}
             </p>
-            <small class="text-slate-300 text-base">Rival team</small>
+            <small class="text-slate-300 text-base">Rival</small>
           </div>
           <div
             class="text-center rounded-lg h-full w-full text-sky-300 dark:bg-white bg-neutral-200 dark:bg-opacity-10 flex flex-col items-center justify-center"
@@ -22,7 +22,7 @@
             <p>
               {{ score[0] }}
             </p>
-            <small class="text-slate-300 text-base">Your team</small>
+            <small class="text-slate-300 text-base">Tu equipo</small>
           </div>
         </div>
       </div>
@@ -61,7 +61,7 @@
         </svg>
 
         <p class="md:text-8xl text-6xl text-center">{{ rowActions }}</p>
-        <p class="md:text-xl text-center">In a row</p>
+        <p class="md:text-xl text-center">Seguidos</p>
       </article>
 
       <article
@@ -75,14 +75,14 @@
     <section class="w-full flex justify-start items-center gap-2">
       <div class="w-screen rounded-lg text-center">
         <div
-          class="bg-white dark:bg-opacity-10 flex w-full rounded-lg p-2 content-between justify-around"
+          class="bg-white dark:bg-opacity-10 flex w-full rounded-lg p-2 content-between justify-around gap-2"
         >
-          <div v-for="n in opponent?.n_sets">Set {{ n }}</div>
+          <div :class="{'rounded-lg py-1 w-full': true, 'bg-white text-slate-800': set == n}" v-for="n in opponent?.n_sets" @click="set = n">Set {{ n }}</div>
         </div>
       </div>
     </section>
 
-    <p class="text-xl w-full text-left">Your stats</p>
+    <p class="text-xl w-full text-left">Estadísticas</p>
     <!-- CHARTS -->
     <section class="w-full flex flex-col justify-start items-center gap-4">
       <!-- BAR CHART -->
@@ -98,8 +98,8 @@
       </div>
 
       <!-- VERTICAL BAR CHART -->
-      <div class="bg-white dark:bg-opacity-10 p-4 rounded-lg min-h-[400px] w-full•">
-        <p class="text-center">Point log</p>
+      <div class="bg-white dark:bg-opacity-10 p-4 rounded-lg min-h-[400px] w-full">
+        <p class="text-center">Curva de registro</p>
         <div id="chart" class="min-h-[400px]">
           <apexchart
             height="100%"
@@ -115,7 +115,6 @@
 
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from "vue";
-// import { getStats, getMatch } from "../firebase";
 import { useCollection, useDocument } from "vuefire";
 import {
   collection,
@@ -123,15 +122,16 @@ import {
   onSnapshot,
   orderBy,
   query,
+where,
 } from "firebase/firestore";
 import { db } from "../firebase";
-import router from "../router";
-import { useRoute } from "vue-router";
 const props = defineProps({
   id: String,
   setNumber: Number,
 });
 const score = ref([0, 0]);
+
+const set = ref(1 as number)
 
 const opponent = useDocument(doc(db, "live_matches", "59p51BXg0ndGKjFUYfeu"));
 
@@ -416,10 +416,9 @@ let pointLog = computed(() => {
     },
   };
 });
-// let rt = useCollection(collection(db, "live_matches", "59p51BXg0ndGKjFUYfeu", "stats"))
 
 const u = onSnapshot(
-  query(collection(db, "live_matches", props.id, "stats"), orderBy("order")),
+  query(collection(db, "live_matches", props.id, "stats"), where("set", "==", set.value), orderBy("order")),
   (q) => {
     let stats = q.docs.map((d) => d.data());
     // console.log($routes)

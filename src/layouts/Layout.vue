@@ -2,10 +2,12 @@
   <main
     class="bg-gradient-to-tr from-rose-100 to-sky-100 dark:bg-gradient-to-tr dark:from-sky-950 dark:via-gray-800"
   >
-    <nav class="flex justify-between items-center p-4 sticky w-full">
-      <!-- Suggested code may be subject to a license. Learn more: ~LicenseLog:3532536039. -->
-      <small class="dark:text-white text-black"> ~ Voley Stats Live</small>
-      <ToggleTheme />
+    <nav class="flex justify-center items-center p-4 sticky w-full">
+      <div class="flex">
+        <img src="/logo.png" alt="logo" width="20">
+        <small class="dark:text-white text-black pl-2"> Voley Stats Live</small>
+      </div>
+      <!-- <ToggleTheme /> -->
     </nav>
     <slot />
 
