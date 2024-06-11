@@ -1,154 +1,192 @@
 <template>
-  <section class="min-h-screen px-4 flex flex-col gap-4 items-center">
-    <!-- SCORE -->
-    <article class="w-full">
-      <div
-        class="bg-white h-40 dark:bg-opacity-10 border border-slate-700 p-4 rounded-lg col-span-2 sm:col-span-2 flex flex-col items-center justify-around sm:order-2 text-4xl md:text-7xl"
-      >
-        <p class="text-xl text-center w-full mb-2">Marcador</p>
+    <section class="min-h-screen px-4 flex flex-col gap-4 items-center">
+        <!-- SCORE -->
+        <article class="w-full">
+            <div
+                class="bg-white h-40 dark:bg-opacity-10 border border-slate-700 p-4 rounded-lg col-span-2 sm:col-span-2 flex flex-col items-center justify-around sm:order-2 text-4xl md:text-7xl"
+            >
+                <p class="text-xl text-center w-full mb-2">Marcador</p>
 
-        <div class="w-full h-full flex items-center gap-2">
-          <div
-            class="text-center rounded-lg h-full w-full text-red-400 dark:bg-white bg-neutral-200 dark:bg-opacity-10 flex flex-col items-center justify-center"
-          >
-            <p>
-              {{ score[1] }}
-            </p>
-            <small class="text-slate-300 text-base">Rival</small>
-          </div>
-          <div
-            class="text-center rounded-lg h-full w-full text-sky-300 dark:bg-white bg-neutral-200 dark:bg-opacity-10 flex flex-col items-center justify-center"
-          >
-            <p>
-              {{ score[0] }}
-            </p>
-            <small class="text-slate-300 text-base">Tu equipo</small>
-          </div>
-        </div>
-      </div>
-    </article>
+                <div class="w-full h-full flex items-center gap-2">
+                    <div
+                        class="text-center rounded-lg h-full w-full text-red-400 dark:bg-white bg-neutral-200 dark:bg-opacity-10 flex flex-col items-center justify-center"
+                    >
+                        <p>
+                            {{ score[1] }}
+                        </p>
+                        <small class="text-slate-300 text-base">Rival</small>
+                    </div>
+                    <div
+                        class="text-center rounded-lg h-full w-full text-sky-300 dark:bg-white bg-neutral-200 dark:bg-opacity-10 flex flex-col items-center justify-center"
+                    >
+                        <p>
+                            {{ score[0] }}
+                        </p>
+                        <small class="text-slate-300 text-base"
+                            >Tu equipo</small
+                        >
+                    </div>
+                </div>
+            </div>
+        </article>
 
-    <!-- ERRORS -->
-    <section class="w-full h-[90px] flex justify-start items-center gap-2">
-      <article
-        class="bg-white dark:bg-opacity-10 p-4 rounded-lg relative flex items-baseline justify-center gap-2 w-1/2"
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          v-if="rowErrors"
-          viewBox="0 0 24 24"
-          fill="currentColor"
-          class="fill-rose-700 size-16 md:size-24 absolute top-[-1.5rem] right-[-1rem]"
-        >
-          <path
-            fill-rule="evenodd"
-            d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25Zm-1.72 6.97a.75.75 0 1 0-1.06 1.06L10.94 12l-1.72 1.72a.75.75 0 1 0 1.06 1.06L12 13.06l1.72 1.72a.75.75 0 1 0 1.06-1.06L13.06 12l1.72-1.72a.75.75 0 1 0-1.06-1.06L12 10.94l-1.72-1.72Z"
-            clip-rule="evenodd"
-          />
-        </svg>
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          v-if="!rowErrors"
-          viewBox="0 0 24 24"
-          fill="currentColor"
-          class="fill-green-600 size-16 md:size-24 absolute top-[-1.5rem] right-[-1rem]"
-        >
-          <path
-            fill-rule="evenodd"
-            d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm13.36-1.814a.75.75 0 1 0-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 0 0-1.06 1.06l2.25 2.25a.75.75 0 0 0 1.14-.094l3.75-5.25Z"
-            clip-rule="evenodd"
-          />
-        </svg>
+        <!-- ERRORS -->
+        <section class="w-full h-fit flex justify-center items-center gap-2">
+          <article
+                class="bg-white dark:bg-opacity-10 p-4 rounded-lg flex items-center justify-around w-1/2 h-[95px]"
+            >
+                <div
+                    class="w-full flex justify-center items-center flex-col gap-2"
+                >
+                    <p class="text-neutral-400 text-sm font-light text-center leading-3">
+                        <span class="text-xl text-white font-normal">+ 1.75</span> 
+                        <br/>
+                        saques para puntuar
+                    </p>
+                    <!-- PROGRESS BAR -->
+                    <div class="bg-neutral-500 w-full h-[10px] rounded-full">
+                        <div
+                            class="bg-sky-300 w-[70%] h-[10px] rounded-full"
+                        ></div>
+                    </div>
+                </div>
+            </article>
+            <article
+                class="bg-white dark:bg-opacity-10 p-2 rounded-lg flex items-center justify-around w-1/2"
+            >
+                <div class="flex justify-center items-center w-fit gap-1">
+                    <svg
+                        v-if="!rowErrors"
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                        class="fill-green-600 size-20 max-w-12"
+                    >
+                        <path
+                            fill-rule="evenodd"
+                            d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm13.36-1.814a.75.75 0 1 0-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 0 0-1.06 1.06l2.25 2.25a.75.75 0 0 0 1.14-.094l3.75-5.25Z"
+                            clip-rule="evenodd"
+                        />
+                    </svg>
+                    <svg
+                        v-else
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                        class="fill-red-500 size-20 max-w-12"
+                    >
+                        <path
+                            fill-rule="evenodd"
+                            d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25Zm-1.72 6.97a.75.75 0 1 0-1.06 1.06L10.94 12l-1.72 1.72a.75.75 0 1 0 1.06 1.06L12 13.06l1.72 1.72a.75.75 0 1 0 1.06-1.06L13.06 12l1.72-1.72a.75.75 0 1 0-1.06-1.06L12 10.94l-1.72-1.72Z"
+                            clip-rule="evenodd"
+                        />
+                    </svg>
 
-        <p class="md:text-8xl text-6xl text-center">{{ rowActions }}</p>
-        <p class="md:text-xl text-center">Seguidos</p>
-      </article>
+                    <p
+                        class="text-base text-neutral-400 leading-5 font-light line-clamp-2"
+                    >
+                        <span class="text-white"
+                            >{{ rowActions }}
+                            {{ rowErrors ? " fallos" : " aciertos" }}</span
+                        >
+                        <br />
+                        seguidos
+                    </p>
+                </div>
+            </article>
 
-      <article
-        class="bg-white dark:bg-opacity-10 p-4 rounded-lg w-1/2 flex justify-center items-center h-full grow"
-      >
-        <p class="text-center">+ 4 hits</p>
-      </article>
+        </section>
+
+        <!-- SETS -->
+        <section class="w-full flex justify-start items-center gap-2">
+            <div class="w-screen rounded-lg text-center">
+                <div
+                    class="bg-white dark:bg-opacity-10 flex w-full rounded-lg p-2 content-between justify-around gap-2"
+                >
+                    <div
+                        :class="{
+                            'rounded-lg py-1 w-full': true,
+                            'bg-white text-slate-800': set == n,
+                        }"
+                        v-for="n in opponent?.n_sets"
+                        @click="set = n"
+                    >
+                        Set {{ n }}
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <p class="text-xl w-full text-left">Estadísticas</p>
+        <!-- CHARTS -->
+        <section class="w-full flex flex-col justify-start items-center gap-4">
+            <!-- BAR CHART -->
+            <div
+                class="bg-white dark:bg-opacity-10 h-full rounded-lg w-full min-h-250"
+            >
+                <apexchart
+                    class=""
+                    type="bar"
+                    :options="errors.chartOptions"
+                    :series="errors.series"
+                ></apexchart>
+            </div>
+
+            <!-- VERTICAL BAR CHART -->
+            <div
+                class="bg-white dark:bg-opacity-10 p-4 rounded-lg min-h-[400px] w-full"
+            >
+                <p class="text-center">Curva de registro</p>
+                <div id="chart" class="min-h-[400px]">
+                    <apexchart
+                        height="100%"
+                        type="bar"
+                        :options="pointLog.chartOptions"
+                        :series="pointLog.series"
+                    ></apexchart>
+                </div>
+            </div>
+        </section>
     </section>
-
-    <!-- SETS -->
-    <section class="w-full flex justify-start items-center gap-2">
-      <div class="w-screen rounded-lg text-center">
-        <div
-          class="bg-white dark:bg-opacity-10 flex w-full rounded-lg p-2 content-between justify-around gap-2"
-        >
-          <div :class="{'rounded-lg py-1 w-full': true, 'bg-white text-slate-800': set == n}" v-for="n in opponent?.n_sets" @click="set = n">Set {{ n }}</div>
-        </div>
-      </div>
-    </section>
-
-    <p class="text-xl w-full text-left">Estadísticas</p>
-    <!-- CHARTS -->
-    <section class="w-full flex flex-col justify-start items-center gap-4">
-      <!-- BAR CHART -->
-      <div
-        class="bg-white dark:bg-opacity-10 h-full rounded-lg w-full min-h-250"
-      >
-        <apexchart
-          class=""
-          type="bar"
-          :options="errors.chartOptions"
-          :series="errors.series"
-        ></apexchart>
-      </div>
-
-      <!-- VERTICAL BAR CHART -->
-      <div class="bg-white dark:bg-opacity-10 p-4 rounded-lg min-h-[400px] w-full">
-        <p class="text-center">Curva de registro</p>
-        <div id="chart" class="min-h-[400px]">
-          <apexchart
-            height="100%"
-            type="bar"
-            :options="pointLog.chartOptions"
-            :series="pointLog.series"
-          ></apexchart>
-        </div>
-      </div>
-    </section>
-  </section>
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import { computed, ref, Ref } from "vue";
+import type { errorLog } from "../interfaces/errorTypes";
 import { useDocument } from "vuefire";
 import {
-  collection,
-  doc,
-  onSnapshot,
-  orderBy,
-  query,
-where,
+    collection,
+    doc,
+    onSnapshot,
+    orderBy,
+    query,
+    where,
 } from "firebase/firestore";
 import { db } from "../firebase";
 const props = defineProps({
-  id: String,
-  setNumber: Number,
+    id: String,
+    setNumber: Number,
 });
 const score = ref([0, 0]);
 
-const set = ref(1 as number)
+const set = ref(1 as number);
 
 const opponent = useDocument(doc(db, "live_matches", "59p51BXg0ndGKjFUYfeu"));
 
-const log = ref({ data: [] as number[], labels: [] as string[] });
+const log: Ref<errorLog> = ref({ data: [], labels: [] });
 
-const errorData = ref({ data: [] as number[], labels: [] as string[] });
+const errorData: Ref<errorLog> = ref({ data: [], labels: [] });
 
 // const serveStats = ref({ data: [] as number[], labels: "" as string });
 
 const areaLabels = [
-  "receive",
-  "block",
-  "dig",
-  "set",
-  "serve",
-  "attack",
-  "fault",
+    "receive",
+    "block",
+    "dig",
+    "set",
+    "serve",
+    "attack",
+    "fault",
 ];
 
 const rowErrors = ref(false);
@@ -156,92 +194,92 @@ const rowErrors = ref(false);
 const rowActions = ref(1);
 
 let errors = computed(() => {
-  return {
-    series: [
-      {
-        name: "Errores",
-        data: errorData.value.data,
-      },
-    ],
-    chartOptions: {
-      title: {
-        text: "Errores",
-        align: "center",
-        margin: 20,
+    return {
+        series: [
+            {
+                name: "Errores",
+                data: errorData.value.data,
+            },
+        ],
+        chartOptions: {
+            title: {
+                text: "Errores",
+                align: "center",
+                margin: 20,
 
-        style: {
-          color: "#fff",
-        },
-      },
-      fill: {
-        type: "gradient",
-        gradient: {
-          type: "diagonal2",
-          gradientToColors: ["#609DE7", "#beebef"],
-          colorStops: [
-            {
-              offset: 40,
-              color: "#609DE7",
-              opacity: 1,
+                style: {
+                    color: "#fff",
+                },
             },
-            {
-              offset: 100,
-              color: "#beebef",
-              opacity: 1,
+            fill: {
+                type: "gradient",
+                gradient: {
+                    type: "diagonal2",
+                    gradientToColors: ["#609DE7", "#beebef"],
+                    colorStops: [
+                        {
+                            offset: 40,
+                            color: "#609DE7",
+                            opacity: 1,
+                        },
+                        {
+                            offset: 100,
+                            color: "#beebef",
+                            opacity: 1,
+                        },
+                    ],
+                },
             },
-          ],
+            chart: {
+                type: "bar",
+                height: "100%",
+                redrawOnParentResize: true,
+                toolbar: {
+                    show: false,
+                },
+            },
+            grid: {
+                show: false,
+                padding: {
+                    left: 0,
+                    right: 0,
+                },
+            },
+            plotOptions: {
+                bar: {
+                    horizontal: false,
+                    borderRadius: 10,
+                    borderRadiusApplication: "end",
+                },
+            },
+            dataLabels: {
+                enabled: false,
+            },
+            xaxis: {
+                labels: {
+                    show: false,
+                },
+                axisBorder: {
+                    show: false,
+                },
+                axisTicks: {
+                    show: false,
+                },
+                categories: errorData.value.labels,
+            },
+            yaxis: {
+                show: false,
+            },
+            tooltip: {
+                theme: "dark",
+                // y: {
+                //   formatter: function (val) {
+                //     return val;
+                //   },
+                // },
+            },
         },
-      },
-      chart: {
-        type: "bar",
-        height: "100%",
-        redrawOnParentResize: true,
-        toolbar: {
-          show: false,
-        },
-      },
-      grid: {
-        show: false,
-        padding: {
-          left: 0,
-          right: 0,
-        },
-      },
-      plotOptions: {
-        bar: {
-          horizontal: false,
-          borderRadius: 10,
-          borderRadiusApplication: "end",
-        },
-      },
-      dataLabels: {
-        enabled: false,
-      },
-      xaxis: {
-        labels: {
-          show: false,
-        },
-        axisBorder: {
-          show: false,
-        },
-        axisTicks: {
-          show: false,
-        },
-        categories: errorData.value.labels,
-      },
-      yaxis: {
-        show: false,
-      },
-      tooltip: {
-        theme: "dark",
-        // y: {
-        //   formatter: function (val) {
-        //     return val;
-        //   },
-        // },
-      },
-    },
-  };
+    };
 });
 
 // let areaStats = computed(() => {
@@ -328,134 +366,140 @@ let errors = computed(() => {
 // });
 
 let pointLog = computed(() => {
-  return {
-    series: [
-      {
-        data: log.value.data,
-      },
-    ],
-    chartOptions: {
-      annotations: {
-        xaxis: [
-          {
-            x: 0,
-            strokeDashArray: 0,
-          },
+    return {
+        series: [
+            {
+                data: log.value.data,
+            },
         ],
-      },
-      chart: {
-        type: "bar",
-        height: "100%",
-        toolbar: {
-          show: false,
+        chartOptions: {
+            annotations: {
+                xaxis: [
+                    {
+                        x: 0,
+                        strokeDashArray: 0,
+                    },
+                ],
+            },
+            chart: {
+                type: "bar",
+                height: "100%",
+                toolbar: {
+                    show: false,
+                },
+            },
+            grid: {
+                show: false,
+                xaxis: {
+                    lines: {
+                        show: false,
+                    },
+                },
+                yaxis: {
+                    lines: {
+                        show: false,
+                    },
+                },
+            },
+            plotOptions: {
+                bar: {
+                    borderRadius: 4,
+                    borderRadiusApplication: "end",
+                    horizontal: true,
+                    // barHeight: 15,
+                    colors: {
+                        ranges: [
+                            {
+                                from: 0,
+                                to: Infinity,
+                                color: "#609DE7",
+                            },
+                            {
+                                from: -Infinity,
+                                to: 0,
+                                color: "#7b100c",
+                            },
+                        ],
+                    },
+                },
+            },
+            dataLabels: {
+                enabled: false,
+            },
+            xaxis: {
+                min: -25,
+                max: 25,
+                axisBorder: {
+                    show: false,
+                },
+                axisTicks: {
+                    show: false,
+                },
+                labels: {
+                    show: false,
+                },
+                categories: log.value.labels,
+            },
+            yaxis: {
+                show: true,
+                labels: {
+                    style: {
+                        colors: "#fff",
+                    },
+                },
+            },
+            tooltip: {
+                enabled: false,
+            },
         },
-      },
-      grid: {
-        show: false,
-        xaxis: {
-          lines: {
-            show: false,
-          },
-        },
-        yaxis: {
-          lines: {
-            show: false,
-          },
-        },
-      },
-      plotOptions: {
-        bar: {
-          borderRadius: 4,
-          borderRadiusApplication: "end",
-          horizontal: true,
-          // barHeight: 15,
-          colors: {
-            ranges: [
-              {
-                from: 0,
-                to: Infinity,
-                color: "#609DE7",
-              },
-              {
-                from: -Infinity,
-                to: 0,
-                color: "#7b100c",
-              },
-            ],
-          },
-        },
-      },
-      dataLabels: {
-        enabled: false,
-      },
-      xaxis: {
-        min: -25,
-        max: 25,
-        axisBorder: {
-          show: false,
-        },
-        axisTicks: {
-          show: false,
-        },
-        labels: {
-          show: false,
-        },
-        categories: log.value.labels,
-      },
-      yaxis: {
-        show: true,
-        labels: {
-          style: {
-            colors: "#fff",
-          },
-        },
-      },
-      tooltip: {
-        enabled: false,
-      },
-    },
-  };
+    };
 });
 
 onSnapshot(
-  query(collection(db, "live_matches", props?.id ?? "", "stats"), where("set", "==", set.value), orderBy("order")),
+    query(
+        collection(db, "live_matches", props?.id ?? "", "stats"),
+        where("set", "==", set.value),
+        orderBy("order")
+    ),
 
-  (q) => {
-    let stats = q.docs.map((d) => d.data());
-    // console.log($routes)
-    let last = stats.at(-1);
-    if (last != undefined && last.to != 0) {
-      rowErrors.value = last?.to == 2;
-      console.log(stats);
-      for (let i = stats.length - 2; i >= 0; i--) {
-        if (stats[i].to == last?.to) {
-          rowActions.value++;
-        } else {
-          break;
+    (q) => {
+        let stats = q.docs.map((d) => d.data());
+        // console.log($routes)
+        let last = stats.at(-1);
+        if (last != undefined && last.to != 0) {
+            rowErrors.value = last?.to == 2;
+            console.log(stats);
+            for (let i = stats.length - 2; i >= 0; i--) {
+                if (stats[i].to == last?.to) {
+                    rowActions.value++;
+                } else {
+                    break;
+                }
+            }
+            // stats.reverse().forEach(s=>)
+            score.value = [last?.score_us, last?.score_them];
+            log.value = {
+                labels: stats.map((s) => s.score_them + "-" + s.score_us),
+                data: stats.map((s) => s.score_us - s.score_them),
+            };
+            // @ts-ignore
+            let grouped = Map.groupBy(
+                stats.filter((s) => s.to == 2 && s.action.type == "error"),
+                // @ts-ignore
+
+                ({ action }) => action.area
+            );
+            errorData.value = {
+                labels: Array.from(
+                    grouped.keys(),
+                    (k: number) => areaLabels[k]
+                ),
+                data: Array.from(grouped.values(), (v: Array<any>) => v.length),
+            };
+            // const serves = stats.filter(s => s.action.area === 4 && s.player !== null)
+            // serveStats.value.data = [serves.filter(s => s.action.id === 8).length, serves.filter(s => s.action.id === 15).length, serves.filter(s => s.action.id !== 15 && s.action.id !== 8).length]
+            // serveStats.value.labels = areaLabels[4]
         }
-      }
-      // stats.reverse().forEach(s=>)
-      score.value = [last?.score_us, last?.score_them];
-      log.value = {
-        labels: stats.map((s) => s.score_them + "-" + s.score_us),
-        data: stats.map((s) => s.score_us - s.score_them),
-      };
-      // @ts-ignore
-      let grouped = Map.groupBy(
-        stats.filter((s) => s.to == 2 && s.action.type == "error"),
-        // @ts-ignore
-
-        ({ action }) => action.area
-      );
-      errorData.value = {
-        labels: Array.from(grouped.keys(), (k: number) => areaLabels[k]),
-        data: Array.from(grouped.values(), (v: Array<any>) => v.length),
-
-      };
-      // const serves = stats.filter(s => s.action.area === 4 && s.player !== null)
-      // serveStats.value.data = [serves.filter(s => s.action.id === 8).length, serves.filter(s => s.action.id === 15).length, serves.filter(s => s.action.id !== 15 && s.action.id !== 8).length]
-      // serveStats.value.labels = areaLabels[4]
     }
-  }
 );
 </script>

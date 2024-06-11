@@ -11,7 +11,19 @@ const routes = [
   {
     path: '/stats/:id',
     name: 'stats',
-    component: StatsView
+    component: StatsView,
+    children: [
+      {
+        path: 'tables',
+        name: 'tableStats',
+        component: ''
+      },
+      {
+        path: 'team',
+        name: 'teamStats',
+        component: ''
+      },
+    ]
   }
 ]
  
