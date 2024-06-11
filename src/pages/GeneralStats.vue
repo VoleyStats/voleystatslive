@@ -114,8 +114,8 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from "vue";
-import { useCollection, useDocument } from "vuefire";
+import { computed, ref } from "vue";
+import { useDocument } from "vuefire";
 import {
   collection,
   doc,
@@ -234,11 +234,11 @@ let errors = computed(() => {
       },
       tooltip: {
         theme: "dark",
-        y: {
-          formatter: function (val) {
-            return val;
-          },
-        },
+        // y: {
+        //   formatter: function (val) {
+        //     return val;
+        //   },
+        // },
       },
     },
   };
@@ -417,8 +417,8 @@ let pointLog = computed(() => {
   };
 });
 
-const u = onSnapshot(
-  query(collection(db, "live_matches", props.id, "stats"), where("set", "==", set.value), orderBy("order")),
+onSnapshot(
+  query(collection(db, "live_matches", props?.id ?? "", "stats"), where("set", "==", set.value), orderBy("order")),
   (q) => {
     let stats = q.docs.map((d) => d.data());
     // console.log($routes)
@@ -439,13 +439,15 @@ const u = onSnapshot(
         labels: stats.map((s) => s.score_them + "-" + s.score_us),
         data: stats.map((s) => s.score_us - s.score_them),
       };
+      // @ts-ignore
       let grouped = Map.groupBy(
         stats.filter((s) => s.to == 2 && s.action.type == "error"),
+        // @ts-ignore
         ({ action }) => action.area
       );
       errorData.value = {
         labels: Array.from(grouped.keys(), (k: number) => areaLabels[k]),
-        data: Array.from(grouped.values(), (v) => v.length),
+        data: Array.from(grouped.values(), (v: Array<any>) => v.length),
       };
       // const serves = stats.filter(s => s.action.area === 4 && s.player !== null)
       // serveStats.value.data = [serves.filter(s => s.action.id === 8).length, serves.filter(s => s.action.id === 15).length, serves.filter(s => s.action.id !== 15 && s.action.id !== 8).length]
