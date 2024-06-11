@@ -1,10 +1,11 @@
 <template>
   <main
-    class="bg-gradient-to-tr from-rose-100 to-sky-100 dark:bg-gradient-to-tr dark:from-sky-950 dark:via-gray-800 h-screen overflow-x-hidden"
+    class="bg-gradient-to-tr from-rose-100 to-sky-100 dark:bg-gradient-to-tr dark:from-gray-800 dark:via-gray-800 min-h-screen overflow-x-hidden"
   >
+  
     <nav class="flex justify-center items-center p-4 w-full">
       <div class="flex">
-        <img src="/logo.png" alt="logo" width="20">
+        <img src="/logo.png" alt="logo" width="20" />
         <small class="dark:text-white text-black pl-2"> Voley Stats Live</small>
       </div>
       <!-- <ToggleTheme /> -->
@@ -16,15 +17,7 @@
       class="p-4 overflow-hidden w-screen fixed bottom-0"
     >
       <div
-        class="flex w-full h-12 rounded-full items-center justify-around 
-        border-slate-300
-        bg-clip-padding 
-        backdrop-filter 
-        backdrop-blur-md 
-        dark:bg-opacity-0 
-        border 
-        dark:border-gray-500
-        "
+        class="flex w-full h-12 rounded-full items-center justify-around border-slate-300 bg-clip-padding backdrop-filter backdrop-blur-md dark:bg-opacity-0 border dark:border-gray-500"
       >
         <!-- ITEMS TOOLBAR -->
         <div
@@ -47,22 +40,25 @@
 
 import type { toolbarItem } from "../interfaces/navegationTypes";
 import { useRoute } from "vue-router";
+import homeIcon from "../assets/icons/home.svg";
+import statsIcon from "../assets/icons/stats.svg";
+import teamIcon from "../assets/icons/team.svg";
 const route = useRoute();
 
 const toolbarData: toolbarItem[] = [
   {
     url: "",
-    icon: "../../public/icons/home.svg",
+    icon: homeIcon,
     name: "Home",
   },
   {
     url: "",
-    icon: "../../public/icons/stats.svg",
+    icon: statsIcon,
     name: "Stats",
   },
   {
     url: "",
-    icon: "../../public/icons/team.svg",
+    icon: teamIcon,
     name: "Team",
   },
 ];

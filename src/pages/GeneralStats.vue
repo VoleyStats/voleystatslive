@@ -1,6 +1,6 @@
 <template>
   <section class="min-h-screen px-4 flex flex-col gap-4 items-center">
-    <!-- MARKER -->
+    <!-- SCORE -->
     <article class="w-full">
       <div
         class="bg-white h-40 dark:bg-opacity-10 border border-slate-700 p-4 rounded-lg col-span-2 sm:col-span-2 flex flex-col items-center justify-around sm:order-2 text-4xl md:text-7xl"
