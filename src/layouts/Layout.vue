@@ -44,6 +44,7 @@
 
 <script setup lang="ts">
 // import ToggleTheme from "../components/ToggleTheme.vue";
+
 import type { toolbarItem } from "../interfaces/navegationTypes";
 import { useRoute } from "vue-router";
 const route = useRoute();

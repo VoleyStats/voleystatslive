@@ -419,6 +419,7 @@ let pointLog = computed(() => {
 
 onSnapshot(
   query(collection(db, "live_matches", props?.id ?? "", "stats"), where("set", "==", set.value), orderBy("order")),
+
   (q) => {
     let stats = q.docs.map((d) => d.data());
     // console.log($routes)
@@ -443,11 +444,13 @@ onSnapshot(
       let grouped = Map.groupBy(
         stats.filter((s) => s.to == 2 && s.action.type == "error"),
         // @ts-ignore
+
         ({ action }) => action.area
       );
       errorData.value = {
         labels: Array.from(grouped.keys(), (k: number) => areaLabels[k]),
         data: Array.from(grouped.values(), (v: Array<any>) => v.length),
+
       };
       // const serves = stats.filter(s => s.action.area === 4 && s.player !== null)
       // serveStats.value.data = [serves.filter(s => s.action.id === 8).length, serves.filter(s => s.action.id === 15).length, serves.filter(s => s.action.id !== 15 && s.action.id !== 8).length]

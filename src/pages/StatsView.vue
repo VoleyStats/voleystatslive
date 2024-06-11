@@ -22,4 +22,5 @@ const tab = ref(1 as number);
 //   tab.value = newTab;
 //   console.log(tab.value);
 // };
+
 </script>
