@@ -1,8 +1,8 @@
 <template>
   <main
-    class="bg-gradient-to-tr from-rose-100 to-sky-100 dark:bg-gradient-to-tr dark:from-sky-950 dark:via-gray-800"
+    class="bg-gradient-to-tr from-rose-100 to-sky-100 dark:bg-gradient-to-tr dark:from-sky-950 dark:via-gray-800 h-screen overflow-x-hidden"
   >
-    <nav class="flex justify-center items-center p-4 sticky w-full">
+    <nav class="flex justify-center items-center p-4 w-full">
       <div class="flex">
         <img src="/logo.png" alt="logo" width="20">
         <small class="dark:text-white text-black pl-2"> Voley Stats Live</small>
