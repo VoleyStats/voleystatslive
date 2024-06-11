@@ -1,5 +1,5 @@
 <template>
-  <section class="flex justify-center items-center h-screen">
+  <section class="flex justify-center items-center h-[35rem]">
 
       <article
         class="mx-4 p-8 rounded-3xl flex flex-col justify-center items-center max-w-lg bg-clip-padding 
