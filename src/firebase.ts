@@ -1,5 +1,6 @@
 import { initializeApp } from "firebase/app";
-import { CollectionReference, collection, doc, getDoc, getDocs, getFirestore } from "firebase/firestore";
+import { collection, doc, getFirestore } from "firebase/firestore";
+
 import { useCollection, useDocument } from "vuefire";
 
 export const firebaseApp = initializeApp({
