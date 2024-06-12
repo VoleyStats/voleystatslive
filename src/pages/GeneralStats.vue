@@ -1,5 +1,18 @@
 <template>
-    <section class="min-h-screen px-4 flex flex-col gap-4 items-center">
+    <section class="min-h-screen px-4 flex flex-col gap-4 items-center relative">
+
+        <!-- test sets -->
+        <div class="fixed top-12 right-0 bg-slate-600 py-4 rounded-lg w-10 flex flex-col items-center">
+            <p class="">Set</p>
+            <ul class="flex flex-col items-center gap-4 mt-2">
+                <li class="text-sm text-bold bg-slate-100 p-2 rounded-full h-6 w-6 text-slate-700 flex justify-center items-center">
+                    <p>1</p>
+                </li>
+                <li class="text-sm text-bold">2</li>
+                <li class="text-sm text-bold">3</li>
+            </ul>
+            <p v-show="false" class="-rotate-90 text-sm">Set 1</p>
+        </div>
         <!-- SCORE -->
         <article class="w-full">
             <div
@@ -67,7 +80,7 @@
         </section>
 
         <!-- SETS -->
-        <section class="w-full flex justify-start items-center gap-2">
+        <section class="w-full flex justify-start items-center gap-2" v-if="false">
             <div class="w-screen rounded-lg text-center">
                 <div
                     class="bg-white dark:bg-opacity-10 flex w-full rounded-lg p-2 content-between justify-around gap-2">
