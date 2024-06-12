@@ -30,13 +30,13 @@
             <article class="bg-white dark:bg-opacity-10 p-4 rounded-lg flex items-center justify-around w-1/2 h-[95px]">
                 <div class="w-full flex justify-center items-center flex-col gap-2">
                     <p class="text-neutral-400 text-sm font-light text-center leading-3">
-                        <span class="text-xl text-white font-normal">+ 1.75</span>
+                        <span class="text-xl text-white font-normal">{{ serveData.percentage }}%</span>
                         <br />
-                        saques para puntuar
+                        de eficiencia en saque
                     </p>
                     <!-- PROGRESS BAR -->
                     <div class="bg-neutral-500 w-full h-[10px] rounded-full">
-                        <div class="bg-sky-300 w-[70%] h-[10px] rounded-full"></div>
+                        <div class='bg-sky-300 w-[70%] h-[10px] rounded-full'></div>
                     </div>
                 </div>
             </article>
@@ -127,6 +127,7 @@ const log: Ref<errorLog> = ref({ data: [], labels: [] });
 
 const errorData: Ref<errorLog> = ref({ data: [], labels: [] });
 
+const serveData = ref({total: 0, points: 0, percentage: 0})
 
 const areaLabels = [
     "receive",
@@ -439,6 +440,14 @@ watch(stats, () => {
             ),
             data: Array.from(grouped.values(), (v: Array<any>) => v.length),
         };
+        let serves = stats.data.filter(s => s.stage === 0 && s.server !== null && s.to !== 0)
+        let pt = serves.filter(s => s.to == 1)
+        serveData.value = {
+            total: serves.length,
+            points: pt.length,
+            percentage: (pt.length / serves.length) * 100
+
+        }
         // const serves = stats.filter(s => s.action.area === 4 && s.player !== null)
         // serveStats.value.data = [serves.filter(s => s.action.id === 8).length, serves.filter(s => s.action.id === 15).length, serves.filter(s => s.action.id !== 15 && s.action.id !== 8).length]
         // serveStats.value.labels = areaLabels[4]
@@ -452,6 +461,11 @@ watch(stats, () => {
             labels: [],
             data: [],
         };
+        serveData.value = {
+            total: 0,
+            points: 0,
+            percentage: 0
+        }
     }
 })
 watch(set, () => {
