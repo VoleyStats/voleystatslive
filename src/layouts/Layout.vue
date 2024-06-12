@@ -15,18 +15,18 @@
         <slot />
 
         <section
-            v-if="route.name == 'stats'"
+            v-if="route.name !== 'home'"
             class="p-4 overflow-hidden w-screen fixed bottom-0"
         >
             <div
                 class="flex w-full h-12 rounded-full items-center justify-around border-slate-300 bg-clip-padding backdrop-filter backdrop-blur-md dark:bg-opacity-0 border dark:border-gray-500"
             >
                 <!-- ITEMS TOOLBAR -->
-                <router-link
+                <div
                     v-for="(toolbarItem, index) in toolbarData"
                     :key="index"
                     class="flex justify-start gap-2 items-center dark:text-white text-slate-700"
-                    :to="`/${route.params?.id}/${toolbarItem.url}`"
+                    @click="$router.push({name: toolbarItem.url})"
                 >
                     <img
                         class="w-6 h-6 text-white"
@@ -36,7 +36,7 @@
                     <small class="">
                         {{ toolbarItem.name }}
                     </small>
-                </router-link>
+                  </div>
             </div>
         </section>
     </main>
@@ -53,7 +53,6 @@ import teamIcon from "../assets/icons/team.svg";
 const route = useRoute();
 
 
-
 const toolbarData: toolbarItem[] = [
     {
         url: "stats",
@@ -61,12 +60,12 @@ const toolbarData: toolbarItem[] = [
         name: "Home",
     },
     {
-        url: "tables",
+        url: "tableStats",
         icon: statsIcon,
         name: "Stats",
     },
     {
-        url: "team",
+        url: "teamStats",
         icon: teamIcon,
         name: "Team",
     },
