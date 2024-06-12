@@ -1,4 +1,4 @@
-import { createWebHistory, createRouter } from 'vue-router'
+import { createWebHistory, createRouter, RouteRecordRaw } from 'vue-router'
 
 import Home from "./pages/Home.vue"
 import StatsView from './pages/StatsView.vue'
@@ -29,7 +29,7 @@ const routes = [
       },
     ]
   }
-]
+] as RouteRecordRaw[]
  
 const router = createRouter({
   history: createWebHistory(),
