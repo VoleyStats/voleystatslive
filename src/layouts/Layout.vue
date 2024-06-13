@@ -1,6 +1,7 @@
 <template>
     <main
         class="bg-gradient-to-tr from-rose-100 to-sky-100 dark:bg-gradient-to-tr dark:from-gray-800 dark:via-gray-800 min-h-screen overflow-x-hidden"
+
     >
     
         <nav class="flex justify-center items-center p-4 w-full">

@@ -499,6 +499,7 @@ const baseStats = reactive({ data: [] as any[] })
 
 watch(stats, () => {
     let last = stats.data.at(-1);
+
     if (last != undefined && last.to != 0) {
         rowActions.value = 1;
         rowErrors.value = last?.to == 2;
@@ -572,6 +573,7 @@ onSnapshot(
         baseStats.data = q.docs.map((d) => d.data())
         stats.data = baseStats.data.filter((s) => s.set.number == set.value);
         // console.log($routes)
+
 
     }
 );

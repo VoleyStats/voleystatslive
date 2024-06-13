@@ -1,6 +1,7 @@
 <template>
   <section class="flex justify-center items-center h-[80dvh]">
 
+
     <article
       class="mx-4 p-8 rounded-3xl flex flex-col justify-center items-center max-w-lg bg-clip-padding backdrop-filter backdrop-blur-lg bg-white bg-opacity-5 border border-slate-600"
     >

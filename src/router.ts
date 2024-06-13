@@ -1,4 +1,6 @@
+
 import { createWebHistory, createRouter, RouteRecordRaw } from 'vue-router'
+
 
 import Home from "./pages/Home.vue"
 import StatsView from './pages/StatsView.vue'
