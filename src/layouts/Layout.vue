@@ -15,7 +15,6 @@
         <slot />
 
         <section
-            v-if="false"
             class="p-4 overflow-hidden w-screen fixed bottom-0"
         >
             <div
@@ -46,11 +45,11 @@
 // import ToggleTheme from "../components/ToggleTheme.vue";
 
 import type { toolbarItem } from "../interfaces/navegationTypes";
-import { useRoute } from "vue-router";
+// import { useRoute } from "vue-router";
 import homeIcon from "../assets/icons/home.svg";
 import statsIcon from "../assets/icons/stats.svg";
 import teamIcon from "../assets/icons/team.svg";
-const route = useRoute();
+// const route = useRoute();
 
 
 const toolbarData: toolbarItem[] = [
@@ -60,7 +59,7 @@ const toolbarData: toolbarItem[] = [
         name: "Home",
     },
     {
-        url: "tableStats",
+        url: "areaStats",
         icon: statsIcon,
         name: "Stats",
     },
