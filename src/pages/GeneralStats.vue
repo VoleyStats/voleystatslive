@@ -1,9 +1,5 @@
 <template>
-    <section
-        class="min-h-screen px-4 flex flex-col gap-4 items-center relative"
-    >
-        <!-- test sets -->
-        <div
+  <div
             class="fixed top-2 right-0 border-slate-300 bg-clip-padding backdrop-filter backdrop-blur-md dark:bg-opacity-0 border dark:border-gray-500 py-2 rounded-l-lg w-12 flex flex-col items-center border-r-0 z-20"
             @click="selectSet = !selectSet"
             >
@@ -25,6 +21,13 @@
             </div>
             <p v-show="!selectSet" class=" text-sm">Set {{ set }}</p>
         </div>
+  <EmptyState v-if="stats.data.length === 0"/>
+    <section
+      v-else
+        class="min-h-screen px-4 flex flex-col gap-4 items-center relative pb-20"
+    >
+        <!-- test sets -->
+        
         <!-- SCORE -->
         <article class="w-full">
             <div
@@ -189,6 +192,7 @@
 import { computed, reactive, ref, Ref, watch } from "vue";
 import type { errorLog } from "../interfaces/errorTypes";
 import { useDocument } from "vuefire";
+import EmptyState from '../components/EmptyState.vue'
 import {
     collection,
     doc,
@@ -512,9 +516,10 @@ watch(stats, () => {
         }
         // stats.reverse().forEach(s=>)
         score.value = [last?.score_us, last?.score_them];
+        let finals = stats.data.filter(s=>s.to !== 0)
         log.value = {
-            labels: stats.data.map((s) => s.score_them + "-" + s.score_us),
-            data: stats.data.map((s) => s.score_us - s.score_them),
+            labels: finals.map((s) => s.score_them + "-" + s.score_us),
+            data: finals.map((s) => s.score_us - s.score_them),
         };
         // @ts-ignore
         let grouped = Map.groupBy(

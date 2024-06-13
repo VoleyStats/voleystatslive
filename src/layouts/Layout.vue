@@ -17,6 +17,7 @@
 
         <section
             class="p-4 overflow-hidden w-screen fixed bottom-0"
+            v-if="$route.name !== 'home'"
         >
             <div
                 class="flex w-full h-12 rounded-full items-center justify-around border-slate-300 bg-clip-padding backdrop-filter backdrop-blur-md dark:bg-opacity-0 border dark:border-gray-500"

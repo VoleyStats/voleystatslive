@@ -5,6 +5,7 @@ import { createWebHistory, createRouter, RouteRecordRaw } from 'vue-router'
 import Home from "./pages/Home.vue"
 import StatsView from './pages/StatsView.vue'
 import AreaStats from './pages/AreaStats.vue'
+import EmptyState from './components/EmptyState.vue'
 const routes = [
   {
     path: '/',
@@ -28,7 +29,7 @@ const routes = [
       {
         path: 'team',
         name: 'teamStats',
-        component: ''
+        component: EmptyState
       },
     ]
   }
