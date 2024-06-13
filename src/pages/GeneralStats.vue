@@ -1,38 +1,50 @@
 <template>
-    <section class="min-h-screen px-4 flex flex-col gap-4 items-center relative">
-
+    <section
+        class="min-h-screen px-4 flex flex-col gap-4 items-center relative"
+    >
         <!-- test sets -->
-        <div class="fixed top-12 right-0 bg-slate-600 py-4 rounded-lg w-10 flex flex-col items-center">
-            <p class="">Set</p>
-            <ul class="flex flex-col items-center gap-4 mt-2">
-                <li class="text-sm text-bold bg-slate-100 p-2 rounded-full h-6 w-6 text-slate-700 flex justify-center items-center">
-                    <p>1</p>
-                </li>
-                <li class="text-sm text-bold">2</li>
-                <li class="text-sm text-bold">3</li>
-            </ul>
-            <p v-show="false" class="-rotate-90 text-sm">Set 1</p>
+        <div
+            class="fixed top-2 right-0 border-slate-300 bg-clip-padding backdrop-filter backdrop-blur-md dark:bg-opacity-0 border dark:border-gray-500 py-4 rounded-l-lg w-10 flex flex-col items-center border-r-0 z-20"
+        >
+            <div v-show="false">
+                <p class="">Set</p>
+                <ul class="flex flex-col items-center gap-4 mt-2">
+                    <li
+                        class="text-sm text-bold bg-slate-100 p-2 rounded-full h-6 w-6 text-slate-700 flex justify-center items-center"
+                    >
+                        <p>1</p>
+                    </li>
+                    <li class="text-sm text-bold">2</li>
+                    <li class="text-sm text-bold">3</li>
+                </ul>
+            </div>
+            <p v-show="true" class="-rotate-90 text-sm">Set 1</p>
         </div>
         <!-- SCORE -->
         <article class="w-full">
             <div
-                class="bg-white h-40 dark:bg-opacity-10 border border-slate-700 p-4 rounded-lg col-span-2 sm:col-span-2 flex flex-col items-center justify-around sm:order-2 text-4xl md:text-7xl">
+                class="bg-white h-40 dark:bg-opacity-10 border border-slate-700 p-4 rounded-lg col-span-2 sm:col-span-2 flex flex-col items-center justify-around sm:order-2 text-4xl md:text-7xl"
+            >
                 <p class="text-xl text-center w-full mb-2">Marcador</p>
 
                 <div class="w-full h-full flex items-center gap-2">
                     <div
-                        class="text-center rounded-lg h-full w-full text-red-400 dark:bg-white bg-neutral-200 dark:bg-opacity-10 flex flex-col items-center justify-center">
+                        class="text-center rounded-lg h-full w-full text-red-400 dark:bg-white bg-neutral-200 dark:bg-opacity-10 flex flex-col items-center justify-center"
+                    >
                         <p>
                             {{ score[1] }}
                         </p>
                         <small class="text-slate-300 text-base">Rival</small>
                     </div>
                     <div
-                        class="text-center rounded-lg h-full w-full text-sky-300 dark:bg-white bg-neutral-200 dark:bg-opacity-10 flex flex-col items-center justify-center">
+                        class="text-center rounded-lg h-full w-full text-sky-300 dark:bg-white bg-neutral-200 dark:bg-opacity-10 flex flex-col items-center justify-center"
+                    >
                         <p>
                             {{ score[0] }}
                         </p>
-                        <small class="text-slate-300 text-base">Tu equipo</small>
+                        <small class="text-slate-300 text-base"
+                            >Tu equipo</small
+                        >
                     </div>
                 </div>
             </div>
@@ -40,54 +52,94 @@
 
         <!-- ERRORS -->
         <section class="w-full h-fit flex justify-center items-center gap-2">
-            <article class="bg-white dark:bg-opacity-10 p-4 rounded-lg flex items-center justify-around w-1/2 h-[95px]">
-                <div class="w-full flex justify-center items-center flex-col gap-2">
-                    <p class="text-neutral-400 text-sm font-light text-center leading-3">
-                        <span class="text-xl text-white font-normal">{{ serveData.percentage }}%</span>
+            <article
+                class="bg-white dark:bg-opacity-10 p-4 rounded-lg flex items-center justify-around w-1/2 h-[95px]"
+            >
+                <div
+                    class="w-full flex justify-center items-center flex-col gap-2"
+                >
+                    <p
+                        class="text-neutral-400 text-xs font-light text-center leading-3"
+                    >
+                        <span class="text-xl text-white font-normal"
+                            >{{ Math.floor(serveData.percentage) }}%</span
+                        >
                         <br />
                         de eficiencia en saque
                     </p>
                     <!-- PROGRESS BAR -->
                     <div class="bg-neutral-500 w-full h-[10px] rounded-full">
-                        <div class='bg-sky-300 w-[70%] h-[10px] rounded-full'></div>
+                        <div
+                            class="bg-sky-300 h-[10px] rounded-full"
+                            :style="`width: ${Math.floor(
+                                serveData.percentage
+                            )}%;`"
+                        ></div>
                     </div>
                 </div>
             </article>
-            <article class="bg-white dark:bg-opacity-10 p-2 rounded-lg flex items-center justify-around w-1/2">
+            <article
+                class="bg-white dark:bg-opacity-10 p-2 rounded-lg flex items-center justify-around w-1/2"
+            >
                 <div class="flex justify-center items-center w-fit gap-1">
-                    <svg v-if="!rowErrors" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
-                        class="fill-green-600 size-20 max-w-12">
-                        <path fill-rule="evenodd"
+                    <svg
+                        v-if="!rowErrors"
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                        class="fill-green-600 size-20 max-w-12"
+                    >
+                        <path
+                            fill-rule="evenodd"
                             d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm13.36-1.814a.75.75 0 1 0-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 0 0-1.06 1.06l2.25 2.25a.75.75 0 0 0 1.14-.094l3.75-5.25Z"
-                            clip-rule="evenodd" />
+                            clip-rule="evenodd"
+                        />
                     </svg>
-                    <svg v-else xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
-                        class="fill-red-500 size-20 max-w-12">
-                        <path fill-rule="evenodd"
+                    <svg
+                        v-else
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                        class="fill-red-500 size-20 max-w-12"
+                    >
+                        <path
+                            fill-rule="evenodd"
                             d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25Zm-1.72 6.97a.75.75 0 1 0-1.06 1.06L10.94 12l-1.72 1.72a.75.75 0 1 0 1.06 1.06L12 13.06l1.72 1.72a.75.75 0 1 0 1.06-1.06L13.06 12l1.72-1.72a.75.75 0 1 0-1.06-1.06L12 10.94l-1.72-1.72Z"
-                            clip-rule="evenodd" />
+                            clip-rule="evenodd"
+                        />
                     </svg>
 
-                    <p class="text-base text-neutral-400 leading-5 font-light line-clamp-2">
-                        <span class="text-white">{{ rowActions }}
-                            {{ rowErrors ? " fallos" : " aciertos" }}</span>
+                    <p
+                        class="text-base text-neutral-400 leading-5 font-light line-clamp-2"
+                    >
+                        <span class="text-white"
+                            >{{ rowActions }}
+                            {{ rowErrors ? " fallos" : " aciertos" }}</span
+                        >
                         <br />
                         seguidos
                     </p>
                 </div>
             </article>
-
         </section>
 
         <!-- SETS -->
-        <section class="w-full flex justify-start items-center gap-2" v-if="false">
+        <section
+            class="w-full flex justify-start items-center gap-2"
+            v-if="false"
+        >
             <div class="w-screen rounded-lg text-center">
                 <div
-                    class="bg-white dark:bg-opacity-10 flex w-full rounded-lg p-2 content-between justify-around gap-2">
-                    <div :class="{
-                                'rounded-lg py-1 w-full': true,
-                                'bg-white text-slate-800': set == n,
-                            }" v-for="n in match?.n_sets" @click="set = n">
+                    class="bg-white dark:bg-opacity-10 flex w-full rounded-lg p-2 content-between justify-around gap-2"
+                >
+                    <div
+                        :class="{
+                            'rounded-lg py-1 w-full': true,
+                            'bg-white text-slate-800': set == n,
+                        }"
+                        v-for="n in match?.n_sets"
+                        @click="set = n"
+                    >
                         Set {{ n }}
                     </div>
                 </div>
@@ -98,15 +150,29 @@
         <!-- CHARTS -->
         <section class="w-full flex flex-col justify-start items-center gap-4">
             <!-- BAR CHART -->
-            <div class="bg-white dark:bg-opacity-10 h-full rounded-lg w-full min-h-250">
-                <apexchart class="" type="bar" :options="errors.chartOptions" :series="errors.series"></apexchart>
+            <div
+                class="bg-white dark:bg-opacity-10 h-full rounded-lg w-full min-h-250"
+            >
+                <apexchart
+                    class=""
+                    type="bar"
+                    :options="errors.chartOptions"
+                    :series="errors.series"
+                ></apexchart>
             </div>
 
             <!-- VERTICAL BAR CHART -->
-            <div class="bg-white dark:bg-opacity-10 p-4 rounded-lg min-h-[400px] w-full">
+            <div
+                class="bg-white dark:bg-opacity-10 p-4 rounded-lg min-h-[400px] w-full"
+            >
                 <p class="text-center">Curva de registro</p>
                 <div id="chart" class="min-h-[400px]">
-                    <apexchart height="100%" type="bar" :options="pointLog.chartOptions" :series="pointLog.series">
+                    <apexchart
+                        height="100%"
+                        type="bar"
+                        :options="pointLog.chartOptions"
+                        :series="pointLog.series"
+                    >
                     </apexchart>
                 </div>
             </div>
@@ -178,16 +244,16 @@ let errors = computed(() => {
                 type: "gradient",
                 gradient: {
                     type: "diagonal2",
-                    gradientToColors: ["#609DE7", "#beebef"],
+                    gradientToColors: ["#7DD3FC", "#7DD3FC"],
                     colorStops: [
                         {
                             offset: 40,
-                            color: "#609DE7",
+                            color: "#7DD3FC",
                             opacity: 1,
                         },
                         {
                             offset: 100,
-                            color: "#beebef",
+                            color: "#7DD3FC",
                             opacity: 1,
                         },
                     ],
@@ -211,8 +277,10 @@ let errors = computed(() => {
             plotOptions: {
                 bar: {
                     horizontal: false,
-                    borderRadius: 10,
-                    borderRadiusApplication: "end",
+              borderRadius: 6,
+              columnWidth: 30,
+              barHeight: '50%',
+              borderRadiusApplication: "end",
                 },
             },
             dataLabels: {
