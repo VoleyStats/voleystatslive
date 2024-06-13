@@ -4,21 +4,26 @@
     >
         <!-- test sets -->
         <div
-            class="fixed top-2 right-0 border-slate-300 bg-clip-padding backdrop-filter backdrop-blur-md dark:bg-opacity-0 border dark:border-gray-500 py-4 rounded-l-lg w-10 flex flex-col items-center border-r-0 z-20"
-        >
-            <div v-show="false">
+            class="fixed top-2 right-0 border-slate-300 bg-clip-padding backdrop-filter backdrop-blur-md dark:bg-opacity-0 border dark:border-gray-500 py-2 rounded-l-lg w-12 flex flex-col items-center border-r-0 z-20"
+            @click="selectSet = !selectSet"
+            >
+            <div v-show="selectSet">
                 <p class="">Set</p>
+                
                 <ul class="flex flex-col items-center gap-4 mt-2">
                     <li
-                        class="text-sm text-bold bg-slate-100 p-2 rounded-full h-6 w-6 text-slate-700 flex justify-center items-center"
+                        :class="{'text-sm text-bold p-2 rounded-full h-6 w-6  flex justify-center items-center': true, 
+                        'text-slate-700 bg-slate-100': set == n
+                    }"
+                        v-for = "n in match?.n_sets"
+                        :key="n"
+                        @click="set = n"
                     >
-                        <p>1</p>
+                        <p>{{ n }}</p>
                     </li>
-                    <li class="text-sm text-bold">2</li>
-                    <li class="text-sm text-bold">3</li>
                 </ul>
             </div>
-            <p v-show="true" class="-rotate-90 text-sm">Set 1</p>
+            <p v-show="!selectSet" class=" text-sm">Set {{ set }}</p>
         </div>
         <!-- SCORE -->
         <article class="w-full">
@@ -65,7 +70,7 @@
                             >{{ Math.floor(serveData.percentage) }}%</span
                         >
                         <br />
-                        de eficiencia en saque
+                        de eficiencia en K2
                     </p>
                     <!-- PROGRESS BAR -->
                     <div class="bg-neutral-500 w-full h-[10px] rounded-full">
@@ -209,18 +214,20 @@ const errorData: Ref<errorLog> = ref({ data: [], labels: [] });
 const serveData = ref({total: 0, points: 0, percentage: 0})
 
 const areaLabels = [
-    "receive",
-    "block",
-    "dig",
-    "set",
-    "serve",
-    "attack",
-    "fault",
+    "Recepción",
+    "Bloqueo",
+    "Defensa",
+    "Colocación",
+    "Saque",
+    "Ataque",
+    "Falta",
 ];
 
 const rowErrors = ref(false);
 
 const rowActions = ref(1);
+
+const selectSet = ref(false);
 
 let errors = computed(() => {
     return {
@@ -303,11 +310,11 @@ let errors = computed(() => {
             },
             tooltip: {
                 theme: "dark",
-                // y: {
-                //   formatter: function (val) {
-                //     return val;
-                //   },
-                // },
+                y: {
+                  formatter: function (val: number) {
+                    return val;
+                  },
+                },
             },
         },
     };
@@ -443,7 +450,7 @@ let pointLog = computed(() => {
                             {
                                 from: 0,
                                 to: Infinity,
-                                color: "#609DE7",
+                                color: "#7DD3FC",
                             },
                             {
                                 from: -Infinity,
@@ -493,6 +500,7 @@ const baseStats = reactive({ data: [] as any[] })
 watch(stats, () => {
     let last = stats.data.at(-1);
     if (last != undefined && last.to != 0) {
+        rowActions.value = 1;
         rowErrors.value = last?.to == 2;
         for (let i = stats.data.length - 2; i >= 0; i--) {
             if (stats.data[i].to == last?.to) {

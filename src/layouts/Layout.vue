@@ -15,7 +15,7 @@
         <slot />
 
         <section
-            v-if="route.name !== 'home'"
+            v-if="false"
             class="p-4 overflow-hidden w-screen fixed bottom-0"
         >
             <div
