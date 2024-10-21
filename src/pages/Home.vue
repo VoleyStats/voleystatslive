@@ -1,41 +1,37 @@
 <template>
-  <section class="flex justify-center items-center h-[80dvh]">
-
-
-    <article
-      class="mx-4 p-8 rounded-3xl flex flex-col justify-center items-center max-w-lg bg-clip-padding backdrop-filter backdrop-blur-lg bg-white bg-opacity-5 border border-slate-600"
-    >
-      <h3
-        class="text-slate-800 text-2xl font-bold text-center mb-6 dark:text-white"
-      >
-        Accede a las estadisticas en vivo de tu equipo
-      </h3>
-      <div class="w-full">
-        <label
-          for="validation"
-          class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-        ></label>
-        <input
-          v-model="codeTeam"
-          type="text"
-          id="validation"
-          class="bg-transparent border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-          placeholder="Escribe el código de tu equipo..."
-          required
-        />
-      </div>
-      <RouterLink
-        :to="codeTeam ? '/stats/' + codeTeam : ''"
-        class="dark:text-white dark:bg-blue-800 py-1 px-10 rounded-lg text-slate-800 bg-slate-100 w-full mt-6 hover:scale-105 text-center"
-        >Acceder</RouterLink
-      >
-    </article>
-  </section>
+    <section class="rounded-lg p-6 mt-6">
+        <div class="text-cente w-full flex justify-center">
+            <h4
+                class="text-xs font-thin border-slate-600 border w-fit text-center py-1 px-4 text-slate-300 rounded-full"
+            >
+                Conecta con tu equipo
+                <i class="bi bi-arrow-right-short text-sm"></i>
+            </h4>
+        </div>
+        <h1 class="text-center text-4xl leading-tight text-pretty">
+            Alcanza el mejor potencial de tu equipo
+        </h1>
+        <p
+            class="text-center text-slate-300 text-sm font-thin leading-normal tracking-normal mt-4 mb-7"
+        >
+            Registra tus estadisticas, descarga informes y mejora partido a
+            partido
+        </p>
+        <div class="flex justify-center items-center">
+            <RouterLink
+                :to="'/team-code'"
+                class="text-sm font-thin border-slate-600 border bg-slate-700 w-fit text-center py-1 px-4 rounded-full"
+                >Ver la app
+            </RouterLink>
+            <RouterLink
+                :to="'/teamCode'"
+                class="text-sm font-thin w-fit text-center py-1 px-4 rounded-full"
+                >Conocer más
+            </RouterLink>
+        </div>
+    </section>
 </template>
 
 <script lang="ts" setup>
-import { ref } from "vue";
 import { RouterLink } from "vue-router";
-
-const codeTeam = ref("");
 </script>
