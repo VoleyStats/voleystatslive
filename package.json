@@ -9,7 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "apexcharts": "^3.49.1",
+    "apexcharts": "^4.0.0",
     "bootstrap-icons": "^1.11.3",
     "firebase": "^10.12.2",
     "vue": "^3.4.21",
