@@ -1,14 +1,19 @@
 <template>
-    <section class="rounded-lg p-6 mt-6">
+    <!-- INTRO + CTAs -->
+    <section
+        class="rounded-lg p-6 mt-6 flex flex-col justify-center items-center"
+    >
         <div class="text-cente w-full flex justify-center">
             <h4
-                class="text-xs font-thin border-slate-600 border w-fit text-center py-1 px-4 text-slate-300 rounded-full"
+                class="text-xs font-thin border-slate-700 border w-fit text-center py-1 px-4 text-slate-300 rounded-full"
             >
                 Conecta con tu equipo
                 <i class="bi bi-arrow-right-short text-sm"></i>
             </h4>
         </div>
-        <h1 class="text-center text-4xl leading-tight text-pretty">
+        <h1
+            class="text-center text-5xl sm:text-6xl lg:text-8xl leading-tight text-pretty sm:max-w-[600px] md:max-w-[700px] lg:max-w-[900px]"
+        >
             Alcanza el mejor potencial de tu equipo
         </h1>
         <p
@@ -30,8 +35,198 @@
             </RouterLink>
         </div>
     </section>
+
+    <!-- SECCION DE PRODUCTO -->
+    <section
+        class="rounded-lg mt-16 items-center grid md:grid-cols-2 gap-4 w-full max-w-screen-xl mx-auto p-4"
+    >
+        <div class="flex justify-center items-center">
+            <img
+                class="max-w-[300px] md:max-w-[460px]"
+                src="https://res.cloudinary.com/dfbloaduq/image/upload/test-2_k6ahsf.webp"
+                alt=""
+            />
+        </div>
+
+        <article class="w-full md:max-w-[480px] mt-4 md:mt-0">
+            <h2
+                class="text-center md:text-left text-3xl sm:text-4xl lg:text-5xl leading-tight text-pretty sm:max-w-[600px] md:max-w-[700px] lg:max-w-[900px]"
+            >
+                Maneja tu equipo al completo
+            </h2>
+            <p
+                class="text-center md:text-left text-slate-300 text-base font-thin leading-normal tracking-normal mt-4 mb-7"
+            >
+                Registra las estadisticas de cada jugador, compara resultados de
+                cada partido, examina la evolución de la temporada y valora
+                posibles estrategias.
+            </p>
+            <p
+                class="text-center md:text-left text-slate-300 text-base font-thin leading-normal tracking-normal mt-4 mb-7"
+            >
+                Registra las estadisticas de cada jugador, compara resultados de
+                cada partido, examina la evolución de la temporada y valora
+                posibles estrategias.
+            </p>
+        </article>
+    </section>
+
+    <!-- SECCION PASARELA -->
+    <section class="mb-9 p-16 bg-gray-900 w-[100vw]">
+        <div class="w-full max-w-screen-xl mx-auto p-4">
+            <h2
+                class="text-center md:text-left text-3xl sm:text-4xl lg:text-5xl leading-tight text-pretty sm:max-w-[600px] md:max-w-[700px] lg:max-w-[900px]"
+            >
+                Conoce la app
+            </h2>
+            <p
+                class="text-center md:text-left text-slate-300 text-base font-thin leading-normal tracking-normal mt-4 mb-7"
+            >
+                Te presentamos algunas de sus principales funcionalidades
+            </p>
+            <div
+                class="flex justify-start items-center flex-col md:flex-row gap-4 md:overflow-x-scroll scroll-p-[24rem]"
+            >
+                <article
+                    class="w-[312px] shrink-0 p-6 rounded-3xl flex flex-col bg-clip-padding backdrop-filter backdrop-blur-lg bg-white bg-opacity-5 border border-slate-600 gap-4 "
+                    v-for="feature in appFeatures"
+                >
+                    <div class="border rounded-xl w-fit py-2 px-3">
+                        <i :class="feature.icon"></i>
+                    </div>
+                    <div>
+                        <h3>{{ feature.title }}</h3>
+                        <p
+                            class="md:text-left text-slate-300 text-sm font-thin"
+                        >
+                            Descarga el PDF con las estadisticas de tu equipo
+                        </p>
+                    </div>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECCION FAQs -->
+    <section class="mt-12 w-full max-w-screen-xl mx-auto p-4">
+        <h2
+            class="text-left md:text-left text-3xl sm:text-4xl lg:text-5xl leading-tight text-pretty"
+        >
+            Preguntas frecuentes
+        </h2>
+
+        <!-- LISTADO DE PREGUNTAS -->
+        <div class="grid grid-flow-row grid-cols-1 gap-2 mt-4 mb-4 w-full">
+            <article
+                class="border rounded-lg px-3 py-2 border-slate-600 g-clip-padding backdrop-filter backdrop-blur-lg bg-opacity-5 bg-white"
+                v-for="(q, index) in faqs"
+                @click="toggleQuestion(index)"
+            >
+                <div class="flex justify-between cursor-pointer items-center">
+                    <h3>{{ q.question }}</h3>
+                    <i
+                        v-if="!qSelection.includes(index)"
+                        class="bi bi-chevron-down"
+                    ></i>
+                    <i
+                        v-if="qSelection.includes(index)"
+                        class="bi bi-chevron-up"
+                    ></i>
+                </div>
+                <p
+                    v-if="qSelection.includes(index)"
+                    class="font-thin text-sm text-slate-300 mt-2"
+                >
+                    {{ q.answer }}
+                </p>
+            </article>
+        </div>
+    </section>
+
+    <!-- CONTACT SECTION -->
+
+    <section class="mb-12 w-full max-w-screen-xl mx-auto p-4">
+        <div
+            class="container mx-auto p-6 bg-clip-padding backdrop-filter backdrop-blur-lg bg-white bg-opacity-5 border border-slate-600 rounded-lg"
+        >
+            <h2
+                class="text-left md:text-left text-3xl sm:text-4xl lg:text-5xl leading-tight text-pretty sm:max-w-[600px] md:max-w-[700px] lg:max-w-[900px]"
+            >
+                <i class="bi bi-chat"></i>
+                Contacta con nosotros
+            </h2>
+            <p
+                class="text-left md:text-left text-slate-300 text-base font-thin leading-normal tracking-normal mt-4 mb-7"
+            >
+                Si tienes alguna duda, sugerencia o quieres colaborar con
+                nosotros, no dudes en contactar con nosotros
+            </p>
+            <div class="flex justify-center items-center">
+                <RouterLink
+                    :to="'/contact'"
+                    class="text-sm font-thin border-slate-600 border bg-slate-700 w-fit text-center py-1 px-4 rounded-full"
+                >
+                    Contactar
+                </RouterLink>
+            </div>
+        </div>
+    </section>
 </template>
 
 <script lang="ts" setup>
+import { ref } from "vue";
 import { RouterLink } from "vue-router";
+
+const appFeatures = [
+    {
+        title: "Descargar el PDF",
+        description: "Descarga el PDF con las estadisticas de tu equipo",
+        icon: "bi bi-asterisk",
+    },
+    {
+        title: "Planifica tus partidos",
+        description:
+            "Evalua el resultado de cada jugador y encuentra su fuerte",
+        icon: "bi bi-graph-up-arrow",
+    },
+    {
+        title: "Analiza la evolución",
+        description:
+            "Compara los resultados de cada partido y valora posibles estrategias",
+        icon: "bi bi-bar-chart-line",
+    },
+    {
+        title: "Comparte informes",
+        description: "Comparte informes de temporada, partido y entreno",
+        icon: "bi bi-filetype-pdf",
+    },
+];
+
+const faqs = [
+    {
+        question: "¿Cómo puedo descargar el PDF?",
+        answer: "Para descargar el PDF, debes ir a la sección de informes y seleccionar la opción de descarga",
+    },
+    {
+        question: "¿Cómo puedo compartir un informe?",
+        answer: "Para compartir un informe, debes ir a la sección de informes y seleccionar la opción de compartir",
+    },
+    {
+        question: "¿Cómo puedo comparar los resultados de cada partido?",
+        answer: "Para comparar los resultados de cada partido, debes ir a la sección de estadisticas y seleccionar la opción de comparar",
+    },
+    {
+        question: "¿Cómo puedo analizar la evolución de la temporada?",
+        answer: "Para analizar la evolución de la temporada, debes ir a la sección de estadisticas y seleccion",
+    },
+];
+
+const qSelection = ref([] as number[]);
+const toggleQuestion = (index: number) => {
+    if (qSelection.value.includes(index)) {
+        qSelection.value = qSelection.value.filter((i) => i !== index);
+    } else {
+        qSelection.value.push(index);
+    }
+};
 </script>
