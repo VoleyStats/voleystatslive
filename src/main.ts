@@ -19,4 +19,3 @@ createApp(App)
         modules: [VueFireFirestoreOptionsAPI(), VueFireDatabaseOptionsAPI()],
     })
     .mount("#app");
-App.config.devtools = true;

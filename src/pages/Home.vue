@@ -1,38 +1,45 @@
 <template>
     <!-- INTRO + CTAs -->
     <section
-        class="rounded-lg p-6 mt-6 flex flex-col justify-center items-center"
+        class="rounded-lg p-6 flex flex-col justify-center items-center h-[100vh] relative"
     >
-        <div class="text-cente w-full flex justify-center">
-            <h4
-                class="text-xs font-thin border-slate-700 border w-fit text-center py-1 px-4 text-slate-300 rounded-full"
-            >
-                Conecta con tu equipo
-                <i class="bi bi-arrow-right-short text-sm"></i>
-            </h4>
+        <div class="h-screen absolute bottom-0 left-0 right-0 top-0">
+            <div
+                class="absolute bottom-0 left-0 right-0 top-0 bg-[linear-gradient(to_right,#4f4f4f2e_1px,transparent_1px),linear-gradient(to_bottom,#4f4f4f2e_1px,transparent_1px)] bg-[size:24px_48px] [mask-image:radial-gradient(ellipse_100%_100%_at_50%_0%,#000_70%,transparent_100%)]"
+            ></div>
         </div>
-        <h1
-            class="text-center text-5xl sm:text-6xl lg:text-8xl leading-tight text-pretty sm:max-w-[600px] md:max-w-[700px] lg:max-w-[900px]"
-        >
-            Alcanza el mejor potencial de tu equipo
-        </h1>
-        <p
-            class="text-center text-slate-300 text-sm font-thin leading-normal tracking-normal mt-4 mb-7"
-        >
-            Registra tus estadisticas, descarga informes y mejora partido a
-            partido
-        </p>
-        <div class="flex justify-center items-center">
-            <RouterLink
-                :to="'/team-code'"
-                class="text-sm font-thin border-slate-600 border bg-slate-700 w-fit text-center py-1 px-4 rounded-full"
-                >Ver la app
-            </RouterLink>
-            <RouterLink
-                :to="'/teamCode'"
-                class="text-sm font-thin w-fit text-center py-1 px-4 rounded-full"
-                >Conocer más
-            </RouterLink>
+        <div class="z-10">
+            <div class="text-cente w-full flex justify-center">
+                <h4
+                    class="text-xs font-thin border-slate-700 bg-gray-800 border w-fit text-center py-1 px-4 text-slate-300 rounded-full"
+                >
+                    Conecta con tu equipo
+                    <i class="bi bi-arrow-right-short text-sm"></i>
+                </h4>
+            </div>
+            <h1
+                class="text-center text-5xl sm:text-6xl lg:text-8xl leading-tight text-pretty sm:max-w-[600px] md:max-w-[700px] lg:max-w-[900px]"
+            >
+                Alcanza el mejor potencial de tu equipo
+            </h1>
+            <p
+                class="text-center text-slate-300 text-sm font-thin leading-normal tracking-normal mt-4 mb-7"
+            >
+                Registra tus estadisticas, descarga informes y mejora partido a
+                partido
+            </p>
+            <div class="flex justify-center items-center">
+                <RouterLink
+                    :to="'/team-code'"
+                    class="text-sm font-thin border-slate-600 border bg-slate-700 w-fit text-center py-1 px-4 rounded-full"
+                    >Ver la app
+                </RouterLink>
+                <RouterLink
+                    :to="'/teamCode'"
+                    class="text-sm font-thin w-fit text-center py-1 px-4 rounded-full"
+                    >Conocer más
+                </RouterLink>
+            </div>
         </div>
     </section>
 
@@ -42,13 +49,14 @@
     >
         <div class="flex justify-center items-center">
             <img
-                class="max-w-[300px] md:max-w-[460px]"
+                ref="productImg"
+                class="max-w-[300px] md:max-w-[460px] img-pr-anime"
                 src="https://res.cloudinary.com/dfbloaduq/image/upload/test-2_k6ahsf.webp"
                 alt=""
             />
         </div>
 
-        <article class="w-full md:max-w-[480px] mt-4 md:mt-0">
+        <article class="w-full md:max-w-[480px] mt-4 md:mt-0 art-pr-animation">
             <h2
                 class="text-center md:text-left text-3xl sm:text-4xl lg:text-5xl leading-tight text-pretty sm:max-w-[600px] md:max-w-[700px] lg:max-w-[900px]"
             >
@@ -72,8 +80,8 @@
     </section>
 
     <!-- SECCION PASARELA -->
-    <section class="mb-9 p-16 bg-gray-900 w-[100vw]">
-        <div class="w-full max-w-screen-xl mx-auto p-4">
+    <section class="mb-9 p-8 bg-gray-900 w-[100vw] max-w-screen-xl mx-auto">
+        <div class="w-full">
             <h2
                 class="text-center md:text-left text-3xl sm:text-4xl lg:text-5xl leading-tight text-pretty sm:max-w-[600px] md:max-w-[700px] lg:max-w-[900px]"
             >
@@ -88,7 +96,7 @@
                 class="flex justify-start items-center flex-col md:flex-row gap-4 md:overflow-x-scroll scroll-p-[24rem]"
             >
                 <article
-                    class="w-[312px] shrink-0 p-6 rounded-3xl flex flex-col bg-clip-padding backdrop-filter backdrop-blur-lg bg-white bg-opacity-5 border border-slate-600 gap-4 "
+                    class="w-[312px] shrink-0 p-6 rounded-3xl flex flex-col bg-clip-padding backdrop-filter backdrop-blur-lg bg-white bg-opacity-5 border border-slate-600 gap-4"
                     v-for="feature in appFeatures"
                 >
                     <div class="border rounded-xl w-fit py-2 px-3">
@@ -108,7 +116,7 @@
     </section>
 
     <!-- SECCION FAQs -->
-    <section class="mt-12 w-full max-w-screen-xl mx-auto p-4">
+    <section class="my-12 w-full max-w-screen-xl mx-auto p-8">
         <h2
             class="text-left md:text-left text-3xl sm:text-4xl lg:text-5xl leading-tight text-pretty"
         >
@@ -142,40 +150,41 @@
             </article>
         </div>
     </section>
-
-    <!-- CONTACT SECTION -->
-
-    <section class="mb-12 w-full max-w-screen-xl mx-auto p-4">
-        <div
-            class="container mx-auto p-6 bg-clip-padding backdrop-filter backdrop-blur-lg bg-white bg-opacity-5 border border-slate-600 rounded-lg"
-        >
-            <h2
-                class="text-left md:text-left text-3xl sm:text-4xl lg:text-5xl leading-tight text-pretty sm:max-w-[600px] md:max-w-[700px] lg:max-w-[900px]"
-            >
-                <i class="bi bi-chat"></i>
-                Contacta con nosotros
-            </h2>
-            <p
-                class="text-left md:text-left text-slate-300 text-base font-thin leading-normal tracking-normal mt-4 mb-7"
-            >
-                Si tienes alguna duda, sugerencia o quieres colaborar con
-                nosotros, no dudes en contactar con nosotros
-            </p>
-            <div class="flex justify-center items-center">
-                <RouterLink
-                    :to="'/contact'"
-                    class="text-sm font-thin border-slate-600 border bg-slate-700 w-fit text-center py-1 px-4 rounded-full"
-                >
-                    Contactar
-                </RouterLink>
-            </div>
-        </div>
-    </section>
 </template>
 
 <script lang="ts" setup>
-import { ref } from "vue";
+import { onMounted, ref } from "vue";
 import { RouterLink } from "vue-router";
+import { gsap } from "gsap";
+
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+gsap.registerPlugin(ScrollTrigger);
+const productImg = ref();
+
+onMounted(() => {
+    gsap.to(".img-pr-anime", {
+        y: -250,
+        autoAlpha: 1,
+        duration: 2.5,
+        ease: "power2.out",
+        scrollTrigger: {
+            trigger: ".img-pr-anime",
+            scrub: true,
+            markers: true,
+        },
+    });
+    gsap.to(".art-pr-animation", {
+        y: -250,
+        autoAlpha: 1,
+        duration: 2.5,
+        ease: "power2.out",
+        scrollTrigger: {
+            trigger: ".art-pr-animation",
+            scrub: true,
+        },
+    });
+});
 
 const appFeatures = [
     {
