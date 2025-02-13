@@ -1,7 +1,7 @@
 <template>
     <!-- INTRO + CTAs -->
     <section
-        class="rounded-lg p-6 flex flex-col justify-center items-center h-[100vh] relative"
+        class="rounded-lg p-6 flex flex-col justify-center items-center h-[80vh] relative"
     >
         <div class="h-screen absolute bottom-0 left-0 right-0 top-0">
             <div
@@ -49,14 +49,13 @@
     >
         <div class="flex justify-center items-center">
             <img
-                ref="productImg"
-                class="max-w-[300px] md:max-w-[460px] img-pr-anime"
+                class="max-w-[300px] md:max-w-[460px] anime-fade-in"
                 src="https://res.cloudinary.com/dfbloaduq/image/upload/test-2_k6ahsf.webp"
                 alt=""
             />
         </div>
 
-        <article class="w-full md:max-w-[480px] mt-4 md:mt-0 art-pr-animation">
+        <article class="w-full md:max-w-[480px] mt-4 md:mt-0 anime-fade-in">
             <h2
                 class="text-center md:text-left text-3xl sm:text-4xl lg:text-5xl leading-tight text-pretty sm:max-w-[600px] md:max-w-[700px] lg:max-w-[900px]"
             >
@@ -80,23 +79,27 @@
     </section>
 
     <!-- SECCION PASARELA -->
-    <section class="mb-9 p-8 bg-gray-900 w-[100vw] max-w-screen-xl mx-auto">
-        <div class="w-full">
-            <h2
-                class="text-center md:text-left text-3xl sm:text-4xl lg:text-5xl leading-tight text-pretty sm:max-w-[600px] md:max-w-[700px] lg:max-w-[900px]"
-            >
-                Conoce la app
-            </h2>
-            <p
-                class="text-center md:text-left text-slate-300 text-base font-thin leading-normal tracking-normal mt-4 mb-7"
-            >
-                Te presentamos algunas de sus principales funcionalidades
-            </p>
+    <section
+        class="mb-9 p-8 bg-gray-900 w-[100vw] mx-auto min-h-[450px] flex justify-center items-center anime-fade-in"
+    >
+        <div class="w-full max-w-screen-xl mx-auto">
+            <article class="mb-8 md:mb-10 anime-fade-in">
+                <h2
+                    class="text-center md:text-left text-3xl sm:text-4xl lg:text-5xl leading-tight text-pretty sm:max-w-[600px] md:max-w-[700px] lg:max-w-[900px]"
+                >
+                    Conoce la app
+                </h2>
+                <p
+                    class="text-center md:text-left text-slate-300 text-base font-thin leading-normal tracking-normal mt-2"
+                >
+                    Te presentamos algunas de sus principales funcionalidades
+                </p>
+            </article>
             <div
                 class="flex justify-start items-center flex-col md:flex-row gap-4 md:overflow-x-scroll scroll-p-[24rem]"
             >
                 <article
-                    class="w-[312px] shrink-0 p-6 rounded-3xl flex flex-col bg-clip-padding backdrop-filter backdrop-blur-lg bg-white bg-opacity-5 border border-slate-600 gap-4"
+                    class="w-[312px] shrink-0 p-6 rounded-3xl flex flex-col bg-clip-padding backdrop-filter backdrop-blur-lg bg-white bg-opacity-5 border border-slate-600 gap-4 anime-fade-in"
                     v-for="feature in appFeatures"
                 >
                     <div class="border rounded-xl w-fit py-2 px-3">
@@ -116,9 +119,11 @@
     </section>
 
     <!-- SECCION FAQs -->
-    <section class="my-12 w-full max-w-screen-xl mx-auto p-8">
+    <section
+        class="my-12 w-full max-w-screen-xl mx-auto p-8 min-h-[650px] flex justify-center items-start flex-col"
+    >
         <h2
-            class="text-left md:text-left text-3xl sm:text-4xl lg:text-5xl leading-tight text-pretty"
+            class="text-left md:text-left text-3xl sm:text-4xl lg:text-5xl leading-tight text-pretty mb-6 anime-fade-in"
         >
             Preguntas frecuentes
         </h2>
@@ -126,7 +131,7 @@
         <!-- LISTADO DE PREGUNTAS -->
         <div class="grid grid-flow-row grid-cols-1 gap-2 mt-4 mb-4 w-full">
             <article
-                class="border rounded-lg px-3 py-2 border-slate-600 g-clip-padding backdrop-filter backdrop-blur-lg bg-opacity-5 bg-white"
+                class="border rounded-lg px-3 py-2 border-slate-600 g-clip-padding backdrop-filter backdrop-blur-lg bg-opacity-5 bg-white anime-fade-in"
                 v-for="(q, index) in faqs"
                 @click="toggleQuestion(index)"
             >
@@ -156,34 +161,35 @@
 import { onMounted, ref } from "vue";
 import { RouterLink } from "vue-router";
 import { gsap } from "gsap";
-
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 gsap.registerPlugin(ScrollTrigger);
-const productImg = ref();
+
+const applyFadeInEffect = (className: string) => {
+    const elements = document.querySelectorAll(className);
+    elements.forEach((element) => {
+        gsap.fromTo(
+            element,
+            { opacity: 0, y: 100 },
+            {
+                opacity: 1,
+                y: 0,
+                duration: 3,
+                scrollTrigger: {
+                    trigger: element,
+                    start: "top 75%",
+                    end: "top 50%",
+                    scrub: true,
+                    once: true,
+                    markers: false,
+                },
+            }
+        );
+    });
+};
 
 onMounted(() => {
-    gsap.to(".img-pr-anime", {
-        y: -250,
-        autoAlpha: 1,
-        duration: 2.5,
-        ease: "power2.out",
-        scrollTrigger: {
-            trigger: ".img-pr-anime",
-            scrub: true,
-            markers: true,
-        },
-    });
-    gsap.to(".art-pr-animation", {
-        y: -250,
-        autoAlpha: 1,
-        duration: 2.5,
-        ease: "power2.out",
-        scrollTrigger: {
-            trigger: ".art-pr-animation",
-            scrub: true,
-        },
-    });
+    applyFadeInEffect(".anime-fade-in");
 });
 
 const appFeatures = [

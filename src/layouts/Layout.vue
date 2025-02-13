@@ -1,6 +1,6 @@
 <template>
     <main
-        class="bg-gradient-to-tr from-rose-100 to-sky-100 dark:bg-gradient-to-tr dark:from-gray-800 dark:via-gray-800 min-h-screen overflow-x-hidden font-sans"
+        class="bg-gradient-to-tr from-rose-100 to-sky-100 dark:bg-gradient-to-tr dark:from-gray-800 dark:via-gray-800 min-h-screen overflow-x-hidden font-sans w-screen"
     >
         <nav class="flex justify-center items-center p-4 w-full">
             <div class="flex" @click="$router.push({ name: 'home' })">
