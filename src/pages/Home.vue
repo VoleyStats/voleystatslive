@@ -32,12 +32,12 @@
                 <RouterLink
                     :to="'/team-code'"
                     class="text-sm font-thin border-slate-600 border bg-slate-700 w-fit text-center py-1 px-4 rounded-full"
-                    >Ver la app
+                    >Consultar estadisticas online
                 </RouterLink>
                 <RouterLink
-                    :to="'/teamCode'"
+                    :to="'#'"
                     class="text-sm font-thin w-fit text-center py-1 px-4 rounded-full"
-                    >Conocer más
+                    >Descargar app
                 </RouterLink>
             </div>
         </div>
@@ -80,7 +80,7 @@
 
     <!-- SECCION PASARELA -->
     <section
-        class="mb-9 p-8 bg-gray-900 w-[100vw] mx-auto min-h-[450px] flex justify-center items-center anime-fade-in"
+        class="mb-9 p-8 bg-gray-900 w-[100vw] mx-auto min-h-[450px] md:min-h-[750px] md:mt-20 flex justify-center items-center anime-fade-in"
     >
         <div class="w-full max-w-screen-xl mx-auto">
             <article class="mb-8 md:mb-10 anime-fade-in">
