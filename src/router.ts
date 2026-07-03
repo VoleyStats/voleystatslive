@@ -1,23 +1,17 @@
-
 import { createWebHistory, createRouter, RouteRecordRaw } from 'vue-router'
 
-
-import Home from "./pages/Home.vue"
-import StatsView from './pages/StatsView.vue'
-import AreaStats from './pages/AreaStats.vue'
-import EmptyState from './components/EmptyState.vue'
-import TeamCode from './pages/TeamCode.vue'
+import Home from './pages/Home.vue'
 
 const routes = [
   {
     path: '/',
     name: 'home',
-    component: Home
+    component: Home,
   },
   {
     path: '/team-code',
     name: 'code',
-    component: TeamCode
+    component: () => import('./pages/TeamCode.vue'),
   },
   {
     path: '/stats/:id',
@@ -26,27 +20,30 @@ const routes = [
       {
         path: '',
         name: 'stats',
-        component: StatsView,
+        component: () => import('./pages/StatsView.vue'),
       },
       {
         path: 'areas',
         name: 'areaStats',
-        component: AreaStats
+        component: () => import('./pages/AreaStats.vue'),
       },
       {
         path: 'team',
         name: 'teamStats',
-        component: EmptyState
+        component: () => import('./components/EmptyState.vue'),
       },
-    ]
-  }
+    ],
+  },
 ] as RouteRecordRaw[]
- 
+
 const router = createRouter({
   history: createWebHistory(),
   routes,
+  scrollBehavior(to, _from, savedPosition) {
+    if (savedPosition) return savedPosition
+    if (to.hash) return { el: to.hash, top: 80, behavior: 'smooth' }
+    return { top: 0 }
+  },
 })
-
-
 
 export default router

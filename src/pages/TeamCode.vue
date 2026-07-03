@@ -1,39 +1,61 @@
 <template>
-    <section class="flex justify-center items-center h-[80dvh]">
-        <article
-            class="mx-4 p-8 rounded-3xl flex flex-col justify-center items-center max-w-lg bg-clip-padding backdrop-filter backdrop-blur-lg bg-white bg-opacity-5 border border-slate-600"
+  <section class="relative min-h-[calc(100vh-4rem)] flex items-center justify-center overflow-hidden px-5 py-16">
+    <div class="pointer-events-none absolute inset-0 bg-grid bg-grid [mask-image:radial-gradient(ellipse_70%_60%_at_50%_40%,#000_50%,transparent_100%)]"></div>
+    <div class="pointer-events-none absolute top-1/3 left-1/2 -translate-x-1/2 h-80 w-80 rounded-full bg-brand-500/20 blur-[120px]"></div>
+
+    <div class="card relative w-full max-w-md p-8 sm:p-10">
+      <div class="flex justify-center mb-6">
+        <span class="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-brand-500/20 to-volt-500/10 border border-white/10">
+          <i class="bi bi-broadcast text-2xl text-volt-400"></i>
+        </span>
+      </div>
+
+      <h1 class="text-2xl font-bold text-center">Estadísticas en vivo</h1>
+      <p class="mt-2 text-sm text-slate-400 text-center">
+        Introduce el código de tu equipo para acceder al marcador y las
+        estadísticas del partido en directo.
+      </p>
+
+      <form class="mt-8" @submit.prevent="goToStats">
+        <label for="team-code" class="block text-sm font-medium text-slate-300 mb-2">
+          Código del equipo
+        </label>
+        <input
+          id="team-code"
+          v-model.trim="codeTeam"
+          type="text"
+          autocomplete="off"
+          class="w-full rounded-xl bg-white/[0.04] border border-white/10 px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-brand-400 focus:ring-2 focus:ring-brand-500/30 transition"
+          placeholder="Ej. equipo-2026"
+        />
+
+        <button
+          type="submit"
+          class="btn-primary w-full mt-6 text-base disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none"
+          :disabled="!codeTeam"
         >
-            <h3
-                class="text-slate-800 text-2xl font-bold text-center mb-6 dark:text-white"
-            >
-                Accede a las estadisticas en vivo de tu equipo
-            </h3>
-            <div class="w-full">
-                <label
-                    for="validation"
-                    class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                ></label>
-                <input
-                    v-model="codeTeam"
-                    type="text"
-                    id="validation"
-                    class="bg-transparent border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                    placeholder="Escribe el código de tu equipo..."
-                    required
-                />
-            </div>
-            <RouterLink
-                :to="codeTeam ? '/stats/' + codeTeam : ''"
-                class="dark:text-white dark:bg-blue-800 py-1 px-10 rounded-lg text-slate-800 bg-slate-100 w-full mt-6 hover:scale-105 text-center"
-                >Acceder</RouterLink
-            >
-        </article>
-    </section>
+          Acceder
+          <i class="bi bi-arrow-right"></i>
+        </button>
+      </form>
+
+      <RouterLink to="/" class="mt-6 flex items-center justify-center gap-1.5 text-xs text-slate-500 hover:text-slate-300 transition">
+        <i class="bi bi-arrow-left"></i>
+        Volver al inicio
+      </RouterLink>
+    </div>
+  </section>
 </template>
 
 <script lang="ts" setup>
 import { ref } from "vue";
-import { RouterLink } from "vue-router";
+import { RouterLink, useRouter } from "vue-router";
 
+const router = useRouter();
 const codeTeam = ref("");
+
+const goToStats = () => {
+  if (!codeTeam.value) return;
+  router.push(`/stats/${codeTeam.value}`);
+};
 </script>

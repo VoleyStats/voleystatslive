@@ -2,7 +2,7 @@
 
   <div class="p-4" >
     <div
-            class="fixed top-2 right-0 border-slate-300 bg-clip-padding backdrop-filter backdrop-blur-md dark:bg-opacity-0 border dark:border-gray-500 py-2 rounded-l-lg w-12 flex flex-col items-center border-r-0 z-20"
+            class="fixed top-20 right-0 z-30 flex w-12 flex-col items-center rounded-l-xl border border-r-0 border-white/10 bg-ink-850/80 py-2 backdrop-blur-xl cursor-pointer"
             @click="selectSet = !selectSet"
             >
             <div v-show="selectSet">
@@ -25,7 +25,7 @@
         </div>
         <EmptyState v-if="stats.data.length === 0"/>
     <div v-else>
-        <article v-for="[player, stat] in rcvStats.data" class="text-center bg-white bg-opacity-10 p-4 rounded-lg m-4">
+        <article v-for="[player, stat] in rcvStats.data" class="text-center bg-white/[0.04] border border-white/10 rounded-2xl p-4 m-4">
             <p class="font-bold pb-2">{{ player }}</p>
             <!-- {{ stat }} -->
             <div class="flex w-full">

@@ -1,0 +1,23 @@
+{
+  "name": "Voley Stats Live",
+  "short_name": "Voley Stats",
+  "description": "Estadísticas de voleibol en vivo: marcador, eficiencia por jugador y por área, e informes en PDF.",
+  "lang": "es",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#070A12",
+  "theme_color": "#070A12",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/logo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

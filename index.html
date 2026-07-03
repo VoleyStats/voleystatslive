@@ -1,13 +1,166 @@
 <!doctype html>
-<html lang="en" id="voleyApp" class="dark">
+<html lang="es" class="dark">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/logo.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Voley Stats Live</title>
+    <script>document.documentElement.classList.add('js')</script>
+
+    <!-- Primary meta -->
+    <title>Voley Stats Live — Estadísticas de voleibol en vivo</title>
+    <meta
+      name="description"
+      content="App para registrar y consultar estadísticas de voleibol en tiempo real. Sigue el marcador, la eficiencia por jugador y por área, y descarga informes en PDF por set. Empieza gratis."
+    />
+    <meta name="keywords" content="estadísticas voleibol, voleibol en vivo, marcador voleibol, análisis voleibol, app voleibol, estadísticas voley, informes voleibol PDF" />
+    <meta name="author" content="Voley Stats Live" />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <meta name="theme-color" content="#070A12" />
+    <link rel="canonical" href="https://voleystatslive.com/" />
+
+    <!-- Icons / PWA -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/logo.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Voley Stats Live" />
+    <meta property="og:locale" content="es_ES" />
+    <meta property="og:title" content="Voley Stats Live — Estadísticas de voleibol en vivo" />
+    <meta
+      property="og:description"
+      content="Registra cada acción del partido y sigue el marcador y las estadísticas de tu equipo de voleibol en tiempo real. Informes en PDF por set y por jugador."
+    />
+    <meta property="og:url" content="https://voleystatslive.com/" />
+    <meta property="og:image" content="https://voleystatslive.com/og-image.svg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Voley Stats Live: estadísticas de voleibol en vivo" />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Voley Stats Live — Estadísticas de voleibol en vivo" />
+    <meta name="twitter:description" content="Estadísticas de voleibol en tiempo real: marcador, eficiencia por jugador y por área, e informes en PDF." />
+    <meta name="twitter:image" content="https://voleystatslive.com/og-image.svg" />
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Structured data: SoftwareApplication -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Voley Stats Live",
+        "applicationCategory": "SportsApplication",
+        "operatingSystem": "Web, Android, iOS",
+        "description": "Aplicación para registrar y consultar estadísticas de voleibol en tiempo real. Permite seguir el marcador en vivo, medir la eficiencia por jugador y por área del juego (recepción, saque, ataque, bloqueo, defensa y colocación), analizar las estadísticas set a set y descargar informes en PDF.",
+        "url": "https://voleystatslive.com/",
+        "inLanguage": "es",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "EUR"
+        },
+        "featureList": [
+          "Marcador de voleibol en vivo",
+          "Estadísticas por jugador",
+          "Análisis por áreas del juego",
+          "Curva de registro de puntos y errores",
+          "Informes descargables en PDF",
+          "Acceso a las estadísticas online mediante código de equipo"
+        ]
+      }
+    </script>
+
+    <!-- Structured data: Organization + WebSite -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "Voley Stats Live",
+        "url": "https://voleystatslive.com/",
+        "logo": "https://voleystatslive.com/favicon.svg"
+      }
+    </script>
+
+    <!-- Structured data: FAQ (mantener sincronizado con src/pages/Home.vue) -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "¿Qué es Voley Stats Live?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Es una aplicación para registrar y consultar estadísticas de voleibol en tiempo real. Anotas cada acción del partido desde la app y cualquiera puede seguir el marcador y las estadísticas en vivo desde la web usando el código del equipo."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "¿Cómo consulto las estadísticas de mi equipo online?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Entra en la sección 'Ver en vivo', introduce el código de tu equipo y accede al marcador y a las estadísticas del partido en directo, con desglose por set y por jugador."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "¿Qué estadísticas puedo registrar?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Puedes registrar acciones en las seis áreas del juego: recepción, saque, ataque, bloqueo, defensa y colocación, además del marcador, las rachas y la eficiencia de cada jugador."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "¿Puedo descargar un informe del partido?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Sí. Al finalizar el partido puedes generar un PDF con el resumen por set y por jugador para analizarlo y compartirlo con el equipo."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "¿Necesito conexión a internet?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Sí, las estadísticas se sincronizan en tiempo real, por lo que necesitas conexión para registrar acciones y para que los demás vean el directo."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "¿Cuánto cuesta?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Puedes empezar a usar Voley Stats Live de forma gratuita. Descarga la app e introduce el código de tu equipo para comenzar a registrar y consultar estadísticas."
+            }
+          }
+        ]
+      }
+    </script>
   </head>
   <body>
     <div id="app"></div>
+    <noscript>
+      <div style="max-width:640px;margin:40px auto;padding:0 20px;font-family:system-ui,sans-serif;color:#e2e8f0;background:#070A12">
+        <h1>Voley Stats Live — Estadísticas de voleibol en vivo</h1>
+        <p>
+          Voley Stats Live es una aplicación para registrar y consultar
+          estadísticas de voleibol en tiempo real. Sigue el marcador en directo,
+          mide la eficiencia por jugador y por área del juego (recepción, saque,
+          ataque, bloqueo, defensa y colocación), analiza cada set y descarga
+          informes en PDF. Activa JavaScript para usar la aplicación.
+        </p>
+      </div>
+    </noscript>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>
