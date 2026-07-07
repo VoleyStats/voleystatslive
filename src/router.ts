@@ -15,6 +15,14 @@ const routes = [
     component: Home
   },
   {
+    // Broadcast scoreboard for OBS Browser Source. `bare` skips the site chrome
+    // (nav/footer/background) so the page renders transparent over video.
+    path: '/overlay/:code',
+    name: 'overlay',
+    component: () => import('./pages/Overlay.vue'),
+    meta: { bare: true }
+  },
+  {
     path: '/team-code',
     name: 'code',
     component: TeamCode
