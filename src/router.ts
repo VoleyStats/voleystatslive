@@ -39,6 +39,13 @@ const routes = [
       { path: 'areas', redirect: { name: 'players' } },
     ],
   },
+  {
+    // Enlace corto que muestra la app (voleystats-live.vercel.app/<código>):
+    // los códigos son IDs de Firestore (20 caracteres alfanuméricos), así el
+    // patrón no captura rutas futuras.
+    path: '/:code([A-Za-z0-9]{15,})',
+    redirect: (to: any) => ({ name: 'stats', params: { id: to.params.code } }),
+  },
 ] as RouteRecordRaw[]
 
 const router = createRouter({
