@@ -101,6 +101,12 @@
                     </div>
                 </div>
 
+                <!-- Mapa de ataque (modos de captura C/D) -->
+                <div v-if="p.directionStats.length >= 3" class="rounded-lg bg-white/[0.04] border border-white/10 p-3">
+                    <p class="text-xs text-slate-400 mb-2">Mapa de ataque</p>
+                    <CourtMap :stats="p.directionStats" :rival="false" />
+                </div>
+
                 <!-- Puntos por set -->
                 <div v-if="set === 0 && p.pointsBySet.some(x => x > 0)" class="rounded-lg bg-white/[0.04] border border-white/10 p-3">
                     <p class="text-xs text-slate-400 mb-2">Puntos por set</p>
@@ -121,6 +127,7 @@ import { computed, reactive, ref } from "vue";
 import { collection, doc, onSnapshot, orderBy, query } from "firebase/firestore";
 import { useRoute } from "vue-router";
 import { useDocument } from "vuefire";
+import CourtMap from "../components/CourtMap.vue";
 import EmptyState from "../components/EmptyState.vue";
 import { db } from "../firebase";
 
@@ -234,6 +241,10 @@ const players = computed(() => {
             },
         ].filter((b) => !/^0 [a-z]+ · 0 |^0 [a-z]+<br>0 /.test(b.html));
 
+        const directionStats = list.filter(
+            (s) => ATTACK_IDS.includes(aid(s)) && typeof s.direction === "string" && s.direction.includes("#")
+        );
+
         return {
             name,
             number: list[0]?.player?.number,
@@ -244,6 +255,7 @@ const players = computed(() => {
             serve: { total: serveTotal, aces, errors: serveErrors },
             pointsBySet,
             blocks,
+            directionStats,
         };
     }).sort((a, b) => b.points - a.points);
 });

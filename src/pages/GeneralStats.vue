@@ -152,6 +152,26 @@
                 </ul>
             </article>
 
+            <!-- ============ MAPA DE ATAQUE (post-partido, modos C/D) ============ -->
+            <article v-if="matchOver && hasDirections" class="card w-full p-4">
+                <div class="flex items-center justify-between mb-3">
+                    <p class="text-sm font-semibold">Mapa de ataque</p>
+                    <div class="flex rounded-full border border-white/10 bg-white/[0.04] p-0.5 text-xs">
+                        <button
+                            class="rounded-full px-3 py-1 transition-colors"
+                            :class="!mapRival ? 'bg-white text-slate-900 font-semibold' : 'text-slate-300'"
+                            @click="mapRival = false"
+                        >{{ usName }}</button>
+                        <button
+                            class="rounded-full px-3 py-1 transition-colors"
+                            :class="mapRival ? 'bg-white text-slate-900 font-semibold' : 'text-slate-300'"
+                            @click="mapRival = true"
+                        >{{ themName }}</button>
+                    </div>
+                </div>
+                <CourtMap :stats="gameStats" :rival="mapRival" />
+            </article>
+
             <!-- ============ ERRORES POR ÁREA (post-partido) ============ -->
             <article v-if="matchOver" class="card w-full p-4">
                 <p class="text-sm font-semibold">Errores por área</p>
@@ -165,6 +185,7 @@
 import { computed, reactive, ref } from "vue";
 import { RouterLink } from "vue-router";
 import { useDocument } from "vuefire";
+import CourtMap from "../components/CourtMap.vue";
 import EmptyState from "../components/EmptyState.vue";
 import { collection, doc, onSnapshot, orderBy, query } from "firebase/firestore";
 import { db } from "../firebase";
@@ -229,6 +250,8 @@ const pickSet = (n: number) => { manualSet.value = n; };
 
 const setStats = computed(() => baseStats.data.filter((s) => s.set?.number == set.value));
 const gameStats = computed(() => setStats.value.filter((s) => !ADMIN_IDS.includes(aid(s))));
+const hasDirections = computed(() => gameStats.value.some((s) => typeof s.direction === "string" && s.direction.includes("#")));
+const mapRival = ref(false);
 const pointEnders = computed(() => gameStats.value.filter((s) => s.to !== 0));
 const lastPoint = computed(() => pointEnders.value.at(-1));
 
