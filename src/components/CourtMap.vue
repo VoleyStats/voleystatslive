@@ -54,19 +54,20 @@
 
             <!-- etiqueta del atacante -->
             <text :x="W / 2" :y="H - 6" text-anchor="middle" fill="#94a3b8" font-size="11">
-                {{ attackerLabel }} atacan hacia arriba
+                {{ attackerLabel }}
             </text>
         </svg>
 
-        <p v-if="total === 0" class="text-xs text-slate-500">Sin direcciones registradas</p>
+        <p v-if="total === 0" class="text-xs text-slate-500">{{ $t('courtMap.noDirections') }}</p>
         <p v-else class="text-xs text-slate-500">
-            {{ total }} ataques con dirección · flecha verde = corredor efectivo, roja = corredor fallido
+            {{ $t('courtMap.summary', { n: total }) }}
         </p>
     </div>
 </template>
 
 <script lang="ts" setup>
 import { computed } from "vue";
+import { useI18n } from "vue-i18n";
 
 // Pista SVG con los corredores de ataque construidos desde el formato de
 // dirección de la app ("from#to", zonas "4A", red "N3", fuera "OT2/OL4",
@@ -77,6 +78,8 @@ const props = defineProps<{
     stats: any[];
     rival: boolean;
 }>();
+
+const { t } = useI18n();
 
 const W = 320;
 const H = 600;
@@ -208,5 +211,7 @@ const heat = computed(() =>
     }))
 );
 
-const attackerLabel = computed(() => (props.rival ? "El rival" : "Tus jugadoras"));
+const attackerLabel = computed(() =>
+    props.rival ? t("courtMap.attackUpRival") : t("courtMap.attackUpUs")
+);
 </script>

@@ -1,8 +1,8 @@
 <template>
     <EmptyState
         v-if="notFound"
-        title="Equipo no encontrado"
-        message="Revisa el enlace del equipo: debe ser el que se comparte desde la app."
+        :title="$t('team.notFoundTitle')"
+        :message="$t('team.notFoundMessage')"
     />
 
     <section v-else class="min-h-screen px-4 pb-16 flex flex-col gap-4 items-center max-w-3xl mx-auto">
@@ -16,14 +16,14 @@
             </span>
             <span class="flex-1 min-w-0">
                 <span class="block text-lg font-bold truncate">{{ teamName }}</span>
-                <span class="block text-xs text-slate-400">{{ matches.length }} partidos compartidos</span>
+                <span class="block text-xs text-slate-400">{{ $t('team.sharedMatches', matches.length) }}</span>
             </span>
         </article>
 
         <EmptyState
             v-if="!loading && matches.length === 0"
-            title="Sin partidos compartidos"
-            message="Cuando el equipo comparta un partido en directo desde la app, aparecerá aquí."
+            :title="$t('team.emptyTitle')"
+            :message="$t('team.emptyMessage')"
         />
 
         <!-- Partidos -->
@@ -34,12 +34,12 @@
             class="card w-full p-4 flex items-center gap-3 hover:border-brand-500/40 transition-colors"
         >
             <span class="flex-1 min-w-0">
-                <span class="block font-semibold truncate">vs {{ m.opponent }}</span>
+                <span class="block font-semibold truncate">{{ $t('team.vs', { opponent: m.opponent }) }}</span>
                 <span class="block text-xs text-slate-400">{{ m.dateLabel }}</span>
             </span>
             <span v-if="m.live" class="inline-flex items-center gap-1.5 text-xs font-semibold text-volt-400">
                 <span class="h-2 w-2 rounded-full bg-volt-400 animate-pulse"></span>
-                EN VIVO
+                {{ $t('team.live') }}
             </span>
             <span v-else-if="m.result" class="font-display font-bold" :class="m.won ? 'text-volt-400' : 'text-red-400'">
                 {{ m.result }}
@@ -53,16 +53,18 @@
 import { computed, reactive, watchEffect } from "vue";
 import { RouterLink, useRoute } from "vue-router";
 import { doc, getDoc } from "firebase/firestore";
+import { useI18n } from "vue-i18n";
 import { useDocument } from "vuefire";
 import EmptyState from "../components/EmptyState.vue";
 import { db } from "../firebase";
 
 const teamId = useRoute().params.id as string;
+const { t, locale } = useI18n();
 const team = useDocument(doc(db, "teams", teamId));
 
 const notFound = computed(() => team.value === null);
 const loading = computed(() => team.value === undefined);
-const teamName = computed(() => team.value?.name ?? "Equipo");
+const teamName = computed(() => team.value?.name ?? t("team.teamFallback"));
 const teamColor = computed(() => {
     const hex = String(team.value?.color ?? "").replace("#", "");
     return hex.length === 6 || hex.length === 8 ? `#${hex}` : "#6E93FF";
@@ -88,7 +90,7 @@ const matches = reactive<TeamMatch[]>([]);
 watchEffect(async () => {
     const index = (team.value?.matches ?? []) as any[];
     if (!index.length) return;
-    const df = new Intl.DateTimeFormat("es", { dateStyle: "medium" });
+    const df = new Intl.DateTimeFormat(locale.value, { dateStyle: "medium" });
     const rows = await Promise.all(
         index.map(async (entry) => {
             const row: TeamMatch = {

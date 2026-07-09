@@ -2,8 +2,8 @@
     <!-- Partido no encontrado -->
     <EmptyState
         v-if="notFound"
-        title="Partido no encontrado"
-        message="Revisa el código del partido: debe ser exactamente el que aparece en la app al activar el directo."
+        :title="$t('stats.notFoundTitle')"
+        :message="$t('stats.notFoundMessage')"
     />
 
     <section v-else class="min-h-screen px-4 pb-24 flex flex-col gap-4 items-center max-w-3xl mx-auto">
@@ -12,13 +12,13 @@
             <div class="flex items-center justify-between mb-3">
                 <span v-if="matchOver" class="inline-flex items-center gap-2 text-xs font-semibold text-slate-300">
                     <i class="bi bi-flag-fill"></i>
-                    FINAL
+                    {{ $t('stats.final') }}
                 </span>
                 <span v-else class="inline-flex items-center gap-2 text-xs font-semibold text-volt-400">
                     <span class="h-2 w-2 rounded-full bg-volt-400 animate-pulse"></span>
-                    EN VIVO · Set {{ currentSet }}
+                    {{ $t('stats.liveSet', { n: currentSet }) }}
                 </span>
-                <span class="text-xs text-slate-500">{{ setsWon[0] }} - {{ setsWon[1] }} en sets</span>
+                <span class="text-xs text-slate-500">{{ $t('stats.inSets', { us: setsWon[0], them: setsWon[1] }) }}</span>
             </div>
 
             <div class="grid grid-cols-2 gap-2">
@@ -42,7 +42,7 @@
                         : 'border-white/10 bg-white/[0.04] text-slate-300 hover:border-white/30'"
                     @click="pickSet(0)"
                 >
-                    Partido
+                    {{ $t('stats.fullMatch') }}
                 </button>
                 <button
                     v-for="n in nSets"
@@ -53,7 +53,7 @@
                         : 'border-white/10 bg-white/[0.04] text-slate-300 hover:border-white/30'"
                     @click="pickSet(n)"
                 >
-                    Set {{ n }}
+                    {{ $t('stats.setN', { n }) }}
                     <span v-if="setResult(n)" class="ml-1 text-xs opacity-70">{{ setResult(n) }}</span>
                 </button>
                 <button
@@ -61,15 +61,15 @@
                     class="shrink-0 rounded-full px-3 py-1.5 text-xs border border-volt-500/40 text-volt-400"
                     @click="manualSet = null"
                 >
-                    <i class="bi bi-broadcast"></i> Volver al directo
+                    <i class="bi bi-broadcast"></i> {{ $t('stats.backToLive') }}
                 </button>
             </div>
         </article>
 
         <EmptyState
             v-if="setStats.length === 0"
-            title="Sin datos en este set"
-            message="Cuando empiece el set, aquí aparecerá el punto a punto y las estadísticas en tiempo real."
+            :title="$t('stats.emptySetTitle')"
+            :message="$t('stats.emptySetMessage')"
         />
 
         <template v-else>
@@ -79,7 +79,7 @@
                     {{ streak.count }}
                 </p>
                 <p class="text-sm text-slate-400">
-                    {{ streak.ours ? "puntos seguidos de " + usName : "puntos seguidos de " + themName }}
+                    {{ $t('stats.streak', { team: streak.ours ? usName : themName }) }}
                 </p>
             </article>
 
@@ -87,11 +87,11 @@
             <section v-if="matchOver" class="w-full grid grid-cols-2 gap-2">
                 <article class="card p-3 text-center">
                     <p class="text-2xl font-display font-bold text-brand-300">{{ pct(sideOut.won, sideOut.total) }}</p>
-                    <p class="text-xs text-slate-400 leading-4 mt-1">side-out<br />{{ sideOut.won }}/{{ sideOut.total }}</p>
+                    <p class="text-xs text-slate-400 leading-4 mt-1">{{ $t('stats.sideOut') }}<br />{{ sideOut.won }}/{{ sideOut.total }}</p>
                 </article>
                 <article class="card p-3 text-center">
                     <p class="text-2xl font-display font-bold text-brand-300">{{ pct(breakPts.won, breakPts.total) }}</p>
-                    <p class="text-xs text-slate-400 leading-4 mt-1">break<br />{{ breakPts.won }}/{{ breakPts.total }}</p>
+                    <p class="text-xs text-slate-400 leading-4 mt-1">{{ $t('stats.break') }}<br />{{ breakPts.won }}/{{ breakPts.total }}</p>
                 </article>
             </section>
             <RouterLink
@@ -103,15 +103,15 @@
                     <i class="bi bi-people-fill"></i>
                 </span>
                 <span class="flex-1">
-                    <span class="block font-semibold">Estadísticas de las jugadoras</span>
-                    <span class="block text-xs text-slate-400">Ataque, recepción, saque y más, jugadora a jugadora</span>
+                    <span class="block font-semibold">{{ $t('stats.playersLinkTitle') }}</span>
+                    <span class="block text-xs text-slate-400">{{ $t('stats.playersLinkSubtitle') }}</span>
                 </span>
                 <i class="bi bi-chevron-right text-slate-500"></i>
             </RouterLink>
 
             <!-- ============ PUNTO A PUNTO ============ -->
             <article class="card w-full p-4">
-                <p class="text-sm font-semibold mb-3">Punto a punto</p>
+                <p class="text-sm font-semibold mb-3">{{ $t('stats.pointByPoint') }}</p>
                 <ul class="space-y-1.5 max-h-96 overflow-y-auto pr-1">
                     <li
                         v-for="p in timeline"
@@ -128,14 +128,14 @@
 
             <!-- ============ MOMENTUM ============ -->
             <article class="card w-full p-4">
-                <p class="text-sm font-semibold mb-1">Momentum</p>
-                <p class="text-xs text-slate-500 mb-2">Diferencia de puntos a lo largo del set</p>
+                <p class="text-sm font-semibold mb-1">{{ $t('stats.momentum') }}</p>
+                <p class="text-xs text-slate-500 mb-2">{{ $t('stats.momentumSubtitle') }}</p>
                 <VueApexCharts type="bar" height="220" :options="momentum.chartOptions" :series="momentum.series" />
             </article>
 
             <!-- ============ ORIGEN DE LOS PUNTOS (post-partido) ============ -->
             <article v-if="matchOver" class="card w-full p-4">
-                <p class="text-sm font-semibold mb-3">Origen de los puntos</p>
+                <p class="text-sm font-semibold mb-3">{{ $t('stats.pointsOrigin') }}</p>
                 <div class="grid grid-cols-[1fr_auto_auto] gap-y-1.5 text-sm">
                     <span></span>
                     <span class="w-16 text-center text-xs text-slate-400">{{ usName }}</span>
@@ -150,7 +150,7 @@
 
             <!-- ============ PUNTOS POR JUGADORA ============ -->
             <article v-if="topScorers.length" class="card w-full p-4">
-                <p class="text-sm font-semibold mb-3">Puntos por jugadora</p>
+                <p class="text-sm font-semibold mb-3">{{ $t('stats.pointsByPlayer') }}</p>
                 <ul class="space-y-1.5">
                     <li v-for="p in topScorers" :key="p.name" class="flex items-center gap-3 text-sm">
                         <span class="w-6 text-right font-display font-bold text-brand-300">{{ p.points }}</span>
@@ -164,13 +164,13 @@
 
             <!-- ============ COMPARATIVA ENTRE SETS (post-partido) ============ -->
             <article v-if="matchOver && setsComparison.length > 1" class="card w-full p-4">
-                <p class="text-sm font-semibold mb-3">Set a set</p>
+                <p class="text-sm font-semibold mb-3">{{ $t('stats.setBySet') }}</p>
                 <div class="grid grid-cols-[auto_1fr_1fr_1fr_1fr] gap-y-1.5 text-sm items-center">
                     <span></span>
-                    <span class="text-center text-xs text-slate-400">Resultado</span>
-                    <span class="text-center text-xs text-slate-400">Side-out</span>
-                    <span class="text-center text-xs text-slate-400">Break</span>
-                    <span class="text-center text-xs text-slate-400">Regalados</span>
+                    <span class="text-center text-xs text-slate-400">{{ $t('stats.colResult') }}</span>
+                    <span class="text-center text-xs text-slate-400">{{ $t('stats.colSideOut') }}</span>
+                    <span class="text-center text-xs text-slate-400">{{ $t('stats.colBreak') }}</span>
+                    <span class="text-center text-xs text-slate-400">{{ $t('stats.colGifted') }}</span>
                     <template v-for="row in setsComparison" :key="row.n">
                         <span class="pr-3 font-semibold text-slate-300">S{{ row.n }}</span>
                         <span class="text-center font-display font-bold" :class="row.won ? 'text-volt-400' : 'text-red-400'">{{ row.result }}</span>
@@ -183,7 +183,7 @@
 
             <!-- ============ CLAVES DEL PARTIDO (post-partido) ============ -->
             <article v-if="matchOver && insights.length" class="card w-full p-4">
-                <p class="text-sm font-semibold mb-3">Claves</p>
+                <p class="text-sm font-semibold mb-3">{{ $t('stats.keys') }}</p>
                 <ul class="space-y-2">
                     <li v-for="(ins, i) in insights" :key="i" class="flex items-start gap-3 rounded-lg bg-white/[0.03] px-3 py-2 text-sm">
                         <i :class="['bi', ins.icon, 'mt-0.5', ins.color]"></i>
@@ -195,7 +195,7 @@
             <!-- ============ MAPA DE ATAQUE (post-partido, modos C/D) ============ -->
             <article v-if="matchOver && hasDirections" class="card w-full p-4">
                 <div class="flex items-center justify-between mb-3">
-                    <p class="text-sm font-semibold">Mapa de ataque</p>
+                    <p class="text-sm font-semibold">{{ $t('stats.attackMap') }}</p>
                     <div class="flex rounded-full border border-white/10 bg-white/[0.04] p-0.5 text-xs">
                         <button
                             class="rounded-full px-3 py-1 transition-colors"
@@ -214,7 +214,7 @@
 
             <!-- ============ ERRORES POR ÁREA (post-partido) ============ -->
             <article v-if="matchOver" class="card w-full p-4">
-                <p class="text-sm font-semibold">Errores por área</p>
+                <p class="text-sm font-semibold">{{ $t('stats.errorsByArea') }}</p>
                 <VueApexCharts type="bar" height="220" :options="errors.chartOptions" :series="errors.series" />
             </article>
         </template>
@@ -224,10 +224,13 @@
 <script setup lang="ts">
 import { computed, reactive, ref } from "vue";
 import { RouterLink } from "vue-router";
+import { useI18n } from "vue-i18n";
 import { useDocument } from "vuefire";
 // Registro local (no global en main.ts): solo esta página paga por ApexCharts.
 import VueApexCharts from "vue3-apexcharts";
 import type { ApexOptions } from "apexcharts";
+
+const { t, te } = useI18n();
 import CourtMap from "../components/CourtMap.vue";
 import EmptyState from "../components/EmptyState.vue";
 import { collection, doc, onSnapshot, orderBy, query } from "firebase/firestore";
@@ -247,26 +250,21 @@ const isRival = (s: any): boolean => String(s?.player?.id ?? "") === "0";
 const rivalServing = (s: any): boolean => String(s?.server?.id ?? "") === "0";
 
 const KILL_IDS = ["9", "10", "11"];
-const ACTION_LABELS: Record<string, string> = {
-    "8": "Ace",
-    "9": "Remate",
-    "10": "Finta",
-    "11": "Block-out",
-    "13": "Punto de bloqueo",
-    "12": "Saque ganador",
-    "15": "Error de saque",
-    "32": "Error de saque",
-    "16": "Error de ataque",
-    "17": "Error de ataque",
-    "18": "Error de ataque",
-    "19": "Falta",
-    "20": "Error de bloqueo",
-    "22": "Error de recepción",
-    "23": "Error de defensa",
-    "24": "Error de colocación",
-    "25": "Error de free",
+// Nombres de acciones y áreas en i18n (stats.actions.a<id> / stats.areas.*),
+// resueltos en el idioma activo. Los ids de acción siguen siendo Strings.
+const actionLabel = (s: any): string => {
+    const key = `stats.actions.a${aid(s)}`;
+    return te(key) ? t(key) : s?.action?.name ?? "";
 };
-const AREA_LABELS = ["Recepción", "Bloqueo", "Defensa", "Colocación", "Saque", "Ataque", "Falta"];
+const AREA_LABELS = computed(() => [
+    t("stats.areas.reception"),
+    t("stats.areas.block"),
+    t("stats.areas.defense"),
+    t("stats.areas.setting"),
+    t("stats.areas.serve"),
+    t("stats.areas.attack"),
+    t("stats.areas.fault"),
+]);
 
 // ------------------------------------------------------------------ datos
 const match = useDocument(doc(db, "live_matches", props?.id ?? "x"));
@@ -282,8 +280,8 @@ onSnapshot(
 
 const notFound = computed(() => match.value === null && baseStats.loaded && baseStats.data.length === 0);
 const nSets = computed(() => match.value?.n_sets ?? 5);
-const usName = computed(() => match.value?.team?.name || "Tu equipo");
-const themName = computed(() => match.value?.opponent || "Rival");
+const usName = computed(() => match.value?.team?.name || t("stats.usFallback"));
+const themName = computed(() => match.value?.opponent || t("stats.themFallback"));
 const currentSet = computed(() => match.value?.current_set ?? 1);
 
 // Set seleccionado: sigue el set en curso durante el directo; en el informe
@@ -364,7 +362,7 @@ const pct = (won: number, total: number): string =>
 // ------------------------------------------------------------------ punto a punto
 const timeline = computed(() =>
     [...pointEnders.value].reverse().map((s, i) => {
-        const label = ACTION_LABELS[aid(s)] ?? s.action?.name ?? "";
+        const label = actionLabel(s);
         const who = isRival(s) ? themName.value : s.player?.name ?? "";
         return {
             key: s.id ?? i,
@@ -378,10 +376,10 @@ const timeline = computed(() =>
 // ------------------------------------------------------------------ origen de puntos
 const sourceRows = computed(() => {
     const rows = [
-        { label: "Ataque", us: 0, them: 0 },
-        { label: "Bloqueo", us: 0, them: 0 },
-        { label: "Saque directo", us: 0, them: 0 },
-        { label: "Errores del rival", us: 0, them: 0 },
+        { label: t("stats.originAttack"), us: 0, them: 0 },
+        { label: t("stats.originBlock"), us: 0, them: 0 },
+        { label: t("stats.originAce"), us: 0, them: 0 },
+        { label: t("stats.originErrors"), us: 0, them: 0 },
     ];
     for (const s of pointEnders.value) {
         const rival = isRival(s);
@@ -449,19 +447,19 @@ const insights = computed(() => {
     const theirPts = points.filter((s) => s.to === 2);
     const gifted = theirPts.filter((s) => !isRival(s)).length;
     if (theirPts.length >= 8 && gifted / theirPts.length >= 0.5) {
-        out.push({ icon: "bi-gift-fill", color: "text-red-400", text: `${gifted} de sus ${theirPts.length} puntos fueron errores propios.` });
+        out.push({ icon: "bi-gift-fill", color: "text-red-400", text: t("stats.insights.gifted", { gifted, total: theirPts.length }) });
     }
 
     const k3 = points.filter((s) => Number(s.stage) === 3);
     const k3lost = k3.filter((s) => s.to === 2).length;
     if (k3.length >= 8 && k3lost / k3.length >= 0.7) {
-        out.push({ icon: "bi-stopwatch", color: "text-orange-400", text: `Puntos largos: se perdieron ${k3lost} de ${k3.length}.` });
+        out.push({ icon: "bi-stopwatch", color: "text-orange-400", text: t("stats.insights.longRallies", { lost: k3lost, total: k3.length }) });
     }
 
     const serves = game.filter((s) => !isRival(s) && ["8", "15", "32", "39", "40", "41"].includes(aid(s)));
     const serveErr = serves.filter((s) => ["15", "32"].includes(aid(s))).length;
     if (serves.length >= 8 && serveErr >= 3 && serveErr / serves.length >= 0.25) {
-        out.push({ icon: "bi-bullseye", color: "text-yellow-400", text: `${serveErr} errores de saque de ${serves.length}: demasiado riesgo.` });
+        out.push({ icon: "bi-bullseye", color: "text-yellow-400", text: t("stats.insights.serveErrors", { errors: serveErr, total: serves.length }) });
     }
 
     const ourAttacks = game.filter((s) => !isRival(s) && ["6", "9", "10", "11", "16", "17"].includes(aid(s)));
@@ -470,13 +468,13 @@ const insights = computed(() => {
         for (const s of ourAttacks) byPlayer.set(s.player?.name ?? "", (byPlayer.get(s.player?.name ?? "") ?? 0) + 1);
         const top = [...byPlayer.entries()].sort((a, b) => b[1] - a[1])[0];
         if (byPlayer.size > 1 && top && top[1] / ourAttacks.length >= 0.5) {
-            out.push({ icon: "bi-diagram-3-fill", color: "text-orange-400", text: `${top[0]} concentró el ${Math.round((top[1] / ourAttacks.length) * 100)}% del ataque.` });
+            out.push({ icon: "bi-diagram-3-fill", color: "text-orange-400", text: t("stats.insights.attackConcentration", { player: top[0], pct: Math.round((top[1] / ourAttacks.length) * 100) }) });
         }
     }
 
     const blockouts = game.filter((s) => isRival(s) && aid(s) === "11").length;
     if (blockouts >= 3) {
-        out.push({ icon: "bi-hand-index-thumb-fill", color: "text-red-400", text: `${blockouts} block-outs del rival usando el bloqueo propio.` });
+        out.push({ icon: "bi-hand-index-thumb-fill", color: "text-red-400", text: t("stats.insights.blockouts", { n: blockouts }) });
     }
 
     const rivalDir = game.filter((s) => isRival(s) && ["6", "9", "10", "11", "16", "17"].includes(aid(s)) && String(s.direction ?? "").includes("#"));
@@ -492,7 +490,7 @@ const insights = computed(() => {
         }
         const top = [...corridors.entries()].sort((a, b) => b[1] - a[1])[0];
         if (top && top[1] >= 4 && top[1] / rivalDir.length >= 0.5) {
-            out.push({ icon: "bi-eye-fill", color: "text-purple-400", text: `El rival atacó el ${Math.round((top[1] / rivalDir.length) * 100)}% por el corredor ${top[0]}.` });
+            out.push({ icon: "bi-eye-fill", color: "text-purple-400", text: t("stats.insights.corridor", { pct: Math.round((top[1] / rivalDir.length) * 100), corridor: top[0] }) });
         }
     }
 
@@ -530,7 +528,7 @@ const momentum = computed(() => {
             tooltip: {
                 theme: "dark",
                 x: { show: true },
-                y: { title: { formatter: () => "Diferencia" } },
+                y: { title: { formatter: () => t("stats.momentumTooltip") } },
             },
         },
     };
@@ -546,7 +544,7 @@ const errors = computed(() => {
     }
     const entries = [...grouped.entries()].sort((a, b) => a[0] - b[0]);
     return {
-        series: [{ name: "Errores", data: entries.map(([, v]) => v) }],
+        series: [{ name: t("stats.errorsSeries"), data: entries.map(([, v]) => v) }],
         chartOptions: <ApexOptions>{
             chart: { type: "bar", toolbar: { show: false } },
             fill: { colors: ["#6E93FF"] },
@@ -554,7 +552,7 @@ const errors = computed(() => {
             plotOptions: { bar: { borderRadius: 6, columnWidth: 30, borderRadiusApplication: "end" } },
             dataLabels: { enabled: false },
             xaxis: {
-                categories: entries.map(([k]) => AREA_LABELS[k] ?? "Otra"),
+                categories: entries.map(([k]) => AREA_LABELS.value[k] ?? t("stats.otherArea")),
                 labels: { style: { colors: "#94a3b8" } },
                 axisBorder: { show: false },
                 axisTicks: { show: false },

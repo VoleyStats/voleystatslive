@@ -18,7 +18,9 @@ Firebase credentials come from `VITE_*` env vars. Copy `.env.example` to `.env` 
 
 ## Architecture
 
-Single-page Vue 3 app (`<script setup>` SFCs, TypeScript) that displays **live volleyball match statistics** read in real time from Firestore. There is no backend in this repo — a separate app (not in this codebase) writes match data; this app is read-only. UI copy is in Spanish.
+Single-page Vue 3 app (`<script setup>` SFCs, TypeScript) that displays **live volleyball match statistics** read in real time from Firestore. There is no backend in this repo — a separate app (not in this codebase) writes match data; this app is read-only.
+
+**i18n:** UI copy is bilingual es/en via vue-i18n (`src/i18n/` — `es.json` is the source of truth, `en.json` the translation; composition API, `legacy: false`, `globalInjection: true`). Default locale: `navigator.language` (es if it starts with "es", en otherwise), user choice persisted in `localStorage["vsl-locale"]` and switchable from the ES/EN toggle in the Layout header. Insight/summary texts use `$t`/`t()` interpolation with params — never string concatenation. The static SEO meta + JSON-LD in `index.html` stay in Spanish on purpose; `Overlay.vue` (OBS) is not translated. When adding UI text, add the key to BOTH json files.
 
 **Stack:** Vue 3 + vue-router (history mode, non-home routes lazy-loaded) + vuefire/Firebase (Firestore only) + Tailwind + ApexCharts (`vue3-apexcharts`, imported locally in `GeneralStats.vue` — NOT registered globally). Deployed on Vercel; `vercel.json` rewrites all paths to `index.html` for client-side routing.
 

@@ -9,7 +9,7 @@
                     : 'border-white/10 bg-white/[0.04] text-slate-300 hover:border-white/30'"
                 @click="set = 0"
             >
-                Partido
+                {{ $t('stats.fullMatch') }}
             </button>
             <button
                 v-for="n in nSets"
@@ -20,14 +20,14 @@
                     : 'border-white/10 bg-white/[0.04] text-slate-300 hover:border-white/30'"
                 @click="set = n"
             >
-                Set {{ n }}
+                {{ $t('stats.setN', { n }) }}
             </button>
         </div>
 
         <EmptyState
             v-if="players.length === 0"
-            title="Sin datos de jugadoras"
-            message="Cuando haya acciones registradas, aquí aparecerán las estadísticas individuales."
+            :title="$t('players.emptyTitle')"
+            :message="$t('players.emptyMessage')"
         />
 
         <article v-for="p in players" :key="p.name" class="card w-full p-4">
@@ -38,11 +38,11 @@
                 </span>
                 <span class="flex-1 min-w-0">
                     <span class="block font-semibold truncate">{{ p.name }}</span>
-                    <span class="block text-xs text-slate-400">{{ p.actions }} acciones</span>
+                    <span class="block text-xs text-slate-400">{{ $t('players.actions', p.actions) }}</span>
                 </span>
                 <span class="text-right">
                     <span class="block text-2xl font-display font-bold text-brand-300">{{ p.points }}</span>
-                    <span class="block text-xs text-slate-400">puntos</span>
+                    <span class="block text-xs text-slate-400">{{ $t('players.points') }}</span>
                 </span>
                 <i class="bi text-slate-500 ml-1" :class="expanded === p.name ? 'bi-chevron-up' : 'bi-chevron-down'"></i>
             </button>
@@ -53,19 +53,19 @@
                     <p class="text-sm font-display font-bold" :class="effColor(p.attack.eff)">
                         {{ p.attack.total ? p.attack.kills + "/" + p.attack.total : "—" }}
                     </p>
-                    <p class="text-[11px] text-slate-400">ataque</p>
+                    <p class="text-[11px] text-slate-400">{{ $t('players.attack') }}</p>
                 </div>
                 <div class="rounded-lg bg-white/[0.04] border border-white/10 py-2">
                     <p class="text-sm font-display font-bold text-slate-200">
                         {{ p.reception.total ? p.reception.mark : "—" }}
                     </p>
-                    <p class="text-[11px] text-slate-400">recepción</p>
+                    <p class="text-[11px] text-slate-400">{{ $t('players.reception') }}</p>
                 </div>
                 <div class="rounded-lg bg-white/[0.04] border border-white/10 py-2">
                     <p class="text-sm font-display font-bold text-slate-200">
                         {{ p.serve.total ? p.serve.aces + "A / " + p.serve.errors + "E" : "—" }}
                     </p>
-                    <p class="text-[11px] text-slate-400">saque</p>
+                    <p class="text-[11px] text-slate-400">{{ $t('players.serve') }}</p>
                 </div>
             </div>
 
@@ -80,7 +80,7 @@
 
                 <!-- Recepción con desglose de notas -->
                 <div v-if="p.reception.total" class="rounded-lg bg-white/[0.04] border border-white/10 p-3">
-                    <p class="text-xs text-slate-400 mb-2">Recepción · nota {{ p.reception.mark }} sobre 3</p>
+                    <p class="text-xs text-slate-400 mb-2">{{ $t('players.receptionMark', { mark: p.reception.mark }) }}</p>
                     <div class="grid grid-cols-4 gap-2 text-center">
                         <div>
                             <p class="font-display font-bold text-volt-400">{{ p.reception.perfect }}</p>
@@ -96,20 +96,20 @@
                         </div>
                         <div>
                             <p class="font-display font-bold text-red-400">{{ p.reception.errors }}</p>
-                            <p class="text-[11px] text-slate-400">error</p>
+                            <p class="text-[11px] text-slate-400">{{ $t('players.error') }}</p>
                         </div>
                     </div>
                 </div>
 
                 <!-- Mapa de ataque (modos de captura C/D) -->
                 <div v-if="p.directionStats.length >= 3" class="rounded-lg bg-white/[0.04] border border-white/10 p-3">
-                    <p class="text-xs text-slate-400 mb-2">Mapa de ataque</p>
+                    <p class="text-xs text-slate-400 mb-2">{{ $t('stats.attackMap') }}</p>
                     <CourtMap :stats="p.directionStats" :rival="false" />
                 </div>
 
                 <!-- Puntos por set -->
                 <div v-if="set === 0 && p.pointsBySet.some(x => x > 0)" class="rounded-lg bg-white/[0.04] border border-white/10 p-3">
-                    <p class="text-xs text-slate-400 mb-2">Puntos por set</p>
+                    <p class="text-xs text-slate-400 mb-2">{{ $t('players.pointsPerSet') }}</p>
                     <div class="flex gap-2">
                         <div v-for="(pts, i) in p.pointsBySet" :key="i" class="flex-1 text-center rounded-md bg-white/[0.04] py-1.5">
                             <p class="font-display font-bold text-sm" :class="pts > 0 ? 'text-brand-300' : 'text-slate-500'">{{ pts }}</p>
@@ -126,12 +126,14 @@
 import { computed, reactive, ref } from "vue";
 import { collection, doc, onSnapshot, orderBy, query } from "firebase/firestore";
 import { useRoute } from "vue-router";
+import { useI18n } from "vue-i18n";
 import { useDocument } from "vuefire";
 import CourtMap from "../components/CourtMap.vue";
 import EmptyState from "../components/EmptyState.vue";
 import { db } from "../firebase";
 
 const matchId = useRoute().params.id as string;
+const { t } = useI18n();
 
 // Contrato con la app: ids de acción como String.
 const aid = (s: any): string => String(s?.action?.id ?? "");
@@ -214,32 +216,41 @@ const players = computed(() => {
             ).length
         );
 
+        // Cada bloque se oculta cuando sus dos primeras cifras son 0 (misma
+        // regla que la antigua regex sobre el html, ahora explícita para que
+        // funcione con los textos traducidos).
         const blocks = [
             {
-                title: "Ataque",
-                html: `${kills} pts · ${attackErrors} err · ${attackTotal} int<br><b>${eff}%</b> de eficacia`,
+                title: t("players.blockAttack"),
+                html: t("players.attackLine", { kills, errors: attackErrors, total: attackTotal, eff }),
+                show: kills > 0 || attackErrors > 0,
             },
             {
-                title: "Saque",
-                html: `${aces} aces · ${serveErrors} err<br>${serveTotal} saques`,
+                title: t("players.blockServe"),
+                html: t("players.serveLine", { aces, errors: serveErrors, total: serveTotal }),
+                show: aces > 0 || serveErrors > 0,
             },
             {
-                title: "Bloqueo",
-                html: `${blockPoints} pts · ${blockTouches} toques<br>${blockErrors} err`,
+                title: t("players.blockBlock"),
+                html: t("players.blockLine", { points: blockPoints, touches: blockTouches, errors: blockErrors }),
+                show: blockPoints > 0 || blockTouches > 0,
             },
             {
-                title: "Defensa",
-                html: `${digs} defensas<br>${digErrors} err`,
+                title: t("players.blockDefense"),
+                html: t("players.defenseLine", { digs, errors: digErrors }),
+                show: digs > 0 || digErrors > 0,
             },
             {
-                title: "Free",
-                html: `${frees} frees<br>${freeErrors} err`,
+                title: t("players.blockFree"),
+                html: t("players.freeLine", { frees, errors: freeErrors }),
+                show: frees > 0 || freeErrors > 0,
             },
             {
-                title: "Colocación",
-                html: `${assists} colocaciones<br>${setErrors} err`,
+                title: t("players.blockSetting"),
+                html: t("players.settingLine", { assists, errors: setErrors }),
+                show: assists > 0 || setErrors > 0,
             },
-        ].filter((b) => !/^0 [a-z]+ · 0 |^0 [a-z]+<br>0 /.test(b.html));
+        ].filter((b) => b.show);
 
         const directionStats = list.filter(
             (s) => ATTACK_IDS.includes(aid(s)) && typeof s.direction === "string" && s.direction.includes("#")

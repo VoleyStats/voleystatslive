@@ -10,16 +10,14 @@
         </span>
       </div>
 
-      <h1 class="text-2xl font-bold text-center">Estadísticas en vivo</h1>
+      <h1 class="text-2xl font-bold text-center">{{ $t('teamCode.title') }}</h1>
       <p class="mt-2 text-sm text-slate-400 text-center">
-        Introduce el código del partido para acceder al marcador y las
-        estadísticas en directo. El código lo comparte quien registra el
-        partido desde la app.
+        {{ $t('teamCode.subtitle') }}
       </p>
 
       <form class="mt-8" @submit.prevent="goToStats">
         <label for="team-code" class="block text-sm font-medium text-slate-300 mb-2">
-          Código del partido
+          {{ $t('teamCode.label') }}
         </label>
         <input
           id="team-code"
@@ -27,7 +25,7 @@
           type="text"
           autocomplete="off"
           class="w-full rounded-xl bg-white/[0.04] border border-white/10 px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-brand-400 focus:ring-2 focus:ring-brand-500/30 transition"
-          placeholder="Pega aquí el código del partido"
+          :placeholder="$t('teamCode.placeholder')"
         />
 
         <button
@@ -35,14 +33,14 @@
           class="btn-primary w-full mt-6 text-base disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none"
           :disabled="!codeTeam"
         >
-          Acceder
+          {{ $t('teamCode.submit') }}
           <i class="bi bi-arrow-right"></i>
         </button>
       </form>
 
       <RouterLink to="/" class="mt-6 flex items-center justify-center gap-1.5 text-xs text-slate-500 hover:text-slate-300 transition">
         <i class="bi bi-arrow-left"></i>
-        Volver al inicio
+        {{ $t('teamCode.back') }}
       </RouterLink>
     </div>
   </section>

@@ -13,28 +13,26 @@
             <span class="absolute inline-flex h-full w-full rounded-full bg-volt-400 animate-pulse-ring"></span>
             <span class="relative inline-flex h-2 w-2 rounded-full bg-volt-400"></span>
           </span>
-          Voleibol · Analítica en tiempo real
+          {{ $t('home.hero.eyebrow') }}
         </span>
 
         <h1 class="mt-6 text-4xl sm:text-5xl lg:text-6xl font-bold leading-[1.05]">
-          Las estadísticas de tu equipo,
-          <span class="text-gradient">en directo</span>.
+          {{ $t('home.hero.titleStart') }}
+          <span class="text-gradient">{{ $t('home.hero.titleHighlight') }}</span>.
         </h1>
 
         <p class="mt-6 text-lg text-slate-400 max-w-xl leading-relaxed">
-          Registra cada acción del partido, sigue el marcador y la eficiencia
-          en tiempo real, y descarga informes por set y por jugador.
-          Adiós a las planillas de papel.
+          {{ $t('home.hero.subtitle') }}
         </p>
 
         <div class="mt-8 flex flex-wrap items-center gap-3">
           <a href="#descargar" class="btn-primary text-base">
             <i class="bi bi-download"></i>
-            Descargar app
+            {{ $t('home.hero.download') }}
           </a>
           <RouterLink to="/team-code" class="btn-ghost text-base">
             <i class="bi bi-broadcast text-volt-400"></i>
-            Ver estadísticas en vivo
+            {{ $t('home.hero.watchLive') }}
           </RouterLink>
         </div>
 
@@ -53,26 +51,26 @@
           <div class="flex items-center justify-between mb-4">
             <span class="inline-flex items-center gap-2 text-xs font-semibold text-volt-400">
               <span class="h-2 w-2 rounded-full bg-volt-400 animate-pulse"></span>
-              EN VIVO · Set 3
+              {{ $t('home.mockup.live') }}
             </span>
-            <span class="text-xs text-slate-500">CD Vóley · vs Rival</span>
+            <span class="text-xs text-slate-500">{{ $t('home.mockup.teams') }}</span>
           </div>
 
           <!-- marcador -->
           <div class="grid grid-cols-2 gap-3 mb-5">
             <div class="rounded-2xl bg-brand-500/10 border border-brand-500/20 p-4 text-center">
               <p class="text-4xl font-display font-bold text-brand-300">21</p>
-              <p class="text-xs text-slate-400 mt-1">Tu equipo</p>
+              <p class="text-xs text-slate-400 mt-1">{{ $t('home.mockup.us') }}</p>
             </div>
             <div class="rounded-2xl bg-white/[0.03] border border-white/10 p-4 text-center">
               <p class="text-4xl font-display font-bold text-slate-300">18</p>
-              <p class="text-xs text-slate-400 mt-1">Rival</p>
+              <p class="text-xs text-slate-400 mt-1">{{ $t('home.mockup.them') }}</p>
             </div>
           </div>
 
           <!-- mini chart -->
           <div class="rounded-2xl bg-white/[0.03] border border-white/10 p-4 mb-4">
-            <p class="text-xs text-slate-400 mb-3">Eficiencia por área</p>
+            <p class="text-xs text-slate-400 mb-3">{{ $t('home.mockup.chartTitle') }}</p>
             <div class="flex items-end justify-between gap-2 h-24">
               <div
                 v-for="(bar, i) in mockBars"
@@ -119,13 +117,10 @@
       </div>
     </div>
     <div class="reveal order-1 lg:order-2">
-      <span class="eyebrow">El producto</span>
-      <h2 class="mt-5 text-3xl sm:text-4xl font-bold">Controla el partido al completo</h2>
+      <span class="eyebrow">{{ $t('home.product.eyebrow') }}</span>
+      <h2 class="mt-5 text-3xl sm:text-4xl font-bold">{{ $t('home.product.title') }}</h2>
       <p class="mt-4 text-slate-400 leading-relaxed">
-        Registra las estadísticas de cada jugador acción a acción: recepción,
-        saque, ataque, bloqueo, defensa y colocación. Compara el rendimiento
-        entre sets, detecta las rachas y decide tus cambios con datos, no con
-        intuición.
+        {{ $t('home.product.text') }}
       </p>
       <ul class="mt-6 space-y-3">
         <li v-for="point in productPoints" :key="point" class="flex items-start gap-3 text-slate-300">
@@ -140,9 +135,9 @@
   <section id="como-funciona" class="relative py-20 lg:py-28 border-y border-white/5 bg-ink-900/40">
     <div class="container-x">
       <div class="max-w-2xl reveal">
-        <span class="eyebrow">Cómo funciona</span>
-        <h2 class="mt-5 text-3xl sm:text-4xl font-bold">De la cancha al informe en tres pasos</h2>
-        <p class="mt-4 text-slate-400">Sin curva de aprendizaje. Empieza a registrar en tu primer partido.</p>
+        <span class="eyebrow">{{ $t('home.how.eyebrow') }}</span>
+        <h2 class="mt-5 text-3xl sm:text-4xl font-bold">{{ $t('home.how.title') }}</h2>
+        <p class="mt-4 text-slate-400">{{ $t('home.how.subtitle') }}</p>
       </div>
       <div class="mt-12 grid md:grid-cols-3 gap-6">
         <article
@@ -167,9 +162,9 @@
   <!-- ================= FUNCIONES ================= -->
   <section id="funciones" class="container-x py-20 lg:py-28">
     <div class="max-w-2xl reveal">
-      <span class="eyebrow">Funciones</span>
-      <h2 class="mt-5 text-3xl sm:text-4xl font-bold">Todo lo que necesita tu cuerpo técnico</h2>
-      <p class="mt-4 text-slate-400">Herramientas pensadas para entrenadores, analistas y jugadores.</p>
+      <span class="eyebrow">{{ $t('home.features.eyebrow') }}</span>
+      <h2 class="mt-5 text-3xl sm:text-4xl font-bold">{{ $t('home.features.title') }}</h2>
+      <p class="mt-4 text-slate-400">{{ $t('home.features.subtitle') }}</p>
     </div>
     <div class="mt-12 grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
       <article
@@ -193,18 +188,17 @@
       <div class="pointer-events-none absolute inset-0 bg-grid bg-grid opacity-40 [mask-image:radial-gradient(ellipse_60%_100%_at_50%_50%,#000,transparent)]"></div>
       <div class="pointer-events-none absolute -bottom-24 left-1/2 -translate-x-1/2 h-64 w-[420px] rounded-full bg-brand-500/25 blur-[100px]"></div>
       <div class="relative">
-        <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold">Lleva a tu equipo al siguiente nivel</h2>
+        <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold">{{ $t('home.download.title') }}</h2>
         <p class="mt-4 text-slate-400 max-w-xl mx-auto">
-          Descarga Voley Stats Live y empieza a registrar estadísticas en tu
-          próximo partido. Gratis para empezar.
+          {{ $t('home.download.text') }}
         </p>
         <div class="mt-8 flex flex-wrap justify-center gap-3">
           <a href="#" class="btn-primary text-base">
             <i class="bi bi-apple text-lg"></i>
-            App Store
+            {{ $t('home.download.appStore') }}
           </a>
           <RouterLink to="/team-code" class="btn-ghost text-base">
-            Consultar en la web
+            {{ $t('home.download.web') }}
           </RouterLink>
         </div>
       </div>
@@ -215,10 +209,10 @@
   <section id="faq" class="container-x pb-24 lg:pb-32">
     <div class="grid lg:grid-cols-[1fr_1.5fr] gap-10">
       <div class="reveal">
-        <span class="eyebrow">Preguntas frecuentes</span>
-        <h2 class="mt-5 text-3xl sm:text-4xl font-bold">¿Tienes dudas?</h2>
+        <span class="eyebrow">{{ $t('home.faq.eyebrow') }}</span>
+        <h2 class="mt-5 text-3xl sm:text-4xl font-bold">{{ $t('home.faq.title') }}</h2>
         <p class="mt-4 text-slate-400">
-          Y si no encuentras tu respuesta, escríbenos y te ayudamos.
+          {{ $t('home.faq.subtitle') }}
         </p>
       </div>
       <div class="space-y-3">
@@ -251,8 +245,11 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, onBeforeUnmount, ref } from "vue";
+import { computed, onMounted, onBeforeUnmount, ref } from "vue";
 import { RouterLink } from "vue-router";
+import { useI18n } from "vue-i18n";
+
+const { t } = useI18n();
 
 /* -------- Reveal on scroll (progressive enhancement, SEO-safe) -------- */
 let observer: IntersectionObserver | null = null;
@@ -275,12 +272,12 @@ onBeforeUnmount(() => observer?.disconnect());
 
 const revealDelay = (i: number) => ({ transitionDelay: `${i * 80}ms` });
 
-/* -------- Contenido -------- */
-const heroStats = [
-  { value: "6", label: "áreas de juego" },
-  { value: "Por set", label: "análisis detallado" },
-  { value: "PDF", label: "informes descargables" },
-];
+/* -------- Contenido (computed sobre t() para reaccionar al idioma) -------- */
+const heroStats = computed(() => [
+  { value: t("home.hero.stat1Value"), label: t("home.hero.stat1Label") },
+  { value: t("home.hero.stat2Value"), label: t("home.hero.stat2Label") },
+  { value: t("home.hero.stat3Value"), label: t("home.hero.stat3Label") },
+]);
 
 const mockBars = [
   { h: "40%", color: "bg-brand-500/60" },
@@ -308,97 +305,41 @@ const mockPlayers = [
   },
 ];
 
-const productMetrics = [
-  { icon: "bi-people-fill", value: "12", label: "jugadoras seguidas" },
-  { icon: "bi-graph-up-arrow", value: "94%", label: "eficiencia en K2" },
-  { icon: "bi-clipboard-data", value: "5", label: "sets analizados" },
-  { icon: "bi-lightning-charge-fill", value: "Live", label: "actualización" },
-];
+const productMetrics = computed(() => [
+  { icon: "bi-people-fill", value: "12", label: t("home.product.metricPlayers") },
+  { icon: "bi-graph-up-arrow", value: "94%", label: t("home.product.metricEfficiency") },
+  { icon: "bi-clipboard-data", value: "5", label: t("home.product.metricSets") },
+  { icon: "bi-lightning-charge-fill", value: t("home.product.metricUpdateValue"), label: t("home.product.metricUpdate") },
+]);
 
-const productPoints = [
-  "Marcador y eficiencia actualizados acción a acción.",
-  "Detección automática de rachas de aciertos y errores.",
-  "Desglose por jugador y por área del campo.",
-  "Filtra las estadísticas set a set.",
-];
+const productPoints = computed(() => [
+  t("home.product.point1"),
+  t("home.product.point2"),
+  t("home.product.point3"),
+  t("home.product.point4"),
+]);
 
-const steps = [
-  {
-    icon: "bi-pencil-square",
-    title: "Registra las acciones",
-    text: "Anota cada jugada desde la app durante el partido: saque, recepción, ataque, bloqueo, defensa y colocación.",
-  },
-  {
-    icon: "bi-broadcast",
-    title: "Sigue el directo",
-    text: "Comparte el código del partido y cualquiera puede ver el marcador y las estadísticas en tiempo real desde la web.",
-  },
-  {
-    icon: "bi-filetype-pdf",
-    title: "Descarga el informe",
-    text: "Al terminar, genera un PDF con el resumen del partido por set y por jugador para revisarlo con el equipo.",
-  },
-];
+const steps = computed(() => [
+  { icon: "bi-pencil-square", title: t("home.how.step1Title"), text: t("home.how.step1Text") },
+  { icon: "bi-broadcast", title: t("home.how.step2Title"), text: t("home.how.step2Text") },
+  { icon: "bi-filetype-pdf", title: t("home.how.step3Title"), text: t("home.how.step3Text") },
+]);
 
-const appFeatures = [
-  {
-    title: "Marcador en vivo",
-    description: "Sigue el resultado set a set y la evolución del partido en tiempo real desde cualquier dispositivo.",
-    icon: "bi-trophy",
-  },
-  {
-    title: "Estadísticas por jugador",
-    description: "Evalúa el rendimiento individual en cada área y encuentra los puntos fuertes de tu plantilla.",
-    icon: "bi-person-badge",
-  },
-  {
-    title: "Análisis por áreas",
-    description: "Recepción, saque, ataque, bloqueo, defensa y colocación: mide la eficiencia en cada fase del juego.",
-    icon: "bi-bar-chart-line",
-  },
-  {
-    title: "Curva de registro",
-    description: "Visualiza las rachas de puntos y errores para entender los momentos clave de cada set.",
-    icon: "bi-activity",
-  },
-  {
-    title: "Informes en PDF",
-    description: "Descarga informes de partido y de temporada para compartir con tu cuerpo técnico y jugadores.",
-    icon: "bi-filetype-pdf",
-  },
-  {
-    title: "Acceso por código",
-    description: "Comparte un simple código y todo el equipo consulta las estadísticas online, sin registros complejos.",
-    icon: "bi-key",
-  },
-];
+const appFeatures = computed(() => [
+  { icon: "bi-trophy", title: t("home.features.f1Title"), description: t("home.features.f1Text") },
+  { icon: "bi-person-badge", title: t("home.features.f2Title"), description: t("home.features.f2Text") },
+  { icon: "bi-bar-chart-line", title: t("home.features.f3Title"), description: t("home.features.f3Text") },
+  { icon: "bi-activity", title: t("home.features.f4Title"), description: t("home.features.f4Text") },
+  { icon: "bi-filetype-pdf", title: t("home.features.f5Title"), description: t("home.features.f5Text") },
+  { icon: "bi-key", title: t("home.features.f6Title"), description: t("home.features.f6Text") },
+]);
 
-const faqs = [
-  {
-    question: "¿Qué es Voley Stats Live?",
-    answer: "Es una aplicación para registrar y consultar estadísticas de voleibol en tiempo real. Anotas cada acción del partido desde la app y cualquiera puede seguir el marcador y las estadísticas en vivo desde la web usando el código del equipo.",
-  },
-  {
-    question: "¿Cómo consulto las estadísticas de mi equipo online?",
-    answer: "Entra en la sección 'Ver en vivo', introduce el código de tu equipo y accede al marcador y a las estadísticas del partido en directo, con desglose por set y por jugador.",
-  },
-  {
-    question: "¿Qué estadísticas puedo registrar?",
-    answer: "Puedes registrar acciones en las seis áreas del juego: recepción, saque, ataque, bloqueo, defensa y colocación, además del marcador, las rachas y la eficiencia de cada jugador.",
-  },
-  {
-    question: "¿Puedo descargar un informe del partido?",
-    answer: "Sí. Al finalizar el partido puedes generar un PDF con el resumen por set y por jugador para analizarlo y compartirlo con el equipo.",
-  },
-  {
-    question: "¿Necesito conexión a internet?",
-    answer: "Sí, las estadísticas se sincronizan en tiempo real, por lo que necesitas conexión para registrar acciones y para que los demás vean el directo.",
-  },
-  {
-    question: "¿Cuánto cuesta?",
-    answer: "Puedes empezar a usar Voley Stats Live de forma gratuita. Descarga la app e introduce el código de tu equipo para comenzar a registrar y consultar estadísticas.",
-  },
-];
+const faqs = computed(() =>
+  ([1, 2, 3, 4, 5, 6] as const).map((n) => ({
+    question: t(`home.faq.q${n}`),
+    answer: t(`home.faq.a${n}`),
+  }))
+);
 
 const qSelection = ref<number[]>([0]);
 const toggleQuestion = (index: number) => {
