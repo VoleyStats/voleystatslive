@@ -5,9 +5,19 @@
       class="sticky top-0 z-40 border-b border-white/5 bg-ink-950/70 backdrop-blur-xl"
     >
       <div class="container-x flex items-center justify-between h-16">
-        <RouterLink to="/" aria-label="Voley Stats Live - inicio">
-          <Logo :size="28" />
-        </RouterLink>
+        <div class="flex items-center gap-3">
+          <button
+            v-if="showBack"
+            class="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/[0.04] text-slate-300 hover:text-white transition-colors"
+            aria-label="Volver"
+            @click="goBack"
+          >
+            <i class="bi bi-arrow-left text-lg"></i>
+          </button>
+          <RouterLink to="/" aria-label="Voley Stats Live - inicio">
+            <Logo :size="28" />
+          </RouterLink>
+        </div>
 
         <nav
           v-if="isHome"
@@ -37,30 +47,8 @@
       <slot />
     </main>
 
-    <!-- BOTTOM TOOLBAR (solo en vistas de estadísticas) -->
-    <nav
-      v-if="showToolbar"
-      class="fixed bottom-4 left-1/2 -translate-x-1/2 z-40 w-[calc(100%-2rem)] max-w-md"
-      aria-label="Navegación de la app"
-    >
-      <div
-        class="flex items-center justify-around h-14 rounded-full border border-white/10 bg-ink-850/80 backdrop-blur-xl shadow-card"
-      >
-        <button
-          v-for="item in toolbarData"
-          :key="item.url"
-          class="flex flex-col items-center gap-0.5 px-4 py-1.5 text-[11px] transition-colors"
-          :class="isActive(item.url) ? 'text-volt-400' : 'text-slate-400 hover:text-white'"
-          @click="go(item)"
-        >
-          <i :class="['bi', item.icon, 'text-lg']"></i>
-          {{ item.name }}
-        </button>
-      </div>
-    </nav>
-
     <!-- FOOTER -->
-    <footer class="border-t border-white/5 mt-auto" :class="{ 'pb-24': showToolbar }">
+    <footer class="border-t border-white/5 mt-auto">
       <div class="container-x py-12 grid gap-10 md:grid-cols-[1.5fr_1fr_1fr_1fr]">
         <div>
           <Logo :size="30" wordmark-class="text-xl" grad-id="footer-grad" />
@@ -110,25 +98,19 @@
 import { computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import Logo from "../components/Logo.vue";
-import type { toolbarItem } from "../interfaces/navegationTypes";
 
 const route = useRoute();
 const router = useRouter();
 
 const isHome = computed(() => route.name === "home");
-const showToolbar = computed(
+const showBack = computed(
   () => !["home", "code"].includes((route.name as string) ?? "")
 );
 
-const toolbarData: toolbarItem[] = [
-  { url: "home", icon: "bi-house", name: "Inicio" },
-  { url: "stats", icon: "bi-broadcast", name: "Directo" },
-  { url: "areaStats", icon: "bi-people", name: "Jugadoras" },
-];
-
-const isActive = (name: string) => route.name === name;
-const go = (item: toolbarItem) =>
-  router.push(item.url === "home" ? { name: "home" } : { name: item.url, params: route.params });
+const goBack = () => {
+  if (window.history.length > 1) router.back();
+  else router.push("/team-code");
+};
 
 const currentYear = new Date().getFullYear();
 </script>

@@ -31,10 +31,12 @@ const routes = [
         component: () => import('./pages/StatsView.vue'),
       },
       {
-        path: 'areas',
-        name: 'areaStats',
-        component: () => import('./pages/AreaStats.vue'),
+        path: 'players',
+        name: 'players',
+        component: () => import('./pages/PlayerStats.vue'),
       },
+      // Ruta antigua de la pestaña de recepción, absorbida por 'players'.
+      { path: 'areas', redirect: { name: 'players' } },
     ],
   },
 ] as RouteRecordRaw[]

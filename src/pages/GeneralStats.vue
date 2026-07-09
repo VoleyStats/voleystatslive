@@ -10,11 +10,14 @@
         <!-- ============ MARCADOR ============ -->
         <article class="card w-full p-5">
             <div class="flex items-center justify-between mb-3">
-                <span v-if="isLive" class="inline-flex items-center gap-2 text-xs font-semibold text-volt-400">
+                <span v-if="matchOver" class="inline-flex items-center gap-2 text-xs font-semibold text-slate-300">
+                    <i class="bi bi-flag-fill"></i>
+                    FINAL
+                </span>
+                <span v-else class="inline-flex items-center gap-2 text-xs font-semibold text-volt-400">
                     <span class="h-2 w-2 rounded-full bg-volt-400 animate-pulse"></span>
                     EN VIVO · Set {{ currentSet }}
                 </span>
-                <span v-else class="text-xs text-slate-500">Partido</span>
                 <span class="text-xs text-slate-500">{{ setsWon[0] }} - {{ setsWon[1] }} en sets</span>
             </div>
 
@@ -60,16 +63,18 @@
         />
 
         <template v-else>
-            <!-- ============ RACHA + FASES ============ -->
-            <section class="w-full grid grid-cols-3 gap-2">
-                <article class="card p-3 text-center">
-                    <p class="text-2xl font-display font-bold" :class="streak.ours ? 'text-volt-400' : 'text-red-400'">
-                        {{ streak.count }}
-                    </p>
-                    <p class="text-xs text-slate-400 leading-4 mt-1">
-                        {{ streak.ours ? "puntos seguidos" : "puntos rivales seguidos" }}
-                    </p>
-                </article>
+            <!-- ============ EN VIVO: RACHA ============ -->
+            <article v-if="!matchOver" class="card w-full p-3 flex items-center justify-center gap-3">
+                <p class="text-2xl font-display font-bold" :class="streak.ours ? 'text-volt-400' : 'text-red-400'">
+                    {{ streak.count }}
+                </p>
+                <p class="text-sm text-slate-400">
+                    {{ streak.ours ? "puntos seguidos de " + usName : "puntos seguidos de " + themName }}
+                </p>
+            </article>
+
+            <!-- ============ POST-PARTIDO: FASES + JUGADORAS ============ -->
+            <section v-if="matchOver" class="w-full grid grid-cols-2 gap-2">
                 <article class="card p-3 text-center">
                     <p class="text-2xl font-display font-bold text-brand-300">{{ pct(sideOut.won, sideOut.total) }}</p>
                     <p class="text-xs text-slate-400 leading-4 mt-1">side-out<br />{{ sideOut.won }}/{{ sideOut.total }}</p>
@@ -79,6 +84,20 @@
                     <p class="text-xs text-slate-400 leading-4 mt-1">break<br />{{ breakPts.won }}/{{ breakPts.total }}</p>
                 </article>
             </section>
+            <RouterLink
+                v-if="matchOver"
+                :to="{ name: 'players', params: { id: props.id } }"
+                class="card w-full p-4 flex items-center gap-3 hover:border-brand-500/40 transition-colors"
+            >
+                <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-500/15 text-brand-300">
+                    <i class="bi bi-people-fill"></i>
+                </span>
+                <span class="flex-1">
+                    <span class="block font-semibold">Estadísticas de las jugadoras</span>
+                    <span class="block text-xs text-slate-400">Ataque, recepción, saque y más, jugadora a jugadora</span>
+                </span>
+                <i class="bi bi-chevron-right text-slate-500"></i>
+            </RouterLink>
 
             <!-- ============ PUNTO A PUNTO ============ -->
             <article class="card w-full p-4">
@@ -104,8 +123,8 @@
                 <apexchart type="bar" height="220" :options="momentum.chartOptions" :series="momentum.series" />
             </article>
 
-            <!-- ============ ORIGEN DE LOS PUNTOS ============ -->
-            <article class="card w-full p-4">
+            <!-- ============ ORIGEN DE LOS PUNTOS (post-partido) ============ -->
+            <article v-if="matchOver" class="card w-full p-4">
                 <p class="text-sm font-semibold mb-3">Origen de los puntos</p>
                 <div class="grid grid-cols-[1fr_auto_auto] gap-y-1.5 text-sm">
                     <span></span>
@@ -133,8 +152,8 @@
                 </ul>
             </article>
 
-            <!-- ============ ERRORES POR ÁREA ============ -->
-            <article class="card w-full p-4">
+            <!-- ============ ERRORES POR ÁREA (post-partido) ============ -->
+            <article v-if="matchOver" class="card w-full p-4">
                 <p class="text-sm font-semibold">Errores por área</p>
                 <apexchart type="bar" height="220" :options="errors.chartOptions" :series="errors.series" />
             </article>
@@ -144,6 +163,7 @@
 
 <script setup lang="ts">
 import { computed, reactive, ref } from "vue";
+import { RouterLink } from "vue-router";
 import { useDocument } from "vuefire";
 import EmptyState from "../components/EmptyState.vue";
 import { collection, doc, onSnapshot, orderBy, query } from "firebase/firestore";
@@ -197,7 +217,6 @@ onSnapshot(
 );
 
 const notFound = computed(() => match.value === null && baseStats.loaded && baseStats.data.length === 0);
-const isLive = computed(() => match.value?.live === true);
 const nSets = computed(() => match.value?.n_sets ?? 5);
 const usName = computed(() => match.value?.team?.name || "Tu equipo");
 const themName = computed(() => match.value?.opponent || "Rival");
@@ -234,6 +253,14 @@ const setsWon = computed(() => {
         }
     }
     return [us, them];
+});
+
+// El mismo enlace vive durante y después del partido: en vivo se muestra el
+// seguimiento (punto a punto, racha, momentum) y cuando hay ganador la página
+// se convierte en el informe (fases, origen de puntos, errores, jugadoras).
+const matchOver = computed(() => {
+    const majority = Math.floor(nSets.value / 2) + 1;
+    return setsWon.value[0] >= majority || setsWon.value[1] >= majority;
 });
 
 // ------------------------------------------------------------------ racha y fases
