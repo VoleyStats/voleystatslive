@@ -1,21 +1,10 @@
 import { createApp } from "vue";
 import "./style.css";
 import App from "./App.vue";
-import VueApexCharts from "vue3-apexcharts";
 import router from "./router.ts";
-import { firebaseApp } from "./firebase.ts";
-import {
-    VueFire,
-    VueFireDatabaseOptionsAPI,
-    VueFireFirestoreOptionsAPI,
-} from "vuefire";
 import "bootstrap-icons/font/bootstrap-icons.css";
 
-createApp(App)
-    .use(VueApexCharts)
-    .use(router)
-    .use(VueFire, {
-        firebaseApp,
-        modules: [VueFireFirestoreOptionsAPI(), VueFireDatabaseOptionsAPI()],
-    })
-    .mount("#app");
+// Firebase y ApexCharts NO se importan aquí: cada página lazy que los
+// necesita los trae consigo (src/firebase.ts y vue3-apexcharts), así la
+// Home (SEO) no paga por ellos en el bundle inicial.
+createApp(App).use(router).mount("#app");

@@ -1,8 +1,10 @@
 import { initializeApp } from "firebase/app";
-import { collection, doc, getFirestore } from "firebase/firestore";
+import { getFirestore } from "firebase/firestore";
 
-import { useCollection, useDocument } from "vuefire";
-
+// Este módulo solo lo importan las páginas lazy que leen Firestore, de modo
+// que Firebase queda fuera del chunk inicial. Los composables de vuefire
+// (useDocument, etc.) encuentran la app por defecto vía getApp(), así que no
+// hace falta instalar el plugin VueFire en main.ts.
 export const firebaseApp = initializeApp({
     apiKey: import.meta.env.VITE_API_KEY,
     authDomain: import.meta.env.VITE_AUTH_DOMAIN,
@@ -14,16 +16,3 @@ export const firebaseApp = initializeApp({
 })
 
 export const db = getFirestore(firebaseApp)
-
-export const matches = collection(db, "live_matches")
-
-export async function getMatch(id:string) {
-    
-    return useDocument(doc(db, "live_matches", id))
-}
-
-export async function getStats(id:string) {
-    // return getDocs(collection(db, "live_matches", id, "stats"))
-    return useCollection(collection(db, "live_matches", id, "stats"))
-    // return await getDoc(doc(db, "live_matches", id))
-}

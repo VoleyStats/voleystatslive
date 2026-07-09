@@ -20,7 +20,9 @@ Firebase credentials come from `VITE_*` env vars. Copy `.env.example` to `.env` 
 
 Single-page Vue 3 app (`<script setup>` SFCs, TypeScript) that displays **live volleyball match statistics** read in real time from Firestore. There is no backend in this repo — a separate app (not in this codebase) writes match data; this app is read-only. UI copy is in Spanish.
 
-**Stack:** Vue 3 + vue-router (history mode, non-home routes lazy-loaded) + VueFire/Firebase (Firestore only) + Tailwind + ApexCharts (`vue3-apexcharts`, registered globally as `<apexchart>`; the ApexCharts core loads as its own async chunk, so the landing doesn't pay for it). Deployed on Vercel; `vercel.json` rewrites all paths to `index.html` for client-side routing.
+**Stack:** Vue 3 + vue-router (history mode, non-home routes lazy-loaded) + vuefire/Firebase (Firestore only) + Tailwind + ApexCharts (`vue3-apexcharts`, imported locally in `GeneralStats.vue` — NOT registered globally). Deployed on Vercel; `vercel.json` rewrites all paths to `index.html` for client-side routing.
+
+**Code-splitting:** `main.ts` deliberately imports neither Firebase nor ApexCharts, so the initial chunk (Home/SEO) stays small. `src/firebase.ts` (`initializeApp` + `db`) is only imported by the lazy stats pages; vuefire composables (`useDocument`) find the default app via `getApp()` — no `VueFire` app plugin needed. `vite.config.ts` pins vendor chunks via rolldown `codeSplitting.groups` (`firebase`, `apexcharts`, plus `apexcharts-ssr` for the SSR copy that `vue3-apexcharts` dynamic-imports but the browser never fetches). Don't re-add Firebase/ApexCharts imports to `main.ts` or eagerly-loaded modules.
 
 **Composition:** `App.vue` → `layouts/Layout.vue` (nav + bottom toolbar + footer) → `<RouterView>` slot. The bottom toolbar is hidden on the `home` and `code` routes.
 
@@ -66,7 +68,7 @@ The app commits to a single dark visual world (sports-analytics product) — the
 
 `index.html` carries full static meta (title, description, canonical, Open Graph, Twitter) plus three JSON-LD blocks: `SoftwareApplication`, `Organization`, and `FAQPage`. **The `FAQPage` JSON-LD must be kept in sync with the `faqs` array in `src/pages/Home.vue`.** `public/` holds `robots.txt` (explicitly allows AI crawlers — GPTBot, ClaudeBot, PerplexityBot, etc. — for GEO), `sitemap.xml`, `llms.txt` (product summary for generative engines), `site.webmanifest`, `favicon.svg`, and `og-image.svg`.
 
-> All absolute URLs use the placeholder domain `https://voleystatslive.com` — replace with the real production domain (in `index.html` canonical/OG/Twitter/JSON-LD, `robots.txt`, and `sitemap.xml`) before launch. There is no prerendering/SSG yet: Google renders the JS, and JSON-LD + `llms.txt` + a `<noscript>` summary cover non-JS/AI crawlers. Firebase still ships in the main bundle (VueFire is initialized globally in `main.ts`); deferring it to the stats routes is the main remaining perf win.
+> All absolute URLs use the placeholder domain `https://voleystatslive.com` — replace with the real production domain (in `index.html` canonical/OG/Twitter/JSON-LD, `robots.txt`, and `sitemap.xml`) before launch. There is no prerendering/SSG yet: Google renders the JS, and JSON-LD + `llms.txt` + a `<noscript>` summary cover non-JS/AI crawlers. Firebase and ApexCharts are code-split out of the initial bundle (see "Code-splitting" above).
 ## Overview
 
 **voleystatslive** is the **public web viewer** for the Voley Stats iOS app. It has no backend of its own: it reads volleyball match data in realtime from the **same Firebase/Firestore project the iOS app writes to** and renders it. It is a companion to the app repo (`../VoleyStatsApp/`), coupled to it only through Firestore (see "Data source" below).
@@ -86,7 +88,7 @@ Requires a `.env` (copy `.env.example`) with Firebase `VITE_*` keys pointing at 
 
 ## Architecture
 
-- **Entry:** `main.ts` mounts `App.vue`, registers the router, ApexCharts, and VueFire (with `firebaseApp` from `firebase.ts`). `App.vue` wraps `<RouterView>` in `layouts/Layout.vue` — so **every route currently renders inside Layout** (nav + gradient background + bottom toolbar + footer).
+- **Entry:** `main.ts` mounts `App.vue` and registers only the router (no Firebase, no ApexCharts — see "Code-splitting"). `App.vue` wraps `<RouterView>` in `layouts/Layout.vue` — so **every route currently renders inside Layout** (nav + gradient background + bottom toolbar + footer).
 - **Router** (`router.ts`, `createWebHistory`):
   - `/` → `Home.vue` (marketing landing, GSAP fade-ins).
   - `/team-code` → `TeamCode.vue` (input where the user types the match `code`, then routes to `/stats/{code}`).

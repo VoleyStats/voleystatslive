@@ -130,7 +130,7 @@
             <article class="card w-full p-4">
                 <p class="text-sm font-semibold mb-1">Momentum</p>
                 <p class="text-xs text-slate-500 mb-2">Diferencia de puntos a lo largo del set</p>
-                <apexchart type="bar" height="220" :options="momentum.chartOptions" :series="momentum.series" />
+                <VueApexCharts type="bar" height="220" :options="momentum.chartOptions" :series="momentum.series" />
             </article>
 
             <!-- ============ ORIGEN DE LOS PUNTOS (post-partido) ============ -->
@@ -215,7 +215,7 @@
             <!-- ============ ERRORES POR ÁREA (post-partido) ============ -->
             <article v-if="matchOver" class="card w-full p-4">
                 <p class="text-sm font-semibold">Errores por área</p>
-                <apexchart type="bar" height="220" :options="errors.chartOptions" :series="errors.series" />
+                <VueApexCharts type="bar" height="220" :options="errors.chartOptions" :series="errors.series" />
             </article>
         </template>
     </section>
@@ -225,6 +225,9 @@
 import { computed, reactive, ref } from "vue";
 import { RouterLink } from "vue-router";
 import { useDocument } from "vuefire";
+// Registro local (no global en main.ts): solo esta página paga por ApexCharts.
+import VueApexCharts from "vue3-apexcharts";
+import type { ApexOptions } from "apexcharts";
 import CourtMap from "../components/CourtMap.vue";
 import EmptyState from "../components/EmptyState.vue";
 import { collection, doc, onSnapshot, orderBy, query } from "firebase/firestore";
@@ -501,7 +504,7 @@ const momentum = computed(() => {
     const pts = pointEnders.value;
     return {
         series: [{ data: pts.map((s) => s.score_us - s.score_them) }],
-        chartOptions: {
+        chartOptions: <ApexOptions>{
             chart: { type: "bar", toolbar: { show: false }, sparkline: { enabled: false } },
             grid: { show: false, padding: { left: 0, right: 0 } },
             plotOptions: {
@@ -544,7 +547,7 @@ const errors = computed(() => {
     const entries = [...grouped.entries()].sort((a, b) => a[0] - b[0]);
     return {
         series: [{ name: "Errores", data: entries.map(([, v]) => v) }],
-        chartOptions: {
+        chartOptions: <ApexOptions>{
             chart: { type: "bar", toolbar: { show: false } },
             fill: { colors: ["#6E93FF"] },
             grid: { show: false, padding: { left: 0, right: 0 } },
