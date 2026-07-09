@@ -1,122 +1,134 @@
 <template>
-    <main
-        class="bg-gradient-to-tr from-rose-100 to-sky-100 dark:bg-gradient-to-tr dark:from-gray-800 dark:via-gray-800 min-h-screen overflow-x-hidden font-sans w-screen"
+  <div class="min-h-screen flex flex-col bg-ink-950 text-slate-200 overflow-x-hidden">
+    <!-- HEADER -->
+    <header
+      class="sticky top-0 z-40 border-b border-white/5 bg-ink-950/70 backdrop-blur-xl"
     >
-        <nav class="flex justify-center items-center p-4 w-full">
-            <div class="flex" @click="$router.push({ name: 'home' })">
-                <img src="/logo.png" alt="logo" width="20" />
-                <small class="dark:text-white text-black pl-2">
-                    Voley Stats Live</small
-                >
-            </div>
-            <!-- <ToggleTheme /> -->
+      <div class="container-x flex items-center justify-between h-16">
+        <RouterLink to="/" aria-label="Voley Stats Live - inicio">
+          <Logo :size="28" />
+        </RouterLink>
+
+        <nav
+          v-if="isHome"
+          class="hidden md:flex items-center gap-8 text-sm text-slate-300"
+          aria-label="Secciones"
+        >
+          <a href="#producto" class="hover:text-white transition-colors">Producto</a>
+          <a href="#como-funciona" class="hover:text-white transition-colors">Cómo funciona</a>
+          <a href="#funciones" class="hover:text-white transition-colors">Funciones</a>
+          <a href="#faq" class="hover:text-white transition-colors">Preguntas</a>
         </nav>
 
-        <slot />
+        <div class="flex items-center gap-2 sm:gap-3">
+          <RouterLink to="/team-code" class="btn-ghost !px-4 !py-2 text-xs sm:text-sm">
+            <i class="bi bi-broadcast text-volt-400"></i>
+            <span class="hidden sm:inline">Ver en vivo</span>
+          </RouterLink>
+          <a href="#descargar" class="btn-primary !px-4 !py-2 text-xs sm:text-sm">
+            Descargar app
+          </a>
+        </div>
+      </div>
+    </header>
 
-        <section
-            class="p-4 overflow-hidden w-screen fixed bottom-0"
-            v-if="!['home', 'code'].includes(($route.name as string) ?? '')"
-        >
-            <div
-                class="flex w-full h-12 rounded-full items-center justify-around border-slate-300 bg-clip-padding backdrop-filter backdrop-blur-md dark:bg-opacity-0 border dark:border-gray-500"
-            >
-                <!-- ITEMS TOOLBAR -->
-                <div
-                    v-for="(toolbarItem, index) in toolbarData"
-                    :key="index"
-                    class="flex justify-start gap-2 items-center dark:text-white text-slate-700"
-                    @click="$router.push({ name: toolbarItem.url })"
-                >
-                    <img
-                        class="w-6 h-6 text-white"
-                        :src="toolbarItem.icon"
-                        alt=""
-                    />
-                    <small class="">
-                        {{ toolbarItem.name }}
-                    </small>
-                </div>
-            </div>
-        </section>
-
-        <footer class="bg-white rounded-lg shadow dark:bg-gray-900">
-            <div class="w-full max-w-screen-xl mx-auto p-4 md:py-8">
-                <div class="sm:flex sm:items-center sm:justify-between">
-                    <div
-                        class="flex justify-start items-center mb-4"
-                        @click="$router.push({ name: 'home' })"
-                    >
-                        <img src="/logo.png" alt="logo" width="40" />
-                        <small class="text-white pl-2 text-xl font-bold">
-                            Voley Stats Live</small
-                        >
-                    </div>
-                    <ul
-                        class="flex flex-wrap items-center mb-6 text-sm font-medium text-gray-500 sm:mb-0 dark:text-gray-400"
-                    >
-                        <li>
-                            <a href="#" class="hover:underline me-4 md:me-6"
-                                >About</a
-                            >
-                        </li>
-                        <li>
-                            <a href="#" class="hover:underline me-4 md:me-6"
-                                >Privacy Policy</a
-                            >
-                        </li>
-                        <li>
-                            <a href="#" class="hover:underline me-4 md:me-6"
-                                >Licensing</a
-                            >
-                        </li>
-                        <li>
-                            <a href="#" class="hover:underline">Contact</a>
-                        </li>
-                    </ul>
-                </div>
-                <hr
-                    class="my-6 border-gray-200 sm:mx-auto dark:border-gray-700 lg:my-8"
-                />
-                <span
-                    class="block text-sm text-gray-500 sm:text-center dark:text-gray-400"
-                    >© {{ currentYear }}
-                    <a href="https://flowbite.com/" class="hover:underline"
-                        >Voley Stats Live</a
-                    >. All Rights Reserved.</span
-                >
-            </div>
-        </footer>
+    <!-- MAIN -->
+    <main class="flex-1">
+      <slot />
     </main>
+
+    <!-- BOTTOM TOOLBAR (solo en vistas de estadísticas) -->
+    <nav
+      v-if="showToolbar"
+      class="fixed bottom-4 left-1/2 -translate-x-1/2 z-40 w-[calc(100%-2rem)] max-w-md"
+      aria-label="Navegación de la app"
+    >
+      <div
+        class="flex items-center justify-around h-14 rounded-full border border-white/10 bg-ink-850/80 backdrop-blur-xl shadow-card"
+      >
+        <button
+          v-for="item in toolbarData"
+          :key="item.url"
+          class="flex flex-col items-center gap-0.5 px-4 py-1.5 text-[11px] transition-colors"
+          :class="isActive(item.url) ? 'text-volt-400' : 'text-slate-400 hover:text-white'"
+          @click="go(item)"
+        >
+          <i :class="['bi', item.icon, 'text-lg']"></i>
+          {{ item.name }}
+        </button>
+      </div>
+    </nav>
+
+    <!-- FOOTER -->
+    <footer class="border-t border-white/5 mt-auto" :class="{ 'pb-24': showToolbar }">
+      <div class="container-x py-12 grid gap-10 md:grid-cols-[1.5fr_1fr_1fr_1fr]">
+        <div>
+          <Logo :size="30" wordmark-class="text-xl" grad-id="footer-grad" />
+          <p class="mt-4 text-sm text-slate-400 max-w-xs leading-relaxed">
+            Estadísticas de voleibol en vivo. Registra cada acción, sigue el
+            marcador en tiempo real y mejora partido a partido.
+          </p>
+        </div>
+        <div>
+          <h3 class="text-xs uppercase tracking-widest text-slate-500 mb-3">Producto</h3>
+          <ul class="space-y-2 text-sm text-slate-400">
+            <li><a href="/#funciones" class="hover:text-white">Funciones</a></li>
+            <li><a href="/#como-funciona" class="hover:text-white">Cómo funciona</a></li>
+            <li><RouterLink to="/team-code" class="hover:text-white">Estadísticas en vivo</RouterLink></li>
+          </ul>
+        </div>
+        <div>
+          <h3 class="text-xs uppercase tracking-widest text-slate-500 mb-3">Recursos</h3>
+          <ul class="space-y-2 text-sm text-slate-400">
+            <li><a href="/#faq" class="hover:text-white">Preguntas frecuentes</a></li>
+            <li><a href="#descargar" class="hover:text-white">Descargar app</a></li>
+          </ul>
+        </div>
+        <div>
+          <h3 class="text-xs uppercase tracking-widest text-slate-500 mb-3">Legal</h3>
+          <ul class="space-y-2 text-sm text-slate-400">
+            <li><a href="#" class="hover:text-white">Privacidad</a></li>
+            <li><a href="#" class="hover:text-white">Términos</a></li>
+            <li><a href="#" class="hover:text-white">Contacto</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="border-t border-white/5">
+        <div class="container-x py-5 text-xs text-slate-500 flex flex-col sm:flex-row items-center justify-between gap-2">
+          <span>© {{ currentYear }} Voley Stats Live. Todos los derechos reservados.</span>
+          <span class="flex items-center gap-1.5">
+            Hecho para equipos que compiten
+            <i class="bi bi-suit-heart-fill text-volt-500"></i>
+          </span>
+        </div>
+      </div>
+    </footer>
+  </div>
 </template>
 
 <script setup lang="ts">
-// import ToggleTheme from "../components/ToggleTheme.vue";
-
+import { computed } from "vue";
+import { useRoute, useRouter } from "vue-router";
+import Logo from "../components/Logo.vue";
 import type { toolbarItem } from "../interfaces/navegationTypes";
-// import { useRoute } from "vue-router";
-import homeIcon from "../assets/icons/home.svg";
-import statsIcon from "../assets/icons/stats.svg";
-import teamIcon from "../assets/icons/team.svg";
-// const route = useRoute();
+
+const route = useRoute();
+const router = useRouter();
+
+const isHome = computed(() => route.name === "home");
+const showToolbar = computed(
+  () => !["home", "code"].includes((route.name as string) ?? "")
+);
 
 const toolbarData: toolbarItem[] = [
-    {
-        url: "home",
-        icon: homeIcon,
-        name: "Home",
-    },
-    {
-        url: "areaStats",
-        icon: statsIcon,
-        name: "Stats",
-    },
-    {
-        url: "teamStats",
-        icon: teamIcon,
-        name: "Team",
-    },
+  { url: "home", icon: "bi-house", name: "Inicio" },
+  { url: "areaStats", icon: "bi-bar-chart-line", name: "Stats" },
+  { url: "teamStats", icon: "bi-people", name: "Equipo" },
 ];
+
+const isActive = (name: string) => route.name === name;
+const go = (item: toolbarItem) =>
+  router.push(item.url === "home" ? { name: "home" } : { name: item.url, params: route.params });
 
 const currentYear = new Date().getFullYear();
 </script>

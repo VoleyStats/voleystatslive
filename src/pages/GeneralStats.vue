@@ -1,6 +1,6 @@
 <template>
   <div
-            class="fixed top-2 right-0 border-slate-300 bg-clip-padding backdrop-filter backdrop-blur-md dark:bg-opacity-0 border dark:border-gray-500 py-2 rounded-l-lg w-12 flex flex-col items-center border-r-0 z-20"
+            class="fixed top-20 right-0 z-30 flex w-12 flex-col items-center rounded-l-xl border border-r-0 border-white/10 bg-ink-850/80 py-2 backdrop-blur-xl cursor-pointer"
             @click="selectSet = !selectSet"
             >
             <div v-show="selectSet">
@@ -31,13 +31,13 @@
         <!-- SCORE -->
         <article class="w-full">
             <div
-                class="bg-white h-40 dark:bg-opacity-10 border border-slate-700 p-4 rounded-lg col-span-2 sm:col-span-2 flex flex-col items-center justify-around sm:order-2 text-4xl md:text-7xl"
+                class="card h-40 p-4 col-span-2 flex flex-col items-center justify-around text-4xl md:text-7xl"
             >
                 <p class="text-xl text-center w-full mb-2">Marcador</p>
 
                 <div class="w-full h-full flex items-center gap-2">
                     <div
-                        class="text-center rounded-lg h-full w-full text-red-400 dark:bg-white bg-neutral-200 dark:bg-opacity-10 flex flex-col items-center justify-center"
+                        class="text-center rounded-lg h-full w-full text-slate-300 bg-white/[0.05] border border-white/10 flex flex-col items-center justify-center"
                     >
                         <p>
                             {{ score[1] }}
@@ -45,7 +45,7 @@
                         <small class="text-slate-300 text-base">Rival</small>
                     </div>
                     <div
-                        class="text-center rounded-lg h-full w-full text-sky-300 dark:bg-white bg-neutral-200 dark:bg-opacity-10 flex flex-col items-center justify-center"
+                        class="text-center rounded-lg h-full w-full text-brand-300 bg-brand-500/10 border border-brand-500/20 flex flex-col items-center justify-center"
                     >
                         <p>
                             {{ score[0] }}
@@ -61,7 +61,7 @@
         <!-- ERRORS -->
         <section class="w-full h-fit flex justify-center items-center gap-2">
             <article
-                class="bg-white dark:bg-opacity-10 p-4 rounded-lg flex items-center justify-around w-1/2 h-[95px]"
+                class="bg-white/[0.04] border border-white/10 p-4 rounded-lg flex items-center justify-around w-1/2 h-[95px]"
             >
                 <div
                     class="w-full flex justify-center items-center flex-col gap-2"
@@ -87,7 +87,7 @@
                 </div>
             </article>
             <article
-                class="bg-white dark:bg-opacity-10 p-2 rounded-lg flex items-center justify-around w-1/2"
+                class="bg-white/[0.04] border border-white/10 p-2 rounded-lg flex items-center justify-around w-1/2"
             >
                 <div class="flex justify-center items-center w-fit gap-1">
                     <svg
@@ -138,7 +138,7 @@
         >
             <div class="w-screen rounded-lg text-center">
                 <div
-                    class="bg-white dark:bg-opacity-10 flex w-full rounded-lg p-2 content-between justify-around gap-2"
+                    class="bg-white/[0.04] border border-white/10 flex w-full rounded-lg p-2 content-between justify-around gap-2"
                 >
                     <div
                         :class="{
@@ -159,7 +159,7 @@
         <section class="w-full flex flex-col justify-start items-center gap-4">
             <!-- BAR CHART -->
             <div
-                class="bg-white dark:bg-opacity-10 h-full rounded-lg w-full min-h-250"
+                class="bg-white/[0.04] border border-white/10 h-full rounded-lg w-full min-h-250"
             >
                 <apexchart
                     class=""
@@ -171,7 +171,7 @@
 
             <!-- VERTICAL BAR CHART -->
             <div
-                class="bg-white dark:bg-opacity-10 p-4 rounded-lg min-h-[400px] w-full"
+                class="bg-white/[0.04] border border-white/10 p-4 rounded-lg min-h-[400px] w-full"
             >
                 <p class="text-center">Curva de registro</p>
                 <div id="chart" class="min-h-[400px]">

@@ -2,6 +2,90 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  color-scheme: light dark;
+@layer base {
+  :root {
+    color-scheme: dark;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-ink-950 text-slate-200 font-sans antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  h1, h2, h3, h4 {
+    @apply font-display tracking-tight text-white;
+    text-wrap: balance;
+  }
+
+  ::selection {
+    background: theme("colors.brand.500");
+    color: white;
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: theme("colors.ink.700");
+    border-radius: 999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: theme("colors.ink.600");
+  }
+}
+
+@layer components {
+  .container-x {
+    @apply w-full max-w-screen-xl mx-auto px-5 sm:px-8;
+  }
+
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-semibold transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400 focus-visible:ring-offset-2 focus-visible:ring-offset-ink-950;
+  }
+  .btn-primary {
+    @apply btn bg-volt-400 text-ink-950 hover:bg-volt-300 hover:shadow-glow-volt hover:-translate-y-0.5;
+  }
+  .btn-secondary {
+    @apply btn bg-brand-500 text-white hover:bg-brand-400 hover:shadow-glow hover:-translate-y-0.5;
+  }
+  .btn-ghost {
+    @apply btn border border-white/15 bg-white/5 text-white backdrop-blur hover:bg-white/10 hover:border-white/25;
+  }
+
+  .card {
+    @apply rounded-3xl border border-white/10 bg-white/[0.04] backdrop-blur-xl shadow-card;
+  }
+
+  .eyebrow {
+    @apply inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-xs font-medium uppercase tracking-widest text-brand-300;
+  }
+
+  .text-gradient {
+    @apply bg-gradient-to-r from-brand-300 via-brand-400 to-volt-400 bg-clip-text text-transparent;
+  }
+
+  /* Progressive-enhancement reveal: content is visible by default (no-JS
+     crawlers see everything); the .js gate only hides it when JS is present. */
+  .js .reveal {
+    opacity: 0;
+    transform: translateY(28px);
+    transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+    will-change: opacity, transform;
+  }
+  .js .reveal.is-visible {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .js .reveal { opacity: 1; transform: none; transition: none; }
+  * { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; }
 }

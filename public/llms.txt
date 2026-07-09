@@ -1,0 +1,33 @@
+# Voley Stats Live
+
+> Aplicación para registrar y consultar estadísticas de voleibol en tiempo real. Los entrenadores registran cada acción del partido desde la app y cualquier persona puede seguir el marcador y las estadísticas en directo desde la web usando el código del equipo.
+
+Voley Stats Live está pensada para entrenadores, cuerpos técnicos, analistas y jugadores de voleibol que quieren tomar decisiones con datos en lugar de con intuición. Es gratuita para empezar y está disponible en la web y como aplicación móvil (Android e iOS).
+
+## Qué hace
+
+- Marcador en vivo: sigue el resultado set a set y la evolución del partido en tiempo real.
+- Estadísticas por jugador: rendimiento individual en cada área del juego.
+- Análisis por áreas: mide la eficiencia en las seis fases del juego — recepción, saque, ataque, bloqueo, defensa y colocación.
+- Curva de registro: visualiza las rachas de puntos y errores para identificar los momentos clave de cada set.
+- Informes en PDF: descarga resúmenes de partido y de temporada por set y por jugador.
+- Acceso por código: comparte un código de equipo y cualquiera consulta las estadísticas online, sin registros complejos.
+
+## Cómo funciona
+
+1. El entrenador registra cada acción del partido desde la app (saque, recepción, ataque, bloqueo, defensa y colocación).
+2. Se comparte el código del equipo; con él, cualquiera ve el marcador y las estadísticas en tiempo real desde la web.
+3. Al terminar el partido se genera un informe PDF por set y por jugador.
+
+## Datos clave
+
+- Categoría: aplicación deportiva (voleibol / analítica deportiva).
+- Plataformas: Web, Android, iOS.
+- Idioma: español.
+- Precio: gratuito para empezar.
+- Tiempo real: sí, las estadísticas se sincronizan en directo (requiere conexión a internet).
+
+## Enlaces
+
+- Inicio: https://voleystatslive.com/
+- Consultar estadísticas en vivo: https://voleystatslive.com/team-code
