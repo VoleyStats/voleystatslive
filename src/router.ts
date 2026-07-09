@@ -35,11 +35,6 @@ const routes = [
         name: 'areaStats',
         component: () => import('./pages/AreaStats.vue'),
       },
-      {
-        path: 'team',
-        name: 'teamStats',
-        component: () => import('./components/EmptyState.vue'),
-      },
     ],
   },
 ] as RouteRecordRaw[]

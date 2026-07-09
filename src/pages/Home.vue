@@ -203,10 +203,6 @@
             <i class="bi bi-apple text-lg"></i>
             App Store
           </a>
-          <a href="#" class="btn-secondary text-base">
-            <i class="bi bi-google-play"></i>
-            Google Play
-          </a>
           <RouterLink to="/team-code" class="btn-ghost text-base">
             Consultar en la web
           </RouterLink>
@@ -335,7 +331,7 @@ const steps = [
   {
     icon: "bi-broadcast",
     title: "Sigue el directo",
-    text: "Comparte el código del equipo y cualquiera puede ver el marcador y las estadísticas en tiempo real desde la web.",
+    text: "Comparte el código del partido y cualquiera puede ver el marcador y las estadísticas en tiempo real desde la web.",
   },
   {
     icon: "bi-filetype-pdf",

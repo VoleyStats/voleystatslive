@@ -122,8 +122,8 @@ const showToolbar = computed(
 
 const toolbarData: toolbarItem[] = [
   { url: "home", icon: "bi-house", name: "Inicio" },
-  { url: "areaStats", icon: "bi-bar-chart-line", name: "Stats" },
-  { url: "teamStats", icon: "bi-people", name: "Equipo" },
+  { url: "stats", icon: "bi-broadcast", name: "Directo" },
+  { url: "areaStats", icon: "bi-people", name: "Jugadoras" },
 ];
 
 const isActive = (name: string) => route.name === name;

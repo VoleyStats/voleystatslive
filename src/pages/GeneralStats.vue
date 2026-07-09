@@ -1,585 +1,382 @@
 <template>
-  <div
-            class="fixed top-20 right-0 z-30 flex w-12 flex-col items-center rounded-l-xl border border-r-0 border-white/10 bg-ink-850/80 py-2 backdrop-blur-xl cursor-pointer"
-            @click="selectSet = !selectSet"
-            >
-            <div v-show="selectSet">
-                <p class="">Set</p>
-                
-                <ul class="flex flex-col items-center gap-4 mt-2">
-                    <li
-                        :class="{'text-sm text-bold p-2 rounded-full h-6 w-6  flex justify-center items-center': true, 
-                        'text-slate-700 bg-slate-100': set == n
-                    }"
-                        v-for = "n in match?.n_sets"
-                        :key="n"
-                        @click="set = n"
-                    >
-                        <p>{{ n }}</p>
-                    </li>
-                </ul>
-            </div>
-            <p v-show="!selectSet" class=" text-sm">Set {{ set }}</p>
-        </div>
-  <EmptyState v-if="stats.data.length === 0"/>
-    <section
-      v-else
-        class="min-h-screen px-4 flex flex-col gap-4 items-center relative pb-20"
-    >
-        <!-- test sets -->
-        
-        <!-- SCORE -->
-        <article class="w-full">
-            <div
-                class="card h-40 p-4 col-span-2 flex flex-col items-center justify-around text-4xl md:text-7xl"
-            >
-                <p class="text-xl text-center w-full mb-2">Marcador</p>
+    <!-- Partido no encontrado -->
+    <EmptyState
+        v-if="notFound"
+        title="Partido no encontrado"
+        message="Revisa el código del partido: debe ser exactamente el que aparece en la app al activar el directo."
+    />
 
-                <div class="w-full h-full flex items-center gap-2">
-                    <div
-                        class="text-center rounded-lg h-full w-full text-slate-300 bg-white/[0.05] border border-white/10 flex flex-col items-center justify-center"
-                    >
-                        <p>
-                            {{ score[1] }}
-                        </p>
-                        <small class="text-slate-300 text-base">Rival</small>
-                    </div>
-                    <div
-                        class="text-center rounded-lg h-full w-full text-brand-300 bg-brand-500/10 border border-brand-500/20 flex flex-col items-center justify-center"
-                    >
-                        <p>
-                            {{ score[0] }}
-                        </p>
-                        <small class="text-slate-300 text-base"
-                            >Tu equipo</small
-                        >
-                    </div>
+    <section v-else class="min-h-screen px-4 pb-24 flex flex-col gap-4 items-center max-w-3xl mx-auto">
+        <!-- ============ MARCADOR ============ -->
+        <article class="card w-full p-5">
+            <div class="flex items-center justify-between mb-3">
+                <span v-if="isLive" class="inline-flex items-center gap-2 text-xs font-semibold text-volt-400">
+                    <span class="h-2 w-2 rounded-full bg-volt-400 animate-pulse"></span>
+                    EN VIVO · Set {{ currentSet }}
+                </span>
+                <span v-else class="text-xs text-slate-500">Partido</span>
+                <span class="text-xs text-slate-500">{{ setsWon[0] }} - {{ setsWon[1] }} en sets</span>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2">
+                <div class="text-center rounded-xl bg-brand-500/10 border border-brand-500/20 py-4">
+                    <p class="text-5xl md:text-6xl font-display font-bold text-brand-300">{{ score[0] }}</p>
+                    <p class="text-xs text-slate-400 mt-2 truncate px-2">{{ usName }}</p>
                 </div>
+                <div class="text-center rounded-xl bg-white/[0.04] border border-white/10 py-4">
+                    <p class="text-5xl md:text-6xl font-display font-bold text-slate-300">{{ score[1] }}</p>
+                    <p class="text-xs text-slate-400 mt-2 truncate px-2">{{ themName }}</p>
+                </div>
+            </div>
+
+            <!-- Selector de sets -->
+            <div class="mt-4 flex items-center gap-2 overflow-x-auto">
+                <button
+                    v-for="n in nSets"
+                    :key="n"
+                    class="shrink-0 rounded-full px-3 py-1.5 text-sm border transition-colors"
+                    :class="set === n
+                        ? 'bg-white text-slate-900 border-white font-semibold'
+                        : 'border-white/10 bg-white/[0.04] text-slate-300 hover:border-white/30'"
+                    @click="pickSet(n)"
+                >
+                    Set {{ n }}
+                    <span v-if="setResult(n)" class="ml-1 text-xs opacity-70">{{ setResult(n) }}</span>
+                </button>
+                <button
+                    v-if="manualSet !== null && manualSet !== currentSet"
+                    class="shrink-0 rounded-full px-3 py-1.5 text-xs border border-volt-500/40 text-volt-400"
+                    @click="manualSet = null"
+                >
+                    <i class="bi bi-broadcast"></i> Volver al directo
+                </button>
             </div>
         </article>
 
-        <!-- ERRORS -->
-        <section class="w-full h-fit flex justify-center items-center gap-2">
-            <article
-                class="bg-white/[0.04] border border-white/10 p-4 rounded-lg flex items-center justify-around w-1/2 h-[95px]"
-            >
-                <div
-                    class="w-full flex justify-center items-center flex-col gap-2"
-                >
-                    <p
-                        class="text-neutral-400 text-xs font-light text-center leading-3"
-                    >
-                        <span class="text-xl text-white font-normal"
-                            >{{ Math.floor(serveData.percentage) }}%</span
-                        >
-                        <br />
-                        de eficiencia en K2
+        <EmptyState
+            v-if="setStats.length === 0"
+            title="Sin datos en este set"
+            message="Cuando empiece el set, aquí aparecerá el punto a punto y las estadísticas en tiempo real."
+        />
+
+        <template v-else>
+            <!-- ============ RACHA + FASES ============ -->
+            <section class="w-full grid grid-cols-3 gap-2">
+                <article class="card p-3 text-center">
+                    <p class="text-2xl font-display font-bold" :class="streak.ours ? 'text-volt-400' : 'text-red-400'">
+                        {{ streak.count }}
                     </p>
-                    <!-- PROGRESS BAR -->
-                    <div class="bg-neutral-500 w-full h-[10px] rounded-full">
-                        <div
-                            class="bg-sky-300 h-[10px] rounded-full"
-                            :style="`width: ${Math.floor(
-                                serveData.percentage
-                            )}%;`"
-                        ></div>
-                    </div>
+                    <p class="text-xs text-slate-400 leading-4 mt-1">
+                        {{ streak.ours ? "puntos seguidos" : "puntos rivales seguidos" }}
+                    </p>
+                </article>
+                <article class="card p-3 text-center">
+                    <p class="text-2xl font-display font-bold text-brand-300">{{ pct(sideOut.won, sideOut.total) }}</p>
+                    <p class="text-xs text-slate-400 leading-4 mt-1">side-out<br />{{ sideOut.won }}/{{ sideOut.total }}</p>
+                </article>
+                <article class="card p-3 text-center">
+                    <p class="text-2xl font-display font-bold text-brand-300">{{ pct(breakPts.won, breakPts.total) }}</p>
+                    <p class="text-xs text-slate-400 leading-4 mt-1">break<br />{{ breakPts.won }}/{{ breakPts.total }}</p>
+                </article>
+            </section>
+
+            <!-- ============ PUNTO A PUNTO ============ -->
+            <article class="card w-full p-4">
+                <p class="text-sm font-semibold mb-3">Punto a punto</p>
+                <ul class="space-y-1.5 max-h-96 overflow-y-auto pr-1">
+                    <li
+                        v-for="p in timeline"
+                        :key="p.key"
+                        class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm"
+                        :class="p.ours ? 'bg-brand-500/10' : 'bg-white/[0.03]'"
+                    >
+                        <span class="shrink-0 font-display font-semibold tabular-nums w-14">{{ p.score }}</span>
+                        <span class="h-2 w-2 shrink-0 rounded-full" :class="p.ours ? 'bg-brand-400' : 'bg-red-400'"></span>
+                        <span class="text-slate-300 truncate">{{ p.label }}</span>
+                    </li>
+                </ul>
+            </article>
+
+            <!-- ============ MOMENTUM ============ -->
+            <article class="card w-full p-4">
+                <p class="text-sm font-semibold mb-1">Momentum</p>
+                <p class="text-xs text-slate-500 mb-2">Diferencia de puntos a lo largo del set</p>
+                <apexchart type="bar" height="220" :options="momentum.chartOptions" :series="momentum.series" />
+            </article>
+
+            <!-- ============ ORIGEN DE LOS PUNTOS ============ -->
+            <article class="card w-full p-4">
+                <p class="text-sm font-semibold mb-3">Origen de los puntos</p>
+                <div class="grid grid-cols-[1fr_auto_auto] gap-y-1.5 text-sm">
+                    <span></span>
+                    <span class="w-16 text-center text-xs text-slate-400">{{ usName }}</span>
+                    <span class="w-16 text-center text-xs text-slate-400">{{ themName }}</span>
+                    <template v-for="row in sourceRows" :key="row.label">
+                        <span class="text-slate-300 py-1">{{ row.label }}</span>
+                        <span class="w-16 text-center py-1 font-semibold" :class="row.us >= row.them ? 'text-brand-300' : ''">{{ row.us }}</span>
+                        <span class="w-16 text-center py-1" :class="row.them > row.us ? 'text-red-300 font-semibold' : ''">{{ row.them }}</span>
+                    </template>
                 </div>
             </article>
-            <article
-                class="bg-white/[0.04] border border-white/10 p-2 rounded-lg flex items-center justify-around w-1/2"
-            >
-                <div class="flex justify-center items-center w-fit gap-1">
-                    <svg
-                        v-if="!rowErrors"
-                        xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 24 24"
-                        fill="currentColor"
-                        class="fill-green-600 size-20 max-w-12"
-                    >
-                        <path
-                            fill-rule="evenodd"
-                            d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm13.36-1.814a.75.75 0 1 0-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 0 0-1.06 1.06l2.25 2.25a.75.75 0 0 0 1.14-.094l3.75-5.25Z"
-                            clip-rule="evenodd"
-                        />
-                    </svg>
-                    <svg
-                        v-else
-                        xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 24 24"
-                        fill="currentColor"
-                        class="fill-red-500 size-20 max-w-12"
-                    >
-                        <path
-                            fill-rule="evenodd"
-                            d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25Zm-1.72 6.97a.75.75 0 1 0-1.06 1.06L10.94 12l-1.72 1.72a.75.75 0 1 0 1.06 1.06L12 13.06l1.72 1.72a.75.75 0 1 0 1.06-1.06L13.06 12l1.72-1.72a.75.75 0 1 0-1.06-1.06L12 10.94l-1.72-1.72Z"
-                            clip-rule="evenodd"
-                        />
-                    </svg>
 
-                    <p
-                        class="text-base text-neutral-400 leading-5 font-light line-clamp-2"
-                    >
-                        <span class="text-white"
-                            >{{ rowActions }}
-                            {{ rowErrors ? " fallos" : " aciertos" }}</span
-                        >
-                        <br />
-                        seguidos
-                    </p>
-                </div>
+            <!-- ============ PUNTOS POR JUGADORA ============ -->
+            <article v-if="topScorers.length" class="card w-full p-4">
+                <p class="text-sm font-semibold mb-3">Puntos por jugadora</p>
+                <ul class="space-y-1.5">
+                    <li v-for="p in topScorers" :key="p.name" class="flex items-center gap-3 text-sm">
+                        <span class="w-6 text-right font-display font-bold text-brand-300">{{ p.points }}</span>
+                        <div class="flex-1 h-2 rounded-full bg-white/[0.06] overflow-hidden">
+                            <div class="h-full rounded-full bg-brand-500/70" :style="{ width: p.barWidth }"></div>
+                        </div>
+                        <span class="w-28 truncate text-slate-300">{{ p.name }}</span>
+                    </li>
+                </ul>
             </article>
-        </section>
 
-        <!-- SETS -->
-        <section
-            class="w-full flex justify-start items-center gap-2"
-            v-if="false"
-        >
-            <div class="w-screen rounded-lg text-center">
-                <div
-                    class="bg-white/[0.04] border border-white/10 flex w-full rounded-lg p-2 content-between justify-around gap-2"
-                >
-                    <div
-                        :class="{
-                            'rounded-lg py-1 w-full': true,
-                            'bg-white text-slate-800': set == n,
-                        }"
-                        v-for="n in match?.n_sets"
-                        @click="set = n"
-                    >
-                        Set {{ n }}
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <p class="text-xl w-full text-left">Estadísticas</p>
-        <!-- CHARTS -->
-        <section class="w-full flex flex-col justify-start items-center gap-4">
-            <!-- BAR CHART -->
-            <div
-                class="bg-white/[0.04] border border-white/10 h-full rounded-lg w-full min-h-250"
-            >
-                <apexchart
-                    class=""
-                    type="bar"
-                    :options="errors.chartOptions"
-                    :series="errors.series"
-                ></apexchart>
-            </div>
-
-            <!-- VERTICAL BAR CHART -->
-            <div
-                class="bg-white/[0.04] border border-white/10 p-4 rounded-lg min-h-[400px] w-full"
-            >
-                <p class="text-center">Curva de registro</p>
-                <div id="chart" class="min-h-[400px]">
-                    <apexchart
-                        height="100%"
-                        type="bar"
-                        :options="pointLog.chartOptions"
-                        :series="pointLog.series"
-                    >
-                    </apexchart>
-                </div>
-            </div>
-        </section>
+            <!-- ============ ERRORES POR ÁREA ============ -->
+            <article class="card w-full p-4">
+                <p class="text-sm font-semibold">Errores por área</p>
+                <apexchart type="bar" height="220" :options="errors.chartOptions" :series="errors.series" />
+            </article>
+        </template>
     </section>
 </template>
 
 <script setup lang="ts">
-import { computed, reactive, ref, Ref, watch } from "vue";
-import type { errorLog } from "../interfaces/errorTypes";
+import { computed, reactive, ref } from "vue";
 import { useDocument } from "vuefire";
-import EmptyState from '../components/EmptyState.vue'
-import {
-    collection,
-    doc,
-    onSnapshot,
-    orderBy,
-    query,
-} from "firebase/firestore";
+import EmptyState from "../components/EmptyState.vue";
+import { collection, doc, onSnapshot, orderBy, query } from "firebase/firestore";
 import { db } from "../firebase";
+
 const props = defineProps({
     id: String,
-    setNumber: Number,
-});
-const score = ref([0, 0]);
-
-const set = ref(1 as number);
-
-const match = useDocument(doc(db, "live_matches", props?.id ?? ""));
-
-const log: Ref<errorLog> = ref({ data: [], labels: [] });
-
-const errorData: Ref<errorLog> = ref({ data: [], labels: [] });
-
-const serveData = ref({total: 0, points: 0, percentage: 0})
-
-const areaLabels = [
-    "Recepción",
-    "Bloqueo",
-    "Defensa",
-    "Colocación",
-    "Saque",
-    "Ataque",
-    "Falta",
-];
-
-const rowErrors = ref(false);
-
-const rowActions = ref(1);
-
-const selectSet = ref(false);
-
-let errors = computed(() => {
-    return {
-        series: [
-            {
-                name: "Errores",
-                data: errorData.value.data,
-            },
-        ],
-        chartOptions: {
-            title: {
-                text: "Errores",
-                align: "center",
-                margin: 20,
-
-                style: {
-                    color: "#fff",
-                },
-            },
-            fill: {
-                type: "gradient",
-                gradient: {
-                    type: "diagonal2",
-                    gradientToColors: ["#7DD3FC", "#7DD3FC"],
-                    colorStops: [
-                        {
-                            offset: 40,
-                            color: "#7DD3FC",
-                            opacity: 1,
-                        },
-                        {
-                            offset: 100,
-                            color: "#7DD3FC",
-                            opacity: 1,
-                        },
-                    ],
-                },
-            },
-            chart: {
-                type: "bar",
-                height: "100%",
-                redrawOnParentResize: true,
-                toolbar: {
-                    show: false,
-                },
-            },
-            grid: {
-                show: false,
-                padding: {
-                    left: 0,
-                    right: 0,
-                },
-            },
-            plotOptions: {
-                bar: {
-                    horizontal: false,
-              borderRadius: 6,
-              columnWidth: 30,
-              barHeight: '50%',
-              borderRadiusApplication: "end",
-                },
-            },
-            dataLabels: {
-                enabled: false,
-            },
-            xaxis: {
-                labels: {
-                    show: false,
-                },
-                axisBorder: {
-                    show: false,
-                },
-                axisTicks: {
-                    show: false,
-                },
-                categories: errorData.value.labels,
-            },
-            yaxis: {
-                show: false,
-            },
-            tooltip: {
-                theme: "dark",
-                y: {
-                  formatter: function (val: number) {
-                    return val;
-                  },
-                },
-            },
-        },
-    };
 });
 
-// let areaStats = computed(() => {
-//   return {
-//     series: serveStats.value.data,
-//     chartOptions: {
-//       dataLabels:{
-//         enabled: false,
-//       },
-//       tooltip: {
-//         theme: "dark",
-//         fillSeriesColor: false,
-//         y: {
-//           formatter: function (val) {
-//             return val;
-//           },
-//         },
-//       },
-//       title: {
-//         text: "Errores",
-//         align: "center",
-//         // margin: 20,
-//         // offsetY: 130,
-//         style:{
-//           color: "#fff"
-//         }
-//       },
-//       stroke: {
-//         show: false
-//       },
-//       legend:{
-//         show: false
-//       },
-//       chart: {
-//         type: "donut",
-//         // offsetY: -10,
-//       },
-//       plotOptions: {
+// ------------------------------------------------------------------ contrato
+// La app envía los ids de acción como String ("9") y los stages como
+// K1=1 / K2=2 / K3=3. Los stats administrativos (tiempo muerto "0",
+// ajuste "98", cambio "99") llevan `to` != 0 pero NO son puntos.
+const ADMIN_IDS = ["0", "98", "99"];
+const aid = (s: any): string => String(s?.action?.id ?? "");
+const isRival = (s: any): boolean => String(s?.player?.id ?? "") === "0";
+const rivalServing = (s: any): boolean => String(s?.server?.id ?? "") === "0";
 
-//         pie: {
-//           startAngle: -135,
-//           endAngle: 135,
-//           dataLabels: {
-//             name: {
-//               // fontSize: "16px",
-//               color: "#fff",
-//               // offsetY: 70,
-//             },
-//             value: {
-//               // offsetY: -10,
-//               fontSize: "22px",
-//               color: "#fff",
-//               formatter: function (val) {
-//                 return val;
-//               },
-//             },
-//           },
-//         },
-//       },
-//       colors: ["#609DE7", "#7b100c", "#efefef"],
-//       // fill: {
-//       //     type: 'gradient',
-//       //     gradient: {
-//       //         type: 'vertical',
-//       //         gradientToColors: ["#609DE7", "#beebef"],
-//       //         colorStops: [
-//       //         {
-//       //             offset: 40,
-//       //             color: '#609DE7',
-//       //             opacity: 1
-//       //           },
-//       //           {
-//       //             offset: 100,
-//       //             color: '#beebef',
-//       //             opacity: 1
-//       //           },
+const KILL_IDS = ["9", "10", "11"];
+const ACTION_LABELS: Record<string, string> = {
+    "8": "Ace",
+    "9": "Remate",
+    "10": "Finta",
+    "11": "Block-out",
+    "13": "Punto de bloqueo",
+    "12": "Saque ganador",
+    "15": "Error de saque",
+    "32": "Error de saque",
+    "16": "Error de ataque",
+    "17": "Error de ataque",
+    "18": "Error de ataque",
+    "19": "Falta",
+    "20": "Error de bloqueo",
+    "22": "Error de recepción",
+    "23": "Error de defensa",
+    "24": "Error de colocación",
+    "25": "Error de free",
+};
+const AREA_LABELS = ["Recepción", "Bloqueo", "Defensa", "Colocación", "Saque", "Ataque", "Falta"];
 
-//       //         ]
-//       //     },
-//       //   },
-//       labels: ["aces", "errors", "rest"],
-//     },
-//   }
-// });
+// ------------------------------------------------------------------ datos
+const match = useDocument(doc(db, "live_matches", props?.id ?? "x"));
+const baseStats = reactive({ data: [] as any[], loaded: false });
 
-let pointLog = computed(() => {
+onSnapshot(
+    query(collection(db, "live_matches", props?.id ?? "x", "stats"), orderBy("order")),
+    (q) => {
+        baseStats.data = q.docs.map((d) => d.data());
+        baseStats.loaded = true;
+    }
+);
+
+const notFound = computed(() => match.value === null && baseStats.loaded && baseStats.data.length === 0);
+const isLive = computed(() => match.value?.live === true);
+const nSets = computed(() => match.value?.n_sets ?? 5);
+const usName = computed(() => match.value?.team?.name || "Tu equipo");
+const themName = computed(() => match.value?.opponent || "Rival");
+const currentSet = computed(() => match.value?.current_set ?? 1);
+
+// Set seleccionado: sigue el set en curso salvo elección manual.
+const manualSet = ref<number | null>(null);
+const set = computed(() => manualSet.value ?? currentSet.value);
+const pickSet = (n: number) => { manualSet.value = n; };
+
+const setStats = computed(() => baseStats.data.filter((s) => s.set?.number == set.value));
+const gameStats = computed(() => setStats.value.filter((s) => !ADMIN_IDS.includes(aid(s))));
+const pointEnders = computed(() => gameStats.value.filter((s) => s.to !== 0));
+const lastPoint = computed(() => pointEnders.value.at(-1));
+
+// ------------------------------------------------------------------ marcador
+const score = computed(() => [lastPoint.value?.score_us ?? 0, lastPoint.value?.score_them ?? 0]);
+
+const scoreboard = computed(() => (match.value?.sets_scoreboard ?? []) as any[]);
+const setResult = (n: number): string => {
+    const s = scoreboard.value.find((x) => x.number === n);
+    return s && (s.score_us > 0 || s.score_them > 0) && n !== currentSet.value
+        ? `${s.score_us}-${s.score_them}`
+        : "";
+};
+const setsWon = computed(() => {
+    let us = match.value?.sets_us ?? 0;
+    let them = match.value?.sets_them ?? 0;
+    if (match.value?.set_closed) {
+        const cur = scoreboard.value.find((x) => x.number === currentSet.value);
+        if (cur) {
+            if (cur.score_us > cur.score_them) us++;
+            else if (cur.score_them > cur.score_us) them++;
+        }
+    }
+    return [us, them];
+});
+
+// ------------------------------------------------------------------ racha y fases
+const streak = computed(() => {
+    const pts = pointEnders.value;
+    const last = pts.at(-1);
+    if (!last) return { count: 0, ours: true };
+    let count = 0;
+    for (let i = pts.length - 1; i >= 0; i--) {
+        if (pts[i].to === last.to) count++;
+        else break;
+    }
+    return { count, ours: last.to === 1 };
+});
+
+const sideOut = computed(() => {
+    const rec = pointEnders.value.filter((s) => rivalServing(s));
+    return { total: rec.length, won: rec.filter((s) => s.to === 1).length };
+});
+const breakPts = computed(() => {
+    const srv = pointEnders.value.filter((s) => !rivalServing(s));
+    return { total: srv.length, won: srv.filter((s) => s.to === 1).length };
+});
+const pct = (won: number, total: number): string =>
+    total > 0 ? Math.round((won / total) * 100) + "%" : "—";
+
+// ------------------------------------------------------------------ punto a punto
+const timeline = computed(() =>
+    [...pointEnders.value].reverse().map((s, i) => {
+        const label = ACTION_LABELS[aid(s)] ?? s.action?.name ?? "";
+        const who = isRival(s) ? themName.value : s.player?.name ?? "";
+        return {
+            key: s.id ?? i,
+            score: `${s.score_us}-${s.score_them}`,
+            ours: s.to === 1,
+            label: who ? `${label} · ${who}` : label,
+        };
+    })
+);
+
+// ------------------------------------------------------------------ origen de puntos
+const sourceRows = computed(() => {
+    const rows = [
+        { label: "Ataque", us: 0, them: 0 },
+        { label: "Bloqueo", us: 0, them: 0 },
+        { label: "Saque directo", us: 0, them: 0 },
+        { label: "Errores del rival", us: 0, them: 0 },
+    ];
+    for (const s of pointEnders.value) {
+        const rival = isRival(s);
+        const id = aid(s);
+        const bucket = KILL_IDS.includes(id) ? 0 : id === "13" ? 1 : id === "8" ? 2 : 3;
+        if (s.to === 1) {
+            // Punto nuestro: si lo cerró el rival, es error suyo.
+            rows[rival ? 3 : bucket].us++;
+        } else if (s.to === 2) {
+            rows[!rival ? 3 : bucket].them++;
+        }
+    }
+    return rows;
+});
+
+// ------------------------------------------------------------------ jugadoras
+const topScorers = computed(() => {
+    const byPlayer = new Map<string, number>();
+    for (const s of pointEnders.value) {
+        if (s.to === 1 && !isRival(s)) {
+            const name = s.player?.name ?? "";
+            if (name) byPlayer.set(name, (byPlayer.get(name) ?? 0) + 1);
+        }
+    }
+    const sorted = [...byPlayer.entries()].sort((a, b) => b[1] - a[1]).slice(0, 6);
+    const max = sorted[0]?.[1] ?? 1;
+    return sorted.map(([name, points]) => ({
+        name,
+        points,
+        barWidth: Math.round((points / max) * 100) + "%",
+    }));
+});
+
+// ------------------------------------------------------------------ charts
+const momentum = computed(() => {
+    const pts = pointEnders.value;
     return {
-        series: [
-            {
-                data: log.value.data,
-            },
-        ],
+        series: [{ data: pts.map((s) => s.score_us - s.score_them) }],
         chartOptions: {
-            annotations: {
-                xaxis: [
-                    {
-                        x: 0,
-                        strokeDashArray: 0,
-                    },
-                ],
-            },
-            chart: {
-                type: "bar",
-                height: "100%",
-                toolbar: {
-                    show: false,
-                },
-            },
-            grid: {
-                show: false,
-                xaxis: {
-                    lines: {
-                        show: false,
-                    },
-                },
-                yaxis: {
-                    lines: {
-                        show: false,
-                    },
-                },
-            },
+            chart: { type: "bar", toolbar: { show: false }, sparkline: { enabled: false } },
+            grid: { show: false, padding: { left: 0, right: 0 } },
             plotOptions: {
                 bar: {
-                    borderRadius: 4,
-                    borderRadiusApplication: "end",
-                    horizontal: true,
-                    // barHeight: 15,
+                    borderRadius: 2,
+                    columnWidth: "80%",
                     colors: {
                         ranges: [
-                            {
-                                from: 0,
-                                to: Infinity,
-                                color: "#7DD3FC",
-                            },
-                            {
-                                from: -Infinity,
-                                to: 0,
-                                color: "#7b100c",
-                            },
+                            { from: 0, to: Infinity, color: "#6E93FF" },
+                            { from: -Infinity, to: -0.5, color: "#F87171" },
                         ],
                     },
                 },
             },
-            dataLabels: {
-                enabled: false,
-            },
+            dataLabels: { enabled: false },
             xaxis: {
-                min: -25,
-                max: 25,
-                axisBorder: {
-                    show: false,
-                },
-                axisTicks: {
-                    show: false,
-                },
-                labels: {
-                    show: false,
-                },
-                categories: log.value.labels,
+                labels: { show: false },
+                axisBorder: { show: false },
+                axisTicks: { show: false },
+                categories: pts.map((s) => `${s.score_us}-${s.score_them}`),
             },
-            yaxis: {
-                show: true,
-                labels: {
-                    style: {
-                        colors: "#fff",
-                    },
-                },
-            },
+            yaxis: { show: false },
             tooltip: {
-                enabled: false,
+                theme: "dark",
+                x: { show: true },
+                y: { title: { formatter: () => "Diferencia" } },
             },
         },
     };
 });
 
-const stats = reactive({ data: [] as any[] })
-const baseStats = reactive({ data: [] as any[] })
-
-
-watch(stats, () => {
-    let last = stats.data.at(-1);
-
-    if (last != undefined && last.to != 0) {
-        rowActions.value = 1;
-        rowErrors.value = last?.to == 2;
-        for (let i = stats.data.length - 2; i >= 0; i--) {
-            if (stats.data[i].to == last?.to) {
-                rowActions.value++;
-            } else {
-                break;
-            }
-        }
-        // stats.reverse().forEach(s=>)
-        score.value = [last?.score_us, last?.score_them];
-        let finals = stats.data.filter(s=>s.to !== 0)
-        log.value = {
-            labels: finals.map((s) => s.score_them + "-" + s.score_us),
-            data: finals.map((s) => s.score_us - s.score_them),
-        };
-        // @ts-ignore
-        let grouped = Map.groupBy(
-            stats.data.filter((s) => s.to == 2 && s.action.type == "error"),
-            // @ts-ignore
-
-            ({ action }) => action.area
-        );
-        errorData.value = {
-            labels: Array.from(
-                grouped.keys(),
-                (k: number) => areaLabels[k]
-            ),
-            data: Array.from(grouped.values(), (v: Array<any>) => v.length),
-        };
-        let serves = stats.data.filter(s => s.stage === 0 && s.server !== null && s.to !== 0)
-        let pt = serves.filter(s => s.to == 1)
-        serveData.value = {
-            total: serves.length,
-            points: pt.length,
-            percentage: (pt.length / serves.length) * 100
-
-        }
-        // const serves = stats.filter(s => s.action.area === 4 && s.player !== null)
-        // serveStats.value.data = [serves.filter(s => s.action.id === 8).length, serves.filter(s => s.action.id === 15).length, serves.filter(s => s.action.id !== 15 && s.action.id !== 8).length]
-        // serveStats.value.labels = areaLabels[4]
-    } else {
-        score.value = [0, 0];
-        log.value = {
-            labels: [],
-            data: [],
-        };
-        errorData.value = {
-            labels: [],
-            data: [],
-        };
-        serveData.value = {
-            total: 0,
-            points: 0,
-            percentage: 0
+const errors = computed(() => {
+    const grouped = new Map<number, number>();
+    for (const s of gameStats.value) {
+        if (s.to === 2 && !isRival(s) && s.action?.type === "error") {
+            const area = Number(s.action?.area ?? -1);
+            grouped.set(area, (grouped.get(area) ?? 0) + 1);
         }
     }
-})
-watch(set, () => {
-    stats.data = baseStats.data.filter((s) => s.set.number == set.value);
-})
-
-onSnapshot(
-    query(
-        collection(db, "live_matches", props?.id ?? "", "stats"),
-        orderBy("order")
-    ),
-
-    (q) => {
-        // console.log(q.docs.map((d) => d.data()))
-        baseStats.data = q.docs.map((d) => d.data())
-        stats.data = baseStats.data.filter((s) => s.set.number == set.value);
-        // console.log($routes)
-
-
-    }
-);
+    const entries = [...grouped.entries()].sort((a, b) => a[0] - b[0]);
+    return {
+        series: [{ name: "Errores", data: entries.map(([, v]) => v) }],
+        chartOptions: {
+            chart: { type: "bar", toolbar: { show: false } },
+            fill: { colors: ["#6E93FF"] },
+            grid: { show: false, padding: { left: 0, right: 0 } },
+            plotOptions: { bar: { borderRadius: 6, columnWidth: 30, borderRadiusApplication: "end" } },
+            dataLabels: { enabled: false },
+            xaxis: {
+                categories: entries.map(([k]) => AREA_LABELS[k] ?? "Otra"),
+                labels: { style: { colors: "#94a3b8" } },
+                axisBorder: { show: false },
+                axisTicks: { show: false },
+            },
+            yaxis: { show: false },
+            tooltip: { theme: "dark" },
+        },
+    };
+});
 </script>

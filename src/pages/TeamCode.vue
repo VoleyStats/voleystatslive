@@ -12,13 +12,14 @@
 
       <h1 class="text-2xl font-bold text-center">Estadísticas en vivo</h1>
       <p class="mt-2 text-sm text-slate-400 text-center">
-        Introduce el código de tu equipo para acceder al marcador y las
-        estadísticas del partido en directo.
+        Introduce el código del partido para acceder al marcador y las
+        estadísticas en directo. El código lo comparte quien registra el
+        partido desde la app.
       </p>
 
       <form class="mt-8" @submit.prevent="goToStats">
         <label for="team-code" class="block text-sm font-medium text-slate-300 mb-2">
-          Código del equipo
+          Código del partido
         </label>
         <input
           id="team-code"
@@ -26,7 +27,7 @@
           type="text"
           autocomplete="off"
           class="w-full rounded-xl bg-white/[0.04] border border-white/10 px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-brand-400 focus:ring-2 focus:ring-brand-500/30 transition"
-          placeholder="Ej. equipo-2026"
+          placeholder="Pega aquí el código del partido"
         />
 
         <button
