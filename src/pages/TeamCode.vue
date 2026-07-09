@@ -56,7 +56,14 @@ const router = useRouter();
 const codeTeam = ref("");
 
 const goToStats = () => {
-  if (!codeTeam.value) return;
-  router.push(`/stats/${codeTeam.value}`);
+  let value = codeTeam.value.trim();
+  if (!value) return;
+  // Acepta el código suelto o la URL completa pegada desde la app.
+  const fromUrl = value.match(/voleystats-live\.vercel\.app\/(?:stats\/|team\/|overlay\/)?([A-Za-z0-9-]+)/);
+  if (fromUrl) value = fromUrl[1];
+  // Los enlaces de equipo llevan un UUID (36 caracteres con guiones); los de
+  // partido son IDs de Firestore (20 alfanuméricos).
+  const isTeam = /^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}$/.test(value);
+  router.push(isTeam ? `/team/${value}` : `/stats/${value}`);
 };
 </script>

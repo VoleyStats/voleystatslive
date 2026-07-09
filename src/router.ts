@@ -40,6 +40,12 @@ const routes = [
     ],
   },
   {
+    // Página pública del equipo: lista sus partidos compartidos.
+    path: '/team/:id',
+    name: 'team',
+    component: () => import('./pages/TeamMatches.vue'),
+  },
+  {
     // Enlace corto que muestra la app (voleystats-live.vercel.app/<código>):
     // los códigos son IDs de Firestore (20 caracteres alfanuméricos), así el
     // patrón no captura rutas futuras.
