@@ -255,10 +255,15 @@ const setsWon = computed(() => {
     return [us, them];
 });
 
-// El mismo enlace vive durante y después del partido: en vivo se muestra el
-// seguimiento (punto a punto, racha, momentum) y cuando hay ganador la página
-// se convierte en el informe (fases, origen de puntos, errores, jugadoras).
+// El mismo enlace vive durante y después del partido: mientras el directo está
+// activo se muestra el seguimiento (punto a punto, racha, momentum) y cuando
+// deja de estarlo (la app publica live=false al cerrarse el set decisivo o al
+// apagar el toggle) la página se convierte en el informe. Fallback para docs
+// de versiones antiguas de la app que nunca actualizan `live`: último set
+// cerrado con mayoría de sets alcanzada.
 const matchOver = computed(() => {
+    if (match.value?.live === false) return true;
+    if (match.value?.set_closed !== true) return false;
     const majority = Math.floor(nSets.value / 2) + 1;
     return setsWon.value[0] >= majority || setsWon.value[1] >= majority;
 });
