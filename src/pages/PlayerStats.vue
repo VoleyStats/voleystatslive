@@ -63,7 +63,11 @@
                 </div>
                 <div class="rounded-lg bg-white/[0.04] border border-white/10 py-2">
                     <p class="text-sm font-display font-bold text-slate-200">
-                        {{ p.serve.total ? p.serve.aces + "A / " + p.serve.errors + "E" : "—" }}
+                        <template v-if="p.serve.total">
+                            {{ p.serve.aces + "A / " + p.serve.errors + "E" }}
+                            <span :class="markColor(p.serve.mark)">· {{ p.serve.mark }}</span>
+                        </template>
+                        <template v-else>—</template>
                     </p>
                     <p class="text-[11px] text-slate-400">{{ $t('players.serve') }}</p>
                 </div>
@@ -75,6 +79,11 @@
                     <div v-for="block in p.blocks" :key="block.title" class="rounded-lg bg-white/[0.04] border border-white/10 p-3">
                         <p class="text-xs text-slate-400 mb-1">{{ block.title }}</p>
                         <p class="text-sm text-slate-200 leading-6" v-html="block.html"></p>
+                        <p v-if="block.mark !== undefined" class="text-sm leading-6">
+                            <span class="text-xs text-slate-400">{{ $t('players.serveMark') }}</span>
+                            <span class="font-display font-bold" :class="markColor(block.mark)"> {{ block.mark }}</span>
+                            <span class="text-xs text-slate-500"> ({{ block.n }})</span>
+                        </p>
                     </div>
                 </div>
 
@@ -195,6 +204,14 @@ const players = computed(() => {
         const serveTotal = count(SERVE_IDS);
         const aces = count(["8"]);
         const serveErrors = count(SERVE_ERR);
+        // Nota de saque 0-3, misma fórmula que la app iPad: los errores solo
+        // cuentan en el denominador. op = el rival la devuelve fácil.
+        const serveOp = count(["41"]);
+        const serve1 = count(["40"]);
+        const serve2 = count(["39"]);
+        const serveMark = serveTotal > 0
+            ? ((serveOp / 2 + serve1 + 2 * serve2 + 3 * aces) / serveTotal).toFixed(1)
+            : "0.0";
 
         const blockPoints = count(["13"]);
         const blockTouches = count(["7"]);
@@ -219,7 +236,7 @@ const players = computed(() => {
         // Cada bloque se oculta cuando sus dos primeras cifras son 0 (misma
         // regla que la antigua regex sobre el html, ahora explícita para que
         // funcione con los textos traducidos).
-        const blocks = [
+        const blocks: { title: string; html: string; show: boolean; mark?: string; n?: number }[] = [
             {
                 title: t("players.blockAttack"),
                 html: t("players.attackLine", { kills, errors: attackErrors, total: attackTotal, eff }),
@@ -228,7 +245,9 @@ const players = computed(() => {
             {
                 title: t("players.blockServe"),
                 html: t("players.serveLine", { aces, errors: serveErrors, total: serveTotal }),
-                show: aces > 0 || serveErrors > 0,
+                show: serveTotal > 0,
+                mark: serveMark,
+                n: serveTotal,
             },
             {
                 title: t("players.blockBlock"),
@@ -263,7 +282,7 @@ const players = computed(() => {
             points,
             attack: { total: attackTotal, kills, errors: attackErrors, eff },
             reception: { total: recTotal, perfect, good, bad, errors: recErrors, mark },
-            serve: { total: serveTotal, aces, errors: serveErrors },
+            serve: { total: serveTotal, aces, errors: serveErrors, mark: serveMark },
             pointsBySet,
             blocks,
             directionStats,
@@ -273,4 +292,10 @@ const players = computed(() => {
 
 const effColor = (eff: number): string =>
     eff >= 40 ? "text-volt-400" : eff >= 25 ? "text-brand-300" : "text-slate-200";
+
+// Color de la nota de saque 0-3 (mismos umbrales que la app).
+const markColor = (mark: string): string => {
+    const v = parseFloat(mark);
+    return v >= 2 ? "text-green-400" : v >= 1.5 ? "text-yellow-400" : "text-red-400";
+};
 </script>

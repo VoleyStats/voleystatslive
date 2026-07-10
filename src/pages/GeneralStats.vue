@@ -148,6 +148,34 @@
                 </div>
             </article>
 
+            <!-- ============ ATAQUE POR FASE Y POR RECEPCIÓN (post-partido) ============ -->
+            <article v-if="matchOver && (attackPhases[0].attempts > 0 || attackPhases[1].attempts > 0)" class="card w-full p-4">
+                <p class="text-sm font-semibold mb-3">{{ $t('stats.attackByPhase') }}</p>
+                <div class="grid grid-cols-2 gap-2">
+                    <div v-for="ph in attackPhases" :key="ph.label" class="text-center rounded-xl bg-white/[0.04] border border-white/10 py-3">
+                        <p class="text-2xl font-display font-bold" :class="ph.color">{{ ph.killPct }}</p>
+                        <p class="text-xs text-slate-400 leading-4 mt-1">
+                            {{ ph.label }}<br />{{ ph.kills }}/{{ ph.attempts }} · {{ $t('stats.effShort', { eff: ph.eff }) }}
+                        </p>
+                    </div>
+                </div>
+                <div v-if="attackByReception.length" class="mt-4 border-t border-white/10 pt-3">
+                    <p class="text-xs text-slate-500 mb-2">{{ $t('stats.attackByReception') }}</p>
+                    <div class="grid grid-cols-[1fr_auto_auto_auto] gap-y-1.5 text-sm items-center">
+                        <span></span>
+                        <span class="w-16 text-center text-xs text-slate-400">{{ $t('stats.colKillsAtt') }}</span>
+                        <span class="w-14 text-center text-xs text-slate-400">{{ $t('stats.colKillPct') }}</span>
+                        <span class="w-14 text-center text-xs text-slate-400">{{ $t('stats.colEff') }}</span>
+                        <template v-for="row in attackByReception" :key="row.grade">
+                            <span class="text-slate-300 py-1">{{ row.label }}</span>
+                            <span class="w-16 text-center py-1">{{ row.kills }}/{{ row.attempts }}</span>
+                            <span class="w-14 text-center py-1 font-semibold" :class="row.color">{{ row.killPct }}</span>
+                            <span class="w-14 text-center py-1">{{ row.eff }}%</span>
+                        </template>
+                    </div>
+                </div>
+            </article>
+
             <!-- ============ PUNTOS POR JUGADORA ============ -->
             <article v-if="topScorers.length" class="card w-full p-4">
                 <p class="text-sm font-semibold mb-3">{{ $t('stats.pointsByPlayer') }}</p>
@@ -162,6 +190,21 @@
                 </ul>
             </article>
 
+            <!-- ============ CONEXIONES COLOCADORA → ATACANTE (post-partido) ============ -->
+            <article v-if="matchOver && setterConnections.length" class="card w-full p-4">
+                <p class="text-sm font-semibold mb-3">{{ $t('stats.setterConnections') }}</p>
+                <div class="grid grid-cols-[1fr_auto_auto] gap-y-1.5 text-sm items-center">
+                    <span></span>
+                    <span class="w-16 text-center text-xs text-slate-400">{{ $t('stats.colKillsAtt') }}</span>
+                    <span class="w-14 text-center text-xs text-slate-400">{{ $t('stats.colKillPct') }}</span>
+                    <template v-for="c in setterConnections" :key="c.key">
+                        <span class="text-slate-300 py-1 truncate">{{ c.setter }} → {{ c.attacker }}</span>
+                        <span class="w-16 text-center py-1">{{ c.kills }}/{{ c.attempts }}</span>
+                        <span class="w-14 text-center py-1 font-semibold" :class="c.color">{{ c.killPct }}</span>
+                    </template>
+                </div>
+            </article>
+
             <!-- ============ COMPARATIVA ENTRE SETS (post-partido) ============ -->
             <article v-if="matchOver && setsComparison.length > 1" class="card w-full p-4">
                 <p class="text-sm font-semibold mb-3">{{ $t('stats.setBySet') }}</p>
@@ -170,13 +213,28 @@
                     <span class="text-center text-xs text-slate-400">{{ $t('stats.colResult') }}</span>
                     <span class="text-center text-xs text-slate-400">{{ $t('stats.colSideOut') }}</span>
                     <span class="text-center text-xs text-slate-400">{{ $t('stats.colBreak') }}</span>
-                    <span class="text-center text-xs text-slate-400">{{ $t('stats.colGifted') }}</span>
+                    <span class="text-center text-xs text-slate-400">{{ $t('stats.colUnforced') }}</span>
                     <template v-for="row in setsComparison" :key="row.n">
                         <span class="pr-3 font-semibold text-slate-300">S{{ row.n }}</span>
                         <span class="text-center font-display font-bold" :class="row.won ? 'text-volt-400' : 'text-red-400'">{{ row.result }}</span>
                         <span class="text-center">{{ row.sideOut }}</span>
                         <span class="text-center">{{ row.breakPts }}</span>
-                        <span class="text-center" :class="row.gifted >= 8 ? 'text-red-300' : ''">{{ row.gifted }}</span>
+                        <span class="text-center" :class="row.unforcedColor">{{ row.unforced }}</span>
+                    </template>
+                </div>
+            </article>
+
+            <!-- ============ RENDIMIENTO POR ROTACIÓN (post-partido) ============ -->
+            <article v-if="matchOver && rotationRows.length" class="card w-full p-4">
+                <p class="text-sm font-semibold mb-3">{{ $t('stats.rotations') }}</p>
+                <div class="grid grid-cols-[auto_1fr_1fr] gap-y-1.5 text-sm items-center">
+                    <span></span>
+                    <span class="text-center text-xs text-slate-400">{{ $t('stats.colSideOut') }}</span>
+                    <span class="text-center text-xs text-slate-400">{{ $t('stats.colBreak') }}</span>
+                    <template v-for="row in rotationRows" :key="row.n">
+                        <span class="pr-3 font-semibold text-slate-300">R{{ row.n }}</span>
+                        <span class="text-center" :class="row.sideOut.color">{{ row.sideOut.text }}</span>
+                        <span class="text-center" :class="row.breakPts.color">{{ row.breakPts.text }}</span>
                     </template>
                 </div>
             </article>
@@ -250,6 +308,32 @@ const isRival = (s: any): boolean => String(s?.player?.id ?? "") === "0";
 const rivalServing = (s: any): boolean => String(s?.server?.id ?? "") === "0";
 
 const KILL_IDS = ["9", "10", "11"];
+const ATTACK_IDS = ["6", "9", "10", "11", "16", "17"];
+const ATTACK_ERR_IDS = ["16", "17"];
+const SERVE_ERR_IDS = ["15", "32"];
+// Nota de recepción: id de acción → nota 0-3 (3 = perfecta).
+const RECEPTION_GRADES: Record<string, number> = { "4": 3, "3": 2, "2": 1, "1": 0, "22": 0 };
+
+// Errores no forzados: puntos del rival regalados sin oposición (error de
+// saque, ataque fallado sin bloqueo, colocación o free). Con la captura en
+// cuadrícula todos los puntos rivales acaban registrados como acción propia,
+// así que el "regalados" bruto rondaba el 100% y no discriminaba; esto sí.
+const isUnforced = (s: any): boolean =>
+    s.to === 2 &&
+    !isRival(s) &&
+    (SERVE_ERR_IDS.includes(aid(s)) ||
+        (ATTACK_ERR_IDS.includes(aid(s)) && s.detail !== "Blocked") ||
+        aid(s) === "24" ||
+        aid(s) === "25");
+
+// Colores compartidos del informe: % de remate y cuota de errores no forzados.
+const killColor = (kills: number, attempts: number): string => {
+    if (!attempts) return "text-slate-500";
+    const p = kills / attempts;
+    return p >= 0.4 ? "text-volt-400" : p >= 0.25 ? "text-yellow-400" : "text-red-400";
+};
+const unforcedColor = (share: number): string =>
+    share >= 0.3 ? "text-red-400" : share >= 0.2 ? "text-yellow-400" : "text-volt-400";
 // Nombres de acciones y áreas en i18n (stats.actions.a<id> / stats.areas.*),
 // resueltos en el idioma activo. Los ids de acción siguen siendo Strings.
 const actionLabel = (s: any): string => {
@@ -413,6 +497,126 @@ const topScorers = computed(() => {
     }));
 });
 
+// ------------------------------------------------------------------ informe: ataque por fase y por recepción
+// K1 (side-out): ataques propios con el rival al saque; K2 (break/transición): el resto.
+const attackPhases = computed(() => {
+    const mk = (label: string) => ({ label, attempts: 0, kills: 0, errors: 0, blocked: 0 });
+    const k1 = mk(t("stats.attackK1"));
+    const k2 = mk(t("stats.attackK2"));
+    for (const s of gameStats.value) {
+        if (isRival(s) || !ATTACK_IDS.includes(aid(s))) continue;
+        const ph = rivalServing(s) ? k1 : k2;
+        ph.attempts++;
+        if (KILL_IDS.includes(aid(s))) ph.kills++;
+        else if (s.detail === "Blocked") ph.blocked++;
+        else if (ATTACK_ERR_IDS.includes(aid(s))) ph.errors++;
+    }
+    return [k1, k2].map((ph) => ({
+        ...ph,
+        killPct: pct(ph.kills, ph.attempts),
+        eff: ph.attempts ? Math.round(((ph.kills - ph.errors - ph.blocked) / ph.attempts) * 100) : 0,
+        color: killColor(ph.kills, ph.attempts),
+    }));
+});
+
+// Ataque según la nota de la recepción previa: se recorre el ámbito en orden,
+// reiniciando entre sets y al cerrarse cada punto (mismo criterio que la app).
+const attackByReception = computed(() => {
+    const buckets = new Map<number, { attempts: number; kills: number; errors: number; blocked: number }>();
+    let lastGrade: number | null = null;
+    let lastSetN: number | null = null;
+    for (const s of gameStats.value) {
+        const n = Number(s.set?.number ?? 0);
+        if (n !== lastSetN) {
+            lastSetN = n;
+            lastGrade = null;
+        }
+        const id = aid(s);
+        if (!isRival(s) && id in RECEPTION_GRADES) {
+            lastGrade = RECEPTION_GRADES[id];
+        } else if (!isRival(s) && ATTACK_IDS.includes(id) && lastGrade !== null) {
+            const b = buckets.get(lastGrade) ?? { attempts: 0, kills: 0, errors: 0, blocked: 0 };
+            b.attempts++;
+            if (KILL_IDS.includes(id)) b.kills++;
+            else if (s.detail === "Blocked") b.blocked++;
+            else if (ATTACK_ERR_IDS.includes(id)) b.errors++;
+            buckets.set(lastGrade, b);
+        }
+        if (s.to !== 0) lastGrade = null;
+    }
+    return [3, 2, 1, 0]
+        .filter((g) => (buckets.get(g)?.attempts ?? 0) > 0)
+        .map((g) => {
+            const b = buckets.get(g)!;
+            return {
+                grade: g,
+                label: t(`stats.recGrade${g}`),
+                kills: b.kills,
+                attempts: b.attempts,
+                killPct: pct(b.kills, b.attempts),
+                eff: Math.round(((b.kills - b.errors - b.blocked) / b.attempts) * 100),
+                color: killColor(b.kills, b.attempts),
+            };
+        });
+});
+
+// ------------------------------------------------------------------ informe: rotaciones
+// Side-out y break por rotación (rotationCount). Si todas las jugadas caen en
+// la misma rotación (o la app no la envió), la tarjeta no aporta nada y se oculta.
+const rotationRows = computed(() => {
+    const map = new Map<number, { soWon: number; soTotal: number; brWon: number; brTotal: number }>();
+    for (const s of pointEnders.value) {
+        const r = s.rotationCount;
+        if (typeof r !== "number") continue;
+        const e = map.get(r) ?? { soWon: 0, soTotal: 0, brWon: 0, brTotal: 0 };
+        if (rivalServing(s)) {
+            e.soTotal++;
+            if (s.to === 1) e.soWon++;
+        } else {
+            e.brTotal++;
+            if (s.to === 1) e.brWon++;
+        }
+        map.set(r, e);
+    }
+    if (map.size <= 1) return [];
+    const cell = (won: number, total: number) =>
+        total > 0
+            ? {
+                  text: `${won}/${total} · ${Math.round((won / total) * 100)}%`,
+                  color: won / total >= 0.5 ? "text-volt-400" : won / total >= 0.35 ? "text-yellow-400" : "text-red-400",
+              }
+            : { text: "—", color: "text-slate-500" };
+    return [...map.entries()]
+        .sort((a, b) => a[0] - b[0])
+        .map(([n, e]) => ({ n, sideOut: cell(e.soWon, e.soTotal), breakPts: cell(e.brWon, e.brTotal) }));
+});
+
+// ------------------------------------------------------------------ informe: conexiones colocadora → atacante
+const setterConnections = computed(() => {
+    const map = new Map<string, { key: string; setter: string; attacker: string; attempts: number; kills: number }>();
+    for (const s of gameStats.value) {
+        if (isRival(s) || !ATTACK_IDS.includes(aid(s)) || !s.setter) continue;
+        const setterId = String(s.setter?.id ?? "");
+        if (setterId === "0" || setterId === String(s.player?.id ?? "")) continue;
+        const key = `${setterId}→${String(s.player?.id ?? "")}`;
+        const e = map.get(key) ?? {
+            key,
+            setter: s.setter?.name ?? "",
+            attacker: s.player?.name ?? "",
+            attempts: 0,
+            kills: 0,
+        };
+        e.attempts++;
+        if (KILL_IDS.includes(aid(s))) e.kills++;
+        map.set(key, e);
+    }
+    return [...map.values()]
+        .filter((e) => e.attempts >= 3)
+        .sort((a, b) => b.attempts - a.attempts)
+        .slice(0, 6)
+        .map((e) => ({ ...e, killPct: pct(e.kills, e.attempts), color: killColor(e.kills, e.attempts) }));
+});
+
 // ------------------------------------------------------------------ informe: set a set y claves
 const setsComparison = computed(() => {
     const rows = [];
@@ -424,13 +628,17 @@ const setsComparison = computed(() => {
         const sb = scoreboard.value.find((x) => x.number === n);
         const rec = pts.filter((s) => rivalServing(s));
         const srv = pts.filter((s) => !rivalServing(s));
+        const theirPts = pts.filter((s) => s.to === 2);
+        const unforced = theirPts.filter(isUnforced).length;
+        const share = theirPts.length ? unforced / theirPts.length : 0;
         rows.push({
             n,
             result: sb ? `${sb.score_us}-${sb.score_them}` : "",
             won: (sb?.score_us ?? 0) > (sb?.score_them ?? 0),
             sideOut: pct(rec.filter((s) => s.to === 1).length, rec.length),
             breakPts: pct(srv.filter((s) => s.to === 1).length, srv.length),
-            gifted: pts.filter((s) => s.to === 2 && !isRival(s)).length,
+            unforced: theirPts.length ? `${unforced} · ${Math.round(share * 100)}%` : "—",
+            unforcedColor: theirPts.length ? unforcedColor(share) : "text-slate-500",
         });
     }
     return rows;
@@ -444,10 +652,12 @@ const insights = computed(() => {
     const points = pointEnders.value;
     if (!points.length) return out;
 
+    // Errores no forzados en lugar del antiguo "regalados": con la captura en
+    // cuadrícula, todo punto rival figura como acción propia y el bruto no servía.
     const theirPts = points.filter((s) => s.to === 2);
-    const gifted = theirPts.filter((s) => !isRival(s)).length;
-    if (theirPts.length >= 8 && gifted / theirPts.length >= 0.5) {
-        out.push({ icon: "bi-gift-fill", color: "text-red-400", text: t("stats.insights.gifted", { gifted, total: theirPts.length }) });
+    const unforced = theirPts.filter(isUnforced).length;
+    if (theirPts.length >= 8 && unforced / theirPts.length >= 0.35) {
+        out.push({ icon: "bi-gift-fill", color: "text-red-400", text: t("stats.insights.unforced", { n: unforced, total: theirPts.length }) });
     }
 
     const k3 = points.filter((s) => Number(s.stage) === 3);
