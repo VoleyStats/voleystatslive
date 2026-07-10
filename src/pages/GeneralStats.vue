@@ -25,6 +25,14 @@
                 <div class="text-center rounded-xl bg-brand-500/10 border border-brand-500/20 py-4">
                     <p class="text-5xl md:text-6xl font-display font-bold text-brand-300">{{ score[0] }}</p>
                     <p class="text-xs text-slate-400 mt-2 truncate px-2">{{ usName }}</p>
+                    <RouterLink
+                        v-if="teamId"
+                        :to="{ name: 'team', params: { id: teamId } }"
+                        class="mt-1.5 inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/[0.04] px-2 py-0.5 text-[11px] text-slate-300 hover:text-white hover:border-brand-500/40 transition-colors"
+                    >
+                        <i class="bi bi-people-fill text-brand-300"></i>
+                        {{ $t('stats.viewTeam') }}
+                    </RouterLink>
                 </div>
                 <div class="text-center rounded-xl bg-white/[0.04] border border-white/10 py-4">
                     <p class="text-5xl md:text-6xl font-display font-bold text-slate-300">{{ score[1] }}</p>
@@ -365,6 +373,12 @@ onSnapshot(
 const notFound = computed(() => match.value === null && baseStats.loaded && baseStats.data.length === 0);
 const nSets = computed(() => match.value?.n_sets ?? 5);
 const usName = computed(() => match.value?.team?.name || t("stats.usFallback"));
+// Enlace a la página pública del equipo: la app serializa el equipo completo
+// (Team.toJSON incluye `id`), pero se protege por si docs antiguos no lo traen.
+const teamId = computed(() => {
+    const id = String(match.value?.team?.id ?? "").trim();
+    return id && id !== "0" ? id : "";
+});
 const themName = computed(() => match.value?.opponent || t("stats.themFallback"));
 const currentSet = computed(() => match.value?.current_set ?? 1);
 

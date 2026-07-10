@@ -46,7 +46,11 @@
               @click="setLocale(l)"
             >{{ l }}</button>
           </div>
-          <RouterLink to="/team-code" class="btn-ghost !px-4 !py-2 text-xs sm:text-sm">
+          <RouterLink
+            v-if="showWatchLive"
+            to="/team-code"
+            class="btn-ghost !px-4 !py-2 text-xs sm:text-sm"
+          >
             <i class="bi bi-broadcast text-volt-400"></i>
             <span class="hidden sm:inline">{{ $t('layout.watchLive') }}</span>
           </RouterLink>
@@ -122,6 +126,13 @@ const { locale } = useI18n();
 const isHome = computed(() => route.name === "home");
 const showBack = computed(
   () => !["home", "code"].includes((route.name as string) ?? "")
+);
+
+// El CTA "Ver en vivo" solo aporta cuando el usuario aún no está dentro de un
+// directo: se oculta en las vistas de estadísticas, la página del equipo, el
+// overlay y el propio formulario de código.
+const showWatchLive = computed(
+  () => !["code", "stats", "players", "team", "overlay"].includes((route.name as string) ?? "")
 );
 
 const goBack = () => {
