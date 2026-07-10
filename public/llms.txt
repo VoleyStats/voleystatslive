@@ -1,33 +1,37 @@
 # Voley Stats Live
 
-> Aplicación para registrar y consultar estadísticas de voleibol en tiempo real. Los entrenadores registran cada acción del partido desde la app y cualquier persona puede seguir el marcador y las estadísticas en directo desde la web usando el código del equipo.
+> Web en directo de Voley Stats, la app de iPad para capturar y analizar estadísticas de voleibol. El entrenador anota cada acción del partido desde la app —incluso sin conexión— y cualquier persona puede seguir el marcador y las estadísticas en directo desde esta web usando el código del equipo, gratis y sin registrarse.
 
-Voley Stats Live está pensada para entrenadores, cuerpos técnicos, analistas y jugadores de voleibol que quieren tomar decisiones con datos en lugar de con intuición. Es gratuita para empezar y está disponible en la web y como aplicación móvil (Android e iOS).
+Voley Stats está pensada para entrenadores, cuerpos técnicos, analistas y jugadoras de voleibol que quieren tomar decisiones con datos en lugar de con intuición. La app es exclusiva para iPad y está disponible en el App Store; descargarla y anotar partidos es gratis, con un plan premium para el histórico y la analítica de temporada.
 
 ## Qué hace
 
-- Marcador en vivo: sigue el resultado set a set y la evolución del partido en tiempo real.
-- Estadísticas por jugador: rendimiento individual en cada área del juego.
-- Análisis por áreas: mide la eficiencia en las seis fases del juego — recepción, saque, ataque, bloqueo, defensa y colocación.
-- Curva de registro: visualiza las rachas de puntos y errores para identificar los momentos clave de cada set.
-- Informes en PDF: descarga resúmenes de partido y de temporada por set y por jugador.
-- Acceso por código: comparte un código de equipo y cualquiera consulta las estadísticas online, sin registros complejos.
+- Captura rápida en rejilla: pensada para que una sola persona pueda entrenar y anotar a la vez.
+- Captura sobre el mapa de la pista: trayectorias de ataque y saque (corredores, zonas de saque).
+- Registro flexible: cada toque o solo las acciones que acaban en punto; cambios y tiempos muertos; recepción valorada en 4 niveles y calidad de saque; fases K1/K2.
+- Marcador, rotación y sacador automáticos.
+- Directo en la web: marcador, punto a punto, momentum y estadísticas por jugadora, gratis y sin registro.
+- Informe post-partido: side-out/break, origen de los puntos, rotaciones, ataque por fase y por calidad de pase, conexiones colocadora-atacante, errores no forzados y mapas de ataque.
+- En la app: dashboard de temporada con filtros, claves automáticas del equipo en lenguaje claro, scouting de rivales, resúmenes entre sets, alertas inteligentes durante el partido, fichas pro de jugadoras, comparador de partidos e informes en PDF.
+- Overlay para OBS y página pública del equipo.
 
 ## Cómo funciona
 
-1. El entrenador registra cada acción del partido desde la app (saque, recepción, ataque, bloqueo, defensa y colocación).
-2. Se comparte el código del equipo; con él, cualquiera ve el marcador y las estadísticas en tiempo real desde la web.
-3. Al terminar el partido se genera un informe PDF por set y por jugador.
+1. El entrenador anota cada acción del partido desde la app de iPad (funciona completamente sin conexión, con base de datos local).
+2. Si quiere compartir el directo, se comparte el código del equipo; con él, cualquiera ve el marcador y las estadísticas en tiempo real desde esta web.
+3. Al terminar, la app genera el informe completo del partido; con el plan premium se puede exportar en PDF.
 
 ## Datos clave
 
 - Categoría: aplicación deportiva (voleibol / analítica deportiva).
-- Plataformas: Web, Android, iOS.
-- Idioma: español.
-- Precio: gratuito para empezar.
-- Tiempo real: sí, las estadísticas se sincronizan en directo (requiere conexión a internet).
+- Plataforma: iPad (iPadOS), en el App Store: https://apps.apple.com/us/app/voley-stats/id6737778450
+- Web en directo: gratuita para los espectadores, sin registro.
+- Idiomas: español e inglés.
+- Precio: freemium. Gratis: captura y estadísticas de cada partido en directo. Premium: histórico del equipo y estadísticas de temporada con filtros, exportación en PDF, copia en la nube y completar estadísticas a posteriori.
+- Sin conexión: sí, la captura y las estadísticas funcionan totalmente offline; internet solo hace falta para el directo, el overlay de OBS, la página pública del equipo y la copia en la nube.
 
 ## Enlaces
 
-- Inicio: https://voleystatslive.com/
-- Consultar estadísticas en vivo: https://voleystatslive.com/team-code
+- Inicio: https://voleystats.vercel.app/
+- Consultar estadísticas en vivo: https://voleystats.vercel.app/team-code
+- App en el App Store: https://apps.apple.com/us/app/voley-stats/id6737778450

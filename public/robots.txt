@@ -39,4 +39,4 @@ Allow: /
 User-agent: CCBot
 Allow: /
 
-Sitemap: https://voleystatslive.com/sitemap.xml
+Sitemap: https://voleystats.vercel.app/sitemap.xml

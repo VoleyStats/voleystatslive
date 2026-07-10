@@ -193,7 +193,12 @@
           {{ $t('home.download.text') }}
         </p>
         <div class="mt-8 flex flex-wrap justify-center gap-3">
-          <a href="#" class="btn-primary text-base">
+          <a
+            href="https://apps.apple.com/us/app/voley-stats/id6737778450"
+            target="_blank"
+            rel="noopener"
+            class="btn-primary text-base"
+          >
             <i class="bi bi-apple text-lg"></i>
             {{ $t('home.download.appStore') }}
           </a>

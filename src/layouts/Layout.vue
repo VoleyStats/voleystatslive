@@ -50,7 +50,7 @@
             <i class="bi bi-broadcast text-volt-400"></i>
             <span class="hidden sm:inline">{{ $t('layout.watchLive') }}</span>
           </RouterLink>
-          <a href="#descargar" class="btn-primary !px-4 !py-2 text-xs sm:text-sm">
+          <a href="/#descargar" class="btn-primary !px-4 !py-2 text-xs sm:text-sm">
             {{ $t('layout.downloadApp') }}
           </a>
         </div>
@@ -83,7 +83,7 @@
           <h3 class="text-xs uppercase tracking-widest text-slate-500 mb-3">{{ $t('layout.footer.resources') }}</h3>
           <ul class="space-y-2 text-sm text-slate-400">
             <li><a href="/#faq" class="hover:text-white">{{ $t('layout.footer.faq') }}</a></li>
-            <li><a href="#descargar" class="hover:text-white">{{ $t('layout.footer.download') }}</a></li>
+            <li><a href="/#descargar" class="hover:text-white">{{ $t('layout.footer.download') }}</a></li>
           </ul>
         </div>
         <div>
