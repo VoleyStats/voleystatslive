@@ -93,9 +93,9 @@
         <div>
           <h3 class="text-xs uppercase tracking-widest text-slate-500 mb-3">{{ $t('layout.footer.legal') }}</h3>
           <ul class="space-y-2 text-sm text-slate-400">
-            <li><a href="#" class="hover:text-white">{{ $t('layout.footer.privacy') }}</a></li>
-            <li><a href="#" class="hover:text-white">{{ $t('layout.footer.terms') }}</a></li>
-            <li><a href="#" class="hover:text-white">{{ $t('layout.footer.contact') }}</a></li>
+            <li><RouterLink :to="{ name: 'privacy' }" class="hover:text-white">{{ $t('layout.footer.privacy') }}</RouterLink></li>
+            <li><RouterLink :to="{ name: 'terms' }" class="hover:text-white">{{ $t('layout.footer.terms') }}</RouterLink></li>
+            <li><RouterLink :to="{ name: 'contact' }" class="hover:text-white">{{ $t('layout.footer.contact') }}</RouterLink></li>
           </ul>
         </div>
       </div>

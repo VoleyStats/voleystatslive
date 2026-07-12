@@ -22,6 +22,21 @@ const routes = [
     component: () => import('./pages/TeamCode.vue'),
   },
   {
+    path: '/privacy',
+    name: 'privacy',
+    component: () => import('./pages/Privacy.vue'),
+  },
+  {
+    path: '/terms',
+    name: 'terms',
+    component: () => import('./pages/Terms.vue'),
+  },
+  {
+    path: '/contact',
+    name: 'contact',
+    component: () => import('./pages/Contact.vue'),
+  },
+  {
     path: '/stats/:id',
     name: 'parentStats',
     children: [

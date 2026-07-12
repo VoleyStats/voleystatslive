@@ -102,7 +102,7 @@
     "faq": {
       "eyebrow": "Preguntas frecuentes",
       "title": "¿Tienes dudas?",
-      "subtitle": "Y si no encuentras tu respuesta, escríbenos y te ayudamos.",
+      "subtitle": "Y si no encuentras tu respuesta, escríbenos a voleystats{'@'}gmail.com y te ayudamos.",
       "q1": "¿Qué es Voley Stats Live?",
       "a1": "Es la web en directo de Voley Stats, la app de iPad para capturar y analizar estadísticas de voleibol. Anotas cada acción del partido desde la app y cualquiera puede seguir el marcador y las estadísticas en vivo desde esta web, gratis y sin registrarse.",
       "q2": "¿Cómo consulto las estadísticas de mi equipo online?",
@@ -290,5 +290,238 @@
   "empty": {
     "title": "No hay datos todavía",
     "message": "Cuando empiece el partido, aquí aparecerán las estadísticas en tiempo real."
+  },
+  "legal": {
+    "eyebrow": "Legal"
+  },
+  "privacy": {
+    "docTitle": "Política de privacidad — Voley Stats",
+    "title": "Política de privacidad",
+    "lastUpdated": "Última actualización: 2 de febrero de 2025",
+    "sections": [
+      {
+        "paragraphs": [
+          "Esta Política de Privacidad describe Nuestras políticas y procedimientos sobre la recogida, el uso y la divulgación de Tu información cuando utilizas el Servicio, y Te informa sobre Tus derechos de privacidad y sobre cómo Te protege la ley."
+        ]
+      },
+      {
+        "heading": "Interpretación y definiciones",
+        "paragraphs": [
+          "Interpretación: los términos cuya letra inicial aparece en mayúscula tienen los significados definidos a continuación, aplicables tanto en singular como en plural.",
+          "Definiciones:"
+        ],
+        "list": [
+          "Cuenta: una cuenta única creada para Ti para acceder a nuestro Servicio.",
+          "Afiliado: una entidad que controla, es controlada por o está bajo control común con una parte, donde \"control\" significa la propiedad del 50 % o más de las acciones.",
+          "Aplicación: Voley stats, el programa de software proporcionado por la Compañía.",
+          "Compañía: referida como \"la Compañía\", \"Nosotros\", \"Nos\" o \"Nuestro\", se refiere a Voley stats.",
+          "País: España.",
+          "Dispositivo: cualquier dispositivo que pueda acceder al Servicio, como un ordenador, un teléfono móvil o una tableta digital.",
+          "Datos Personales: cualquier información que se relacione con una persona identificada o identificable.",
+          "Servicio: la Aplicación.",
+          "Proveedor de Servicios: cualquier persona física o jurídica que trate los datos en nombre de la Compañía.",
+          "Datos de Uso: datos recogidos automáticamente, ya sean generados por el uso del Servicio o por la propia infraestructura del Servicio.",
+          "Tú: la persona que accede al Servicio o lo utiliza, o la empresa u otra entidad jurídica en cuyo nombre dicha persona accede al Servicio o lo utiliza."
+        ]
+      },
+      {
+        "heading": "Recogida y uso de tus datos personales",
+        "paragraphs": [
+          "Tipos de datos recogidos:",
+          "Datos Personales — mientras utilizas Nuestro Servicio, podemos pedirte que Nos proporciones cierta información de identificación personal que puede utilizarse para contactar contigo o identificarte, incluyendo: dirección de correo electrónico y Datos de Uso.",
+          "Datos de Uso — se recogen automáticamente y pueden incluir la dirección de Protocolo de Internet de Tu Dispositivo (p. ej., la dirección IP), el tipo de navegador, la versión del navegador, las páginas de nuestro Servicio que visitas, la hora y la fecha de Tu visita, el tiempo dedicado a esas páginas, identificadores únicos de dispositivo y otros datos de diagnóstico. Cuando accedes mediante un dispositivo móvil: tipo de dispositivo, ID único, dirección IP, sistema operativo, tipo de navegador de Internet móvil, identificadores únicos de dispositivo y otros datos de diagnóstico."
+        ]
+      },
+      {
+        "heading": "Uso de tus datos personales",
+        "paragraphs": [
+          "La Compañía puede utilizar los Datos Personales para:"
+        ],
+        "list": [
+          "Proporcionar y mantener nuestro Servicio.",
+          "Gestionar Tu Cuenta.",
+          "Ejecutar un contrato (compra de productos/servicios).",
+          "Contactar contigo (correo electrónico o comunicación electrónica equivalente sobre actualizaciones o comunicaciones informativas).",
+          "Proporcionarte noticias, ofertas especiales e información general sobre bienes y servicios similares, salvo que hayas optado por no recibirlos.",
+          "Gestionar Tus solicitudes.",
+          "Evaluar o llevar a cabo transferencias de negocio.",
+          "Otros fines, como el análisis de datos, las tendencias de uso y la mejora de nuestro Servicio."
+        ]
+      },
+      {
+        "heading": "Compartición",
+        "paragraphs": [
+          "Podemos compartir Tu información personal:"
+        ],
+        "list": [
+          "Con Proveedores de Servicios (para supervisar y analizar el uso).",
+          "En transferencias de negocio.",
+          "Con Afiliados (que deberán respetar esta política).",
+          "Con socios comerciales.",
+          "Con otros usuarios (cuando interactúas en áreas públicas).",
+          "Con Tu consentimiento."
+        ]
+      },
+      {
+        "heading": "Conservación",
+        "paragraphs": [
+          "Solo durante el tiempo necesario para los fines establecidos en esta política; los Datos de Uso, en general, durante periodos más cortos, salvo por motivos de seguridad u obligaciones legales."
+        ]
+      },
+      {
+        "heading": "Transferencia",
+        "paragraphs": [
+          "La información se trata en las oficinas operativas de la Compañía y en otros lugares donde se encuentren las partes implicadas, y puede transferirse a ordenadores situados fuera de Tu jurisdicción; la Compañía tomará las medidas razonables para garantizar que los datos se traten de forma segura."
+        ]
+      },
+      {
+        "heading": "Eliminación de tus datos personales",
+        "paragraphs": [
+          "Tienes derecho a eliminar o a solicitar ayuda para eliminar los Datos Personales que hemos recogido; puedes actualizar, modificar o eliminar Tu información desde los ajustes de Tu Cuenta o contactando con Nosotros. Ten en cuenta que podemos conservar cierta información cuando la ley lo exija."
+        ]
+      },
+      {
+        "heading": "Divulgación",
+        "list": [
+          "Transacciones comerciales (con aviso antes de que los Datos Personales pasen a estar sujetos a una política diferente).",
+          "Fuerzas del orden (si lo exige la ley o ante solicitudes válidas de autoridades públicas).",
+          "Otros requisitos legales (cumplir una obligación legal; proteger los derechos o la propiedad de la Compañía; prevenir o investigar posibles infracciones; proteger la seguridad personal de los usuarios o del público; protegerse frente a responsabilidades legales)."
+        ]
+      },
+      {
+        "heading": "Seguridad",
+        "paragraphs": [
+          "Ningún método de transmisión por Internet ni de almacenamiento electrónico es 100 % seguro; utilizamos medios comercialmente aceptables, pero no podemos garantizar una seguridad absoluta."
+        ]
+      },
+      {
+        "heading": "Privacidad de los menores",
+        "paragraphs": [
+          "Nuestro Servicio no está dirigido a menores de 13 años. No recogemos conscientemente información de identificación personal de menores de 13 años. Si eres padre, madre o tutor y sabes que tu hijo o hija nos ha proporcionado Datos Personales, contacta con Nosotros. Si nos basamos en el consentimiento y tu país exige el consentimiento parental, podemos requerir dicho consentimiento antes del tratamiento."
+        ]
+      },
+      {
+        "heading": "Enlaces a otros sitios web",
+        "paragraphs": [
+          "Nuestro Servicio puede contener enlaces a sitios de terceros no operados por Nosotros; revisa sus políticas; no asumimos ninguna responsabilidad por el contenido o las prácticas de terceros."
+        ]
+      },
+      {
+        "heading": "Cambios",
+        "paragraphs": [
+          "Podemos actualizar esta política; lo notificaremos por correo electrónico y/o mediante un aviso destacado en el Servicio y actualizaremos la fecha de \"Última actualización\"; revísala periódicamente."
+        ]
+      },
+      {
+        "heading": "Contacto",
+        "paragraphs": [
+          "Si tienes alguna pregunta sobre esta Política de Privacidad, puedes contactarnos por correo electrónico en voleystats{'@'}gmail.com."
+        ]
+      }
+    ]
+  },
+  "terms": {
+    "docTitle": "Condiciones de uso — Voley Stats",
+    "title": "Condiciones de uso",
+    "lastUpdated": "Última actualización: 12 de julio de 2026",
+    "note": "Este documento es una plantilla informativa y no constituye asesoramiento jurídico.",
+    "sections": [
+      {
+        "heading": "1. Quiénes somos y objeto",
+        "paragraphs": [
+          "Voley Stats es una app para iPad, disponible en el App Store, para capturar y analizar estadísticas de voleibol. Esta web (voleystats.vercel.app) permite seguir partidos en directo y consultar informes y estadísticas compartidas desde la app. Estas condiciones regulan el uso de ambas."
+        ]
+      },
+      {
+        "heading": "2. Aceptación",
+        "paragraphs": [
+          "Al usar la app o la web aceptas estas condiciones de uso y nuestra política de privacidad. Si no estás de acuerdo con ellas, no utilices el servicio."
+        ]
+      },
+      {
+        "heading": "3. La app",
+        "paragraphs": [
+          "Te concedemos una licencia de uso personal, no exclusiva e intransferible para utilizar la app. Las descargas y compras —incluidas las funciones premium, como el histórico con filtros, la exportación en PDF, la copia de seguridad en la nube y completar estadísticas a posteriori— se gestionan a través del App Store de Apple y se rigen por sus condiciones. A la app le aplica el EULA estándar de Apple."
+        ]
+      },
+      {
+        "heading": "4. La web",
+        "paragraphs": [
+          "El acceso a la web es gratuito y no requiere registro. Los enlaces de partido y de equipo son públicos: cualquier persona que tenga el enlace puede ver su contenido."
+        ]
+      },
+      {
+        "heading": "5. Contenido y responsabilidad del entrenador",
+        "paragraphs": [
+          "Las estadísticas capturadas pertenecen a quien las captura. Al activar el directo o compartir un enlace, el usuario autoriza su publicación en la web y declara contar con los consentimientos necesarios de las personas cuyos datos aparecen (nombres y dorsales de jugadoras, incluidas menores, bajo responsabilidad del club o del entrenador). Puedes desactivar el directo desde la app en cualquier momento."
+        ]
+      },
+      {
+        "heading": "6. Uso aceptable",
+        "paragraphs": [
+          "Está prohibido usar el servicio con fines ilícitos, realizar accesos automatizados masivos (scraping), interferir con el funcionamiento del servicio o intentar acceder a datos de otros equipos sin disponer de su enlace."
+        ]
+      },
+      {
+        "heading": "7. Propiedad intelectual",
+        "paragraphs": [
+          "El software, la marca, el diseño y los informes generados son propiedad de Voley Stats o de sus licenciantes. Las estadísticas son del usuario que las captura."
+        ]
+      },
+      {
+        "heading": "8. Disponibilidad y garantías",
+        "paragraphs": [
+          "El servicio se presta \"tal cual\". Las estadísticas tienen fines informativos y deportivos: no garantizamos su exactitud ni la disponibilidad continua del servicio, y no somos responsables de las decisiones tomadas con base en ellas."
+        ]
+      },
+      {
+        "heading": "9. Limitación de responsabilidad",
+        "paragraphs": [
+          "En la medida permitida por la ley, no seremos responsables de daños indirectos derivados del uso del servicio. Nada en estas condiciones limita los derechos que la legislación de consumo te otorgue."
+        ]
+      },
+      {
+        "heading": "10. Cambios",
+        "paragraphs": [
+          "Podremos actualizar estas condiciones publicando la nueva versión en esta página con su fecha de actualización."
+        ]
+      },
+      {
+        "heading": "11. Ley aplicable y jurisdicción",
+        "paragraphs": [
+          "Estas condiciones se rigen por la legislación española. Cuando actúes como consumidor, serán competentes los tribunales de tu domicilio."
+        ]
+      },
+      {
+        "heading": "12. Contacto",
+        "paragraphs": [
+          "Para cualquier cuestión sobre estas condiciones puedes escribirnos a voleystats{'@'}gmail.com."
+        ]
+      }
+    ]
+  },
+  "contact": {
+    "docTitle": "Contacto — Voley Stats",
+    "eyebrow": "Contacto",
+    "title": "Hablemos",
+    "text": "¿Dudas, sugerencias o problemas con la app o la web? Escríbenos y te responderemos lo antes posible.",
+    "cta": "Enviar un email",
+    "subject": "Contacto Voley Stats",
+    "emailIntro": "O escríbenos directamente a:",
+    "cards": {
+      "support": {
+        "title": "Soporte de la app",
+        "text": "¿Algo no funciona o no encuentras una función? Cuéntanos qué pasa y desde qué dispositivo usas la app."
+      },
+      "feedback": {
+        "title": "Feedback",
+        "text": "Ideas, sugerencias y peticiones de nuevas estadísticas: nos encanta escucharlas y nos ayudan a priorizar."
+      },
+      "privacy": {
+        "title": "Privacidad y datos",
+        "text": "Consultas sobre tus datos, los de tu equipo o cómo desactivar un directo.",
+        "link": "Leer la política de privacidad"
+      }
+    }
   }
 }
