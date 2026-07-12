@@ -70,7 +70,7 @@
     <footer class="border-t border-white/5 mt-auto">
       <div class="container-x py-12 grid gap-10 md:grid-cols-[1.5fr_1fr_1fr_1fr]">
         <div>
-          <Logo :size="30" wordmark-class="text-xl" grad-id="footer-grad" />
+          <Logo :size="30" wordmark-class="text-xl" />
           <p class="mt-4 text-sm text-slate-400 max-w-xs leading-relaxed">
             {{ $t('layout.footer.tagline') }}
           </p>
