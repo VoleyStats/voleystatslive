@@ -1,7 +1,7 @@
 {
   "layout": {
     "back": "Volver",
-    "homeLink": "Voley Stats Live - inicio",
+    "homeLink": "Voley Stats - inicio",
     "sections": "Secciones",
     "langSelector": "Idioma",
     "nav": {
@@ -25,7 +25,7 @@
       "privacy": "Privacidad",
       "terms": "Términos",
       "contact": "Contacto",
-      "rights": "© {year} Voley Stats Live. Todos los derechos reservados.",
+      "rights": "© {year} Voley Stats. Todos los derechos reservados.",
       "madeFor": "Hecho para equipos que compiten"
     }
   },
@@ -34,7 +34,7 @@
       "eyebrow": "Voleibol · Analítica en tiempo real",
       "titleStart": "Las estadísticas de tu equipo,",
       "titleHighlight": "en directo",
-      "subtitle": "Anota el partido desde el iPad mientras entrenas —incluso sin conexión—, comparte el marcador y las estadísticas en directo y analiza cada set a fondo al terminar. Adiós a las planillas de papel.",
+      "subtitle": "Anota el partido desde el iPad mientras diriges —incluso sin conexión—, comparte el marcador y las estadísticas en directo y analiza cada set a fondo al terminar. Adiós a las planillas de papel.",
       "download": "Descargar app",
       "watchLive": "Ver estadísticas en vivo",
       "stat1Value": "6",
@@ -112,7 +112,7 @@
       "q4": "¿Puedo descargar un informe del partido?",
       "a4": "Sí. Al terminar el partido la app genera un informe completo: side-out y break, origen de los puntos, rotaciones, ataque por fase y por calidad de pase, conexiones colocadora-atacante, errores no forzados y mapas de ataque. Con el plan premium puedes exportarlo en PDF para compartirlo con el equipo.",
       "q5": "¿Necesito conexión a internet?",
-      "a5": "No para anotar: la app funciona completamente sin conexión, con base de datos local, así que puedes capturar y consultar estadísticas en cualquier pabellón. Solo necesitas internet para compartir el directo en esta web, usar el overlay para OBS, la página pública del equipo o la copia de seguridad en la nube.",
+      "a5": "No para anotar: la app funciona completamente sin conexión, así que puedes capturar y consultar estadísticas en cualquier pabellón. Solo necesitas internet para compartir el directo en esta web, usar el overlay para OBS, la página pública del equipo o la copia de seguridad en la nube.",
       "q6": "¿Cuánto cuesta?",
       "a6": "Descargar la app y anotar tus partidos es gratis, incluidas las estadísticas en directo de cada partido. El plan premium añade el histórico del equipo y las estadísticas de temporada con filtros, la exportación en PDF, la copia de seguridad en la nube y la posibilidad de completar a posteriori estadísticas que no anotaste en vivo. Ver los directos desde la web es siempre gratis."
     }
