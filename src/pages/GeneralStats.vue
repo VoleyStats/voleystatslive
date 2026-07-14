@@ -316,7 +316,7 @@ const isRival = (s: any): boolean => String(s?.player?.id ?? "") === "0";
 const rivalServing = (s: any): boolean => String(s?.server?.id ?? "") === "0";
 
 const KILL_IDS = ["9", "10", "11"];
-const ATTACK_IDS = ["6", "9", "10", "11", "16", "17"];
+const ATTACK_IDS = ["6", "9", "10", "11", "16", "17", "47"];
 const ATTACK_ERR_IDS = ["16", "17"];
 const SERVE_ERR_IDS = ["15", "32"];
 // Nota de recepción: id de acción → nota 0-3 (3 = perfecta).
@@ -686,7 +686,7 @@ const insights = computed(() => {
         out.push({ icon: "bi-bullseye", color: "text-yellow-400", text: t("stats.insights.serveErrors", { errors: serveErr, total: serves.length }) });
     }
 
-    const ourAttacks = game.filter((s) => !isRival(s) && ["6", "9", "10", "11", "16", "17"].includes(aid(s)));
+    const ourAttacks = game.filter((s) => !isRival(s) && ATTACK_IDS.includes(aid(s)));
     if (ourAttacks.length >= 12) {
         const byPlayer = new Map<string, number>();
         for (const s of ourAttacks) byPlayer.set(s.player?.name ?? "", (byPlayer.get(s.player?.name ?? "") ?? 0) + 1);
@@ -701,7 +701,7 @@ const insights = computed(() => {
         out.push({ icon: "bi-hand-index-thumb-fill", color: "text-red-400", text: t("stats.insights.blockouts", { n: blockouts }) });
     }
 
-    const rivalDir = game.filter((s) => isRival(s) && ["6", "9", "10", "11", "16", "17"].includes(aid(s)) && String(s.direction ?? "").includes("#"));
+    const rivalDir = game.filter((s) => isRival(s) && ATTACK_IDS.includes(aid(s)) && String(s.direction ?? "").includes("#"));
     if (rivalDir.length >= 6) {
         const corridors = new Map<string, number>();
         for (const s of rivalDir) {

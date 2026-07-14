@@ -90,7 +90,7 @@ const rowH = (netY - M) / 3;
 const third = rowH; // línea de 3 metros ≈ primera fila
 
 const aid = (s: any): string => String(s?.action?.id ?? "");
-const ATTACK_IDS = ["6", "9", "10", "11", "16", "17"];
+const ATTACK_IDS = ["6", "9", "10", "11", "16", "17", "47"];
 
 // Distribución de zonas idéntica a la app (DirectionsCourt):
 // mitad propia (abajo, de la red hacia fuera) y mitad rival (arriba).

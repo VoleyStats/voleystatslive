@@ -147,7 +147,7 @@ const { t } = useI18n();
 // Contrato con la app: ids de acción como String.
 const aid = (s: any): string => String(s?.action?.id ?? "");
 const ADMIN_IDS = ["0", "98", "99"];
-const ATTACK_IDS = ["6", "9", "10", "11", "16", "17"];
+const ATTACK_IDS = ["6", "9", "10", "11", "16", "17", "47"];
 const KILL_IDS = ["9", "10", "11"];
 const ATTACK_ERR = ["16", "17"];
 const RECEPTION_IDS = ["1", "2", "3", "4", "22"];
