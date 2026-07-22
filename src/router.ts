@@ -45,13 +45,19 @@ const routes = [
         name: 'stats',
         component: () => import('./pages/StatsView.vue'),
       },
+      // Antes página aparte ('players' → PlayerStats.vue); ahora es la
+      // pestaña "Por jugadora" de GeneralStats.vue. Redirige preservando el
+      // enlace antiguo, preseleccionando esa pestaña vía query.
       {
         path: 'players',
-        name: 'players',
-        component: () => import('./pages/PlayerStats.vue'),
+        redirect: (to: any) => ({ name: 'stats', params: to.params, query: { tab: 'players' } }),
       },
-      // Ruta antigua de la pestaña de recepción, absorbida por 'players'.
-      { path: 'areas', redirect: { name: 'players' } },
+      // Ruta aún más antigua de la pestaña de recepción, absorbida también
+      // por la pestaña "Por jugadora".
+      {
+        path: 'areas',
+        redirect: (to: any) => ({ name: 'stats', params: to.params, query: { tab: 'players' } }),
+      },
     ],
   },
   {

@@ -1,5 +1,5 @@
 // Fórmulas y constantes de estadísticas compartidas entre el visor de un
-// partido (GeneralStats.vue, PlayerStats.vue) y las estadísticas agregadas
+// partido (GeneralStats.vue, components/stats/PlayersSection.vue) y las estadísticas agregadas
 // de equipo (composables/useTeamStats.ts, TeamMatches.vue). Todo lo que hay
 // aquí opera sobre el shape crudo de un doc de `live_matches/{code}/stats`
 // (ver contrato en ../../CLAUDE.md y VoleyStatsApp/CLAUDE.md) — no dupliques
@@ -19,7 +19,7 @@ export const SERVE_ERR_IDS = ["15", "32"];
 export const RECEPTION_IDS = ["1", "2", "3", "4", "22"];
 // Nota de recepción: id de acción -> nota 0-3 (3 = perfecta).
 export const RECEPTION_GRADES: Record<string, number> = { "4": 3, "3": 2, "2": 1, "1": 0, "22": 0 };
-// Nota de saque 0-3 (misma fórmula que la app iPad). OJO: `PlayerStats.vue`
+// Nota de saque 0-3 (misma fórmula que la app iPad). OJO: `PlayersSection.vue`
 // tiene los pesos de 39/41 permutados (bug conocido, no se corrige aquí para
 // no cambiar una cifra ya publicada) — código nuevo debe usar estos pesos.
 export const SERVE_WEIGHTS: Record<string, number> = { "39": 0.5, "40": 1, "41": 2, "8": 3 };

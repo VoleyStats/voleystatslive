@@ -34,7 +34,7 @@
                  propio skeleton, a la altura del contenido real). -->
             <div class="w-full flex items-center gap-1.5 overflow-x-auto pb-1">
                 <button
-                    v-for="tab in TABS"
+                    v-for="tab in visibleTabs"
                     :key="tab.key"
                     class="shrink-0 rounded-full px-3 py-1.5 text-xs border transition-colors"
                     :class="activeTab === tab.key
@@ -57,6 +57,9 @@
                 <SkeletonCard :lines="3" />
                 <SkeletonChart :height="240" />
                 <SkeletonChart :height="240" />
+            </template>
+            <template v-else-if="activeTab === 'players'">
+                <SkeletonCard v-for="n in 4" :key="n" :lines="3" />
             </template>
             <template v-else-if="activeTab === 'tables'">
                 <SkeletonCard :lines="6" />
@@ -148,7 +151,7 @@
             <!-- ============ PESTAÑAS (espejo de la app) ============ -->
             <div class="w-full flex items-center gap-1.5 overflow-x-auto pb-1">
                 <button
-                    v-for="tab in TABS"
+                    v-for="tab in visibleTabs"
                     :key="tab.key"
                     class="shrink-0 rounded-full px-3 py-1.5 text-xs border transition-colors"
                     :class="activeTab === tab.key
@@ -183,20 +186,6 @@
                         {{ $t('stats.streak', { team: streak.ours ? usName : themName }) }}
                     </p>
                 </article>
-
-                <RouterLink
-                    :to="{ name: 'players', params: { id: props.id } }"
-                    class="card w-full p-4 flex items-center gap-3 hover:border-brand-500/40 transition-colors"
-                >
-                    <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-500/15 text-brand-300">
-                        <i class="bi bi-people-fill"></i>
-                    </span>
-                    <span class="flex-1">
-                        <span class="block font-semibold">{{ $t('stats.playersLinkTitle') }}</span>
-                        <span class="block text-xs text-slate-400">{{ $t('stats.playersLinkSubtitle') }}</span>
-                    </span>
-                    <i class="bi bi-chevron-right text-slate-500"></i>
-                </RouterLink>
 
                 <!-- Claves del partido -->
                 <article v-if="insights.length" class="card w-full p-4">
@@ -273,17 +262,28 @@
                 />
             </template>
 
-            <!-- ============ 3. TABLAS ============ -->
+            <!-- ============ 3. POR JUGADORA ============ -->
+            <template v-else-if="activeTab === 'players'">
+                <PlayersSection
+                    :stats="gameStats"
+                    :n-sets="nSets"
+                    :set="set"
+                    :derived-kills="derived.kills"
+                    :derived-aces="derived.aces"
+                />
+            </template>
+
+            <!-- ============ 4. TABLAS ============ -->
             <template v-else-if="activeTab === 'tables'">
                 <SkillTablesSection :stats="gameStats" :all-stats="setStats" />
             </template>
 
-            <!-- ============ 4. DIRECCIONES ============ -->
+            <!-- ============ 5. DIRECCIONES ============ -->
             <template v-else-if="activeTab === 'directions'">
                 <DirectionsSection :stats="gameStats" />
             </template>
 
-            <!-- ============ 5. PUNTO A PUNTO ============ -->
+            <!-- ============ 6. PUNTO A PUNTO ============ -->
             <template v-else-if="activeTab === 'pointByPoint'">
                 <article class="card w-full p-4">
                     <p class="text-sm font-semibold mb-3">{{ $t('stats.pointByPoint') }}</p>
@@ -313,8 +313,8 @@
 </template>
 
 <script setup lang="ts">
-import { computed, reactive, ref } from "vue";
-import { RouterLink } from "vue-router";
+import { computed, reactive, ref, watch } from "vue";
+import { useRoute } from "vue-router";
 import { useI18n } from "vue-i18n";
 import { useDocument } from "vuefire";
 // Registro local (no global en main.ts): solo esta página paga por ApexCharts.
@@ -326,6 +326,7 @@ import EmptyState from "../components/EmptyState.vue";
 import SkeletonCard from "../components/SkeletonCard.vue";
 import SkeletonChart from "../components/SkeletonChart.vue";
 import Rotations360Section from "../components/stats/Rotations360Section.vue";
+import PlayersSection from "../components/stats/PlayersSection.vue";
 import SkillTablesSection from "../components/stats/SkillTablesSection.vue";
 import DirectionsSection from "../components/stats/DirectionsSection.vue";
 import { collection, doc, onSnapshot, orderBy, query } from "firebase/firestore";
@@ -349,17 +350,34 @@ const props = defineProps({
     id: String,
 });
 
-// Pestañas de la página, espejo de la app: General / Rotaciones / Tablas /
-// Direcciones / Punto a punto. El selector de set (arriba) es global a todas.
+const route = useRoute();
+
+// Pestañas de la página, espejo de la app: General / Rotaciones / Por
+// jugadora / Tablas / Direcciones / Punto a punto. El selector de set
+// (arriba) es global a todas.
 const TABS = [
     { key: "general", labelKey: "stats.tabGeneral" },
     { key: "rotations", labelKey: "stats.tabRotations" },
+    { key: "players", labelKey: "stats.tabPlayers" },
     { key: "tables", labelKey: "stats.tabTables" },
     { key: "directions", labelKey: "stats.tabDirections" },
     { key: "pointByPoint", labelKey: "stats.pointByPoint" },
 ] as const;
 type TabKey = (typeof TABS)[number]["key"];
-const activeTab = ref<TabKey>("general");
+const isValidTab = (k: unknown): k is TabKey => typeof k === "string" && TABS.some((t) => t.key === k);
+
+// Mientras el partido está en directo solo tienen sentido General y Punto a
+// punto (rachas/momentum en vivo); el resto de pestañas (informe post-set)
+// se ocultan hasta que el partido termina.
+const LIVE_VISIBLE_KEYS: TabKey[] = ["general", "pointByPoint"];
+const visibleTabs = computed(() => (matchOver.value ? TABS : TABS.filter((tab) => LIVE_VISIBLE_KEYS.includes(tab.key))));
+
+// Tab preseleccionado por query (enlaces antiguos a /stats/:id/players o
+// /stats/:id/areas, ver router.ts) — se respeta si es válido, si no cae al
+// default resuelto más abajo (junto a `matchOver`, del que depende).
+const requestedTab = route.query.tab;
+const activeTab = ref<TabKey>(isValidTab(requestedTab) ? requestedTab : "general");
+let defaultTabResolved = isValidTab(requestedTab);
 
 // Colores compartidos del informe: cuota de errores no forzados.
 const unforcedColor = (share: number): string =>
@@ -440,6 +458,27 @@ const setsWon = computed(() => {
 // de versiones antiguas de la app que nunca actualizan `live`: último set
 // cerrado con mayoría de sets alcanzada.
 const matchOver = computed(() => isMatchFinished(match.value));
+
+// Tab activo por defecto/gating de directo: General si el partido ya estaba
+// terminado al abrir la página, Punto a punto si sigue en directo — se
+// resuelve en cuanto se conoce el estado real del partido (a la vez que se
+// revela el contenido, con `baseStats.loaded`). Además, mientras el partido
+// sigue en directo, si el tab activo (preseleccionado por query o resuelto
+// aquí) queda oculto por el gating de `visibleTabs`, cae a Punto a punto. Al
+// terminar el partido (reactivo, con la página abierta) reaparecen todas las
+// pestañas sin forzar un salto del tab activo.
+watch(
+    () => [baseStats.loaded, matchOver.value] as const,
+    ([loaded, isOver]) => {
+        if (!loaded) return;
+        if (!defaultTabResolved) {
+            defaultTabResolved = true;
+            if (!isValidTab(requestedTab)) activeTab.value = isOver ? "general" : "pointByPoint";
+        }
+        if (!isOver && !LIVE_VISIBLE_KEYS.includes(activeTab.value)) activeTab.value = "pointByPoint";
+    },
+    { immediate: true }
+);
 
 // ------------------------------------------------------------------ racha y fases
 const streak = computed(() => {

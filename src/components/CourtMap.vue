@@ -75,7 +75,7 @@ import { useI18n } from "vue-i18n";
 // arriba, igual que registra la app, así el mismo render sirve para ambos.
 
 // `actionIds` acota la familia de acciones a agregar (por defecto ataque,
-// como hasta ahora en GeneralStats/PlayerStats). Las estadísticas de equipo
+// como hasta ahora en GeneralStats/PlayersSection). Las estadísticas de equipo
 // (TeamMatches.vue) pasan la familia de saque reutilizando el mismo render:
 // el saque también codifica `direction` como "S5/S6/S1#<zona-caída>" (ver
 // `Capture.swift`), que `fromPoint`/`toPoint` ya interpretan sin cambios.
