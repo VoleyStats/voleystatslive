@@ -1,4 +1,4 @@
-import { computed, reactive, ref, watchEffect } from "vue";
+import { computed, markRaw, reactive, ref, shallowRef, watchEffect } from "vue";
 import { collection, doc, getDoc, getDocs, orderBy, query } from "firebase/firestore";
 import { useDocument } from "vuefire";
 import { db } from "../firebase";
@@ -110,6 +110,16 @@ export interface TeamMatchData {
     stats: StatDoc[];
 }
 
+// `markRaw` sobre el doc de partido y cada doc de stat: son árboles de datos
+// grandes (cientos/miles de stats por equipo) que solo se leen para derivar
+// agregados con `Map`/`Set` de identidad de objeto (`deriveCredits`, tablas
+// por destreza…) — no necesitan (ni deben) pasar por el proxy reactivo de
+// Vue. Evita el coste de proxificación profunda y garantiza que la identidad
+// de objeto se conserva intacta desde la carga hasta el consumo.
+function rawStats(stats: StatDoc[]): StatDoc[] {
+    return stats.map((s) => markRaw(s));
+}
+
 async function loadMatch(entry: TeamMatchIndexEntry): Promise<TeamMatchData> {
     const code = entry.code;
     const cached = readCache(code);
@@ -121,8 +131,8 @@ async function loadMatch(entry: TeamMatchIndexEntry): Promise<TeamMatchData> {
             season: entry.season ?? null,
             finished: true,
             found: true,
-            match: cached.match,
-            stats: cached.stats,
+            match: cached.match ? markRaw(cached.match) : cached.match,
+            stats: rawStats(cached.stats),
         };
     }
 
@@ -141,8 +151,8 @@ async function loadMatch(entry: TeamMatchIndexEntry): Promise<TeamMatchData> {
     }
     const rawMatch = matchSnap.data() as StatDoc;
     const statsSnap = await getDocs(query(collection(db, "live_matches", code, "stats"), orderBy("order")));
-    const stats = statsSnap.docs.map((d) => d.data());
-    const trimmed = trimMatch(rawMatch);
+    const stats = rawStats(statsSnap.docs.map((d) => d.data()));
+    const trimmed = markRaw(trimMatch(rawMatch));
     const finished = isMatchFinished(rawMatch);
     if (finished) writeCache(code, { match: trimmed, stats });
 
@@ -158,11 +168,31 @@ async function loadMatch(entry: TeamMatchIndexEntry): Promise<TeamMatchData> {
     };
 }
 
+// Cuánto se espacian, como mínimo, los commits del agregado `matches`
+// durante una carga progresiva (varios partidos resolviéndose en paralelo).
+// Con `CONCURRENCY` partidos en vuelo, sin este throttle cada partido que
+// llega dispara su propio commit -> invalida todos los computeds derivados
+// (KPIs, radar, rotaciones, tablas…) y todas las gráficas ApexCharts se
+// vuelven a montar/recalcular una vez por partido (O(n²) para n partidos).
+const COMMIT_THROTTLE_MS = 300;
+
 export function useTeamStats(teamId: string) {
     const team = useDocument(doc(db, "teams", teamId));
 
-    const matchesByCode = reactive(new Map<string, TeamMatchData>());
-    const matches = computed(() => [...matchesByCode.values()].sort((a, b) => b.date - a.date));
+    // Map plano (NO reactive()): solo se lee/escribe dentro del watchEffect
+    // de carga de abajo. Si fuera `reactive()`, cada `.get()` durante el
+    // cálculo de `pending` trackearía esa entrada como dependencia, y el
+    // `.set()` posterior (tras el `await`) volvería a disparar el mismo
+    // watchEffect en bucle por cada partido resuelto — puro trabajo
+    // desperdiciado y una fuente más de proxificación profunda de los stats.
+    // La única fuente de reactividad hacia el resto de la app es el
+    // `shallowRef` `matches`, que se reemplaza en bloque (nunca se muta).
+    const matchesByCode = new Map<string, TeamMatchData>();
+    const matches = shallowRef<TeamMatchData[]>([]);
+
+    function commitMatches(): void {
+        matches.value = [...matchesByCode.values()].sort((a, b) => b.date - a.date);
+    }
 
     const progress = reactive({ loading: false, done: 0, total: 0 });
 
@@ -194,6 +224,9 @@ export function useTeamStats(teamId: string) {
         const index = (team.value?.matches ?? []) as StatDoc[];
         if (!index.length) return;
 
+        // Lectura de `matchesByCode` (Map plano, sin tracking): no añade
+        // `matchesByCode` a las dependencias de este effect, así que
+        // resolver un partido no vuelve a disparar este mismo watchEffect.
         const pending = index.filter((e) => {
             const code = String(e?.code ?? "");
             if (!code) return false;
@@ -206,6 +239,12 @@ export function useTeamStats(teamId: string) {
         progress.total = index.length;
         progress.done = index.length - pending.length;
 
+        // El progreso (contador) se refresca por partido resuelto (barato:
+        // 2 números). El commit del agregado `matches` -> el que dispara
+        // toda la recomputación aguas abajo (KPIs, gráficas…) -> se agrupa
+        // como mucho cada COMMIT_THROTTLE_MS, con un commit final
+        // garantizado al terminar el lote completo.
+        let lastCommit = 0;
         await mapWithConcurrency(
             pending,
             CONCURRENCY,
@@ -222,9 +261,15 @@ export function useTeamStats(teamId: string) {
             },
             (done) => {
                 progress.done = index.length - pending.length + done;
+                const now = Date.now();
+                if (now - lastCommit >= COMMIT_THROTTLE_MS) {
+                    lastCommit = now;
+                    commitMatches();
+                }
             }
         );
 
+        commitMatches(); // commit final: asegura que el último lote se ve.
         progress.loading = false;
     });
 

@@ -119,328 +119,364 @@
             />
 
             <template v-else>
-                <!-- Resumen -->
-                <article class="card w-full p-4">
-                    <p class="text-sm font-semibold mb-3">{{ $t('team.summary') }}</p>
-                    <div class="grid grid-cols-3 gap-2">
-                        <div class="text-center rounded-xl bg-white/[0.04] border border-white/10 py-3">
-                            <p class="text-lg font-display font-bold text-brand-300">{{ matchesRecord.won }}-{{ matchesRecord.lost }}</p>
-                            <p class="text-[11px] text-slate-400 mt-1">{{ $t('team.matchesRecord') }}</p>
-                        </div>
-                        <div class="text-center rounded-xl bg-white/[0.04] border border-white/10 py-3">
-                            <p class="text-lg font-display font-bold text-brand-300">{{ setsRecord.won }}-{{ setsRecord.lost }}</p>
-                            <p class="text-[11px] text-slate-400 mt-1">{{ $t('team.setsRecord') }}</p>
-                        </div>
-                        <div class="text-center rounded-xl bg-white/[0.04] border border-white/10 py-3">
-                            <p class="text-lg font-display font-bold" :class="currentStreak.count ? (currentStreak.won ? 'text-volt-400' : 'text-red-400') : 'text-slate-300'">
-                                {{ currentStreak.count || "—" }}
-                            </p>
-                            <p class="text-[11px] text-slate-400 mt-1">{{ currentStreak.won ? $t('team.streakWon') : $t('team.streakLost') }}</p>
-                        </div>
-                    </div>
-                    <div v-if="recentForm.length" class="mt-3 flex items-center gap-1.5">
-                        <span
-                            v-for="(w, i) in recentForm"
-                            :key="i"
-                            class="h-2.5 w-2.5 rounded-full"
-                            :class="w ? 'bg-volt-400' : 'bg-red-400'"
-                        ></span>
-                        <span class="text-[11px] text-slate-500 ml-1">{{ $t('team.recentForm') }}</span>
-                    </div>
-                </article>
+                <!-- Sub-pestañas de "Estadísticas" (mismo orden que la app) -->
+                <div class="w-full flex items-center gap-1.5 overflow-x-auto pb-1">
+                    <button
+                        v-for="tab in STATS_TABS"
+                        :key="tab.key"
+                        class="shrink-0 rounded-full px-3 py-1.5 text-xs border transition-colors"
+                        :class="statsTab === tab.key
+                            ? 'bg-white text-slate-900 border-white font-semibold'
+                            : 'border-white/10 bg-white/[0.04] text-slate-300 hover:border-white/30'"
+                        @click="statsTab = tab.key"
+                    >
+                        {{ $t(tab.labelKey) }}
+                    </button>
+                </div>
 
-                <!-- KPIs de equipo -->
-                <article class="card w-full p-4">
-                    <p class="text-sm font-semibold mb-3">{{ $t('team.kpis') }}</p>
-                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                        <div class="rounded-lg bg-white/[0.04] border border-white/10 py-3 text-center">
-                            <p class="text-lg font-display font-bold text-brand-300">{{ pct(kpiSideOut.won, kpiSideOut.total) }}</p>
-                            <p class="text-[11px] text-slate-400 leading-4 mt-1">{{ $t('stats.sideOut') }}<br />{{ kpiSideOut.won }}/{{ kpiSideOut.total }}</p>
+                <!-- ============ 1. GENERAL ============ -->
+                <template v-if="statsTab === 'general'">
+                    <!-- Resumen -->
+                    <article class="card w-full p-4">
+                        <p class="text-sm font-semibold mb-3">{{ $t('team.summary') }}</p>
+                        <div class="grid grid-cols-3 gap-2">
+                            <div class="text-center rounded-xl bg-white/[0.04] border border-white/10 py-3">
+                                <p class="text-lg font-display font-bold text-brand-300">{{ matchesRecord.won }}-{{ matchesRecord.lost }}</p>
+                                <p class="text-[11px] text-slate-400 mt-1">{{ $t('team.matchesRecord') }}</p>
+                            </div>
+                            <div class="text-center rounded-xl bg-white/[0.04] border border-white/10 py-3">
+                                <p class="text-lg font-display font-bold text-brand-300">{{ setsRecord.won }}-{{ setsRecord.lost }}</p>
+                                <p class="text-[11px] text-slate-400 mt-1">{{ $t('team.setsRecord') }}</p>
+                            </div>
+                            <div class="text-center rounded-xl bg-white/[0.04] border border-white/10 py-3">
+                                <p class="text-lg font-display font-bold" :class="currentStreak.count ? (currentStreak.won ? 'text-volt-400' : 'text-red-400') : 'text-slate-300'">
+                                    {{ currentStreak.count || "—" }}
+                                </p>
+                                <p class="text-[11px] text-slate-400 mt-1">{{ currentStreak.won ? $t('team.streakWon') : $t('team.streakLost') }}</p>
+                            </div>
                         </div>
-                        <div class="rounded-lg bg-white/[0.04] border border-white/10 py-3 text-center">
-                            <p class="text-lg font-display font-bold text-brand-300">{{ pct(kpiBreak.won, kpiBreak.total) }}</p>
-                            <p class="text-[11px] text-slate-400 leading-4 mt-1">{{ $t('stats.break') }}<br />{{ kpiBreak.won }}/{{ kpiBreak.total }}</p>
+                        <div v-if="recentForm.length" class="mt-3 flex items-center gap-1.5">
+                            <span
+                                v-for="(w, i) in recentForm"
+                                :key="i"
+                                class="h-2.5 w-2.5 rounded-full"
+                                :class="w ? 'bg-volt-400' : 'bg-red-400'"
+                            ></span>
+                            <span class="text-[11px] text-slate-500 ml-1">{{ $t('team.recentForm') }}</span>
                         </div>
-                        <div class="rounded-lg bg-white/[0.04] border border-white/10 py-3 text-center">
-                            <p class="text-lg font-display font-bold text-slate-200">{{ kpiReceptionMark }}</p>
-                            <p class="text-[11px] text-slate-400 leading-4 mt-1">{{ $t('team.receptionMark') }}<br />{{ kpiReception.total }}</p>
-                        </div>
-                        <div class="rounded-lg bg-white/[0.04] border border-white/10 py-3 text-center">
-                            <p class="text-lg font-display font-bold" :class="kpiAttackEff >= 40 ? 'text-volt-400' : kpiAttackEff >= 25 ? 'text-brand-300' : 'text-slate-200'">{{ kpiAttackEff }}%</p>
-                            <p class="text-[11px] text-slate-400 leading-4 mt-1">{{ $t('team.attackEff') }}<br />{{ kpiAttack.kills }}/{{ kpiAttack.attempts }}</p>
-                        </div>
-                        <div class="rounded-lg bg-white/[0.04] border border-white/10 py-3 text-center">
-                            <p class="text-lg font-display font-bold" :class="kpiUnforced.share >= 0.3 ? 'text-red-400' : kpiUnforced.share >= 0.2 ? 'text-yellow-400' : 'text-volt-400'">
-                                {{ pct(kpiUnforced.count, kpiUnforced.total) }}
-                            </p>
-                            <p class="text-[11px] text-slate-400 leading-4 mt-1">{{ $t('team.unforced') }}<br />{{ kpiUnforced.count }}/{{ kpiUnforced.total }}</p>
-                        </div>
-                    </div>
-                </article>
+                    </article>
 
-                <!-- Totales absolutos por área -->
-                <article v-if="areaRows.length" class="card w-full p-4">
-                    <p class="text-sm font-semibold mb-3">{{ $t('team.byArea') }}</p>
-                    <div class="grid grid-cols-[1fr_auto_auto_auto] gap-y-1.5 text-sm items-center">
-                        <span></span>
-                        <span class="w-14 text-center text-xs text-slate-400">{{ $t('team.colTotal') }}</span>
-                        <span class="w-14 text-center text-xs text-slate-400">{{ $t('team.colWon') }}</span>
-                        <span class="w-14 text-center text-xs text-slate-400">{{ $t('team.colErrors') }}</span>
-                        <template v-for="row in areaRows" :key="row.area">
-                            <span class="text-slate-300 py-1 truncate">{{ $t(`stats.areas.${AREA_LABEL_KEYS[row.area] ?? 'fault'}`) }}</span>
-                            <span class="w-14 text-center py-1">{{ row.total }}</span>
-                            <span class="w-14 text-center py-1 text-volt-400">{{ row.won }}</span>
-                            <span class="w-14 text-center py-1 text-red-400">{{ row.errors }}</span>
-                        </template>
-                    </div>
-                </article>
+                    <!-- KPIs de equipo -->
+                    <article class="card w-full p-4">
+                        <p class="text-sm font-semibold mb-3">{{ $t('team.kpis') }}</p>
+                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                            <div class="rounded-lg bg-white/[0.04] border border-white/10 py-3 text-center">
+                                <p class="text-lg font-display font-bold text-brand-300">{{ pct(kpiSideOut.won, kpiSideOut.total) }}</p>
+                                <p class="text-[11px] text-slate-400 leading-4 mt-1">{{ $t('stats.sideOut') }}<br />{{ kpiSideOut.won }}/{{ kpiSideOut.total }}</p>
+                            </div>
+                            <div class="rounded-lg bg-white/[0.04] border border-white/10 py-3 text-center">
+                                <p class="text-lg font-display font-bold text-brand-300">{{ pct(kpiBreak.won, kpiBreak.total) }}</p>
+                                <p class="text-[11px] text-slate-400 leading-4 mt-1">{{ $t('stats.break') }}<br />{{ kpiBreak.won }}/{{ kpiBreak.total }}</p>
+                            </div>
+                            <div class="rounded-lg bg-white/[0.04] border border-white/10 py-3 text-center">
+                                <p class="text-lg font-display font-bold text-slate-200">{{ kpiReceptionMark }}</p>
+                                <p class="text-[11px] text-slate-400 leading-4 mt-1">{{ $t('team.receptionMark') }}<br />{{ kpiReception.total }}</p>
+                            </div>
+                            <div class="rounded-lg bg-white/[0.04] border border-white/10 py-3 text-center">
+                                <p class="text-lg font-display font-bold" :class="kpiAttackEff >= 40 ? 'text-volt-400' : kpiAttackEff >= 25 ? 'text-brand-300' : 'text-slate-200'">{{ kpiAttackEff }}%</p>
+                                <p class="text-[11px] text-slate-400 leading-4 mt-1">{{ $t('team.attackEff') }}<br />{{ kpiAttack.kills }}/{{ kpiAttack.attempts }}</p>
+                            </div>
+                            <div class="rounded-lg bg-white/[0.04] border border-white/10 py-3 text-center">
+                                <p class="text-lg font-display font-bold" :class="kpiUnforced.share >= 0.3 ? 'text-red-400' : kpiUnforced.share >= 0.2 ? 'text-yellow-400' : 'text-volt-400'">
+                                    {{ pct(kpiUnforced.count, kpiUnforced.total) }}
+                                </p>
+                                <p class="text-[11px] text-slate-400 leading-4 mt-1">{{ $t('team.unforced') }}<br />{{ kpiUnforced.count }}/{{ kpiUnforced.total }}</p>
+                            </div>
+                        </div>
+                    </article>
 
-                <!-- ============ RADAR DE EQUIPO ============ -->
-                <article class="card w-full p-4">
-                    <p class="text-sm font-semibold mb-3">{{ $t('team.radarTitle') }}</p>
-                    <VueApexCharts type="radar" height="280" :options="radarTeamChart.chartOptions" :series="radarTeamChart.series" />
-                </article>
+                    <!-- Radar de equipo (vive en General, como en la app) -->
+                    <article class="card w-full p-4">
+                        <p class="text-sm font-semibold mb-3">{{ $t('team.radarTitle') }}</p>
+                        <VueApexCharts type="radar" height="280" :options="radarTeamChart.chartOptions" :series="radarTeamChart.series" />
+                    </article>
+                </template>
 
-                <!-- ============ RADAR POR JUGADORA ============ -->
-                <article v-if="rosterPlayers.length" class="card w-full p-4">
-                    <p class="text-sm font-semibold mb-3">{{ $t('team.radarByPlayer') }}</p>
-                    <div class="flex items-center gap-2 overflow-x-auto pb-1 mb-2">
-                        <button
-                            v-for="p in rosterPlayers"
-                            :key="p.id"
-                            class="shrink-0 rounded-full px-3 py-1.5 text-xs border transition-colors"
-                            :class="currentPlayerId === p.id
-                                ? 'bg-white text-slate-900 border-white font-semibold'
-                                : 'border-white/10 bg-white/[0.04] text-slate-300 hover:border-white/30'"
-                            @click="selectedPlayerId = p.id"
-                        >
-                            {{ p.name }}
-                        </button>
-                    </div>
-                    <VueApexCharts type="radar" height="280" :options="radarPlayerChart.chartOptions" :series="radarPlayerChart.series" />
-                </article>
+                <!-- ============ 2. ROTACIONES ============ -->
+                <template v-else-if="statsTab === 'rotations'">
+                    <article v-if="rotationCells.length" class="card w-full p-4">
+                        <p class="text-sm font-semibold mb-3">{{ $t('team.rotationsTitle') }}</p>
+                        <div class="overflow-x-auto">
+                            <div class="grid grid-cols-[auto_auto_auto_auto_auto_auto_auto_auto] gap-x-1 gap-y-1.5 text-xs items-center min-w-[560px]">
+                                <span></span>
+                                <span class="text-center text-slate-400 px-1">{{ $t('team.colSO') }}</span>
+                                <span class="text-center text-slate-400 px-1">{{ $t('team.colBR') }}</span>
+                                <span class="text-center text-slate-400 px-1">{{ $t('team.colRec') }}</span>
+                                <span class="text-center text-slate-400 px-1">{{ $t('team.colKill') }}</span>
+                                <span class="text-center text-slate-400 px-1">{{ $t('team.colErr') }}</span>
+                                <span class="text-center text-slate-400 px-1">{{ $t('team.colPts') }}</span>
+                                <span class="text-center text-slate-400 px-1">{{ $t('team.colDiff') }}</span>
+                                <template v-for="row in rotationCells" :key="row.n">
+                                    <span class="font-semibold text-slate-300 px-1">R{{ row.n }}</span>
+                                    <span class="text-center rounded-md py-1.5" :style="row.so.style">{{ row.so.text }}</span>
+                                    <span class="text-center rounded-md py-1.5" :style="row.br.style">{{ row.br.text }}</span>
+                                    <span class="text-center rounded-md py-1.5" :style="row.rec.style">{{ row.rec.text }}</span>
+                                    <span class="text-center rounded-md py-1.5" :style="row.kill.style">{{ row.kill.text }}</span>
+                                    <span class="text-center rounded-md py-1.5" :style="row.err.style">{{ row.err.text }}</span>
+                                    <span class="text-center py-1.5 text-slate-300">{{ row.pts }}</span>
+                                    <span class="text-center rounded-md py-1.5" :style="row.diff.style">{{ row.diff.text }}</span>
+                                </template>
+                                <span class="font-semibold text-slate-400 px-1 pt-2 border-t border-white/10">{{ $t('team.rotationsAverages') }}</span>
+                                <span class="text-center pt-2 border-t border-white/10 text-slate-300">{{ pct(kpiSideOut.won, kpiSideOut.total) }}</span>
+                                <span class="text-center pt-2 border-t border-white/10 text-slate-300">{{ pct(kpiBreak.won, kpiBreak.total) }}</span>
+                                <span class="text-center pt-2 border-t border-white/10 text-slate-300">{{ rotationAverages.rec.toFixed(1) }}</span>
+                                <span class="text-center pt-2 border-t border-white/10 text-slate-300">{{ Math.round(rotationAverages.kill * 100) }}%</span>
+                                <span class="text-center pt-2 border-t border-white/10 text-slate-300">{{ Math.round(rotationAverages.err * 100) }}%</span>
+                                <span class="text-center pt-2 border-t border-white/10 text-slate-300">{{ rotationAverages.rallies }}</span>
+                                <span class="text-center pt-2 border-t border-white/10 text-slate-500">—</span>
+                            </div>
+                        </div>
+                    </article>
 
-                <!-- ============ ROTACIONES 360 ============ -->
-                <article v-if="rotationCells.length" class="card w-full p-4">
-                    <p class="text-sm font-semibold mb-3">{{ $t('team.rotationsTitle') }}</p>
-                    <div class="overflow-x-auto">
-                        <div class="grid grid-cols-[auto_auto_auto_auto_auto_auto_auto_auto] gap-x-1 gap-y-1.5 text-xs items-center min-w-[560px]">
+                    <article v-if="attackPhases.some((p) => p.attempts > 0)" class="card w-full p-4">
+                        <p class="text-sm font-semibold mb-3">{{ $t('stats.attackByPhase') }}</p>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div v-for="ph in attackPhases" :key="ph.label" class="text-center rounded-xl bg-white/[0.04] border border-white/10 py-3">
+                                <p class="text-2xl font-display font-bold" :class="ph.color">{{ ph.killPct }}</p>
+                                <p class="text-xs text-slate-400 leading-4 mt-1">
+                                    {{ ph.label }}<br />{{ ph.kills }}/{{ ph.attempts }} · {{ $t('stats.effShort', { eff: ph.eff }) }}
+                                </p>
+                            </div>
+                        </div>
+                    </article>
+
+                    <article v-if="receptionGradeRows.length" class="card w-full p-4">
+                        <p class="text-sm font-semibold mb-3">{{ $t('stats.attackByReception') }}</p>
+                        <VueApexCharts type="donut" height="240" :options="receptionGradeChart.chartOptions" :series="receptionGradeChart.series" />
+                    </article>
+
+                    <article v-if="techniqueRows.length" class="card w-full p-4">
+                        <p class="text-sm font-semibold mb-3">{{ $t('team.technique') }}</p>
+                        <VueApexCharts type="donut" height="240" :options="techniqueChart.chartOptions" :series="techniqueChart.series" />
+                    </article>
+
+                    <article v-if="setterRows.length" class="card w-full p-4">
+                        <p class="text-sm font-semibold mb-3">{{ $t('stats.setterConnections') }}</p>
+                        <div class="grid grid-cols-[1fr_auto_auto] gap-y-1.5 text-sm items-center">
                             <span></span>
-                            <span class="text-center text-slate-400 px-1">{{ $t('team.colSO') }}</span>
-                            <span class="text-center text-slate-400 px-1">{{ $t('team.colBR') }}</span>
-                            <span class="text-center text-slate-400 px-1">{{ $t('team.colRec') }}</span>
-                            <span class="text-center text-slate-400 px-1">{{ $t('team.colKill') }}</span>
-                            <span class="text-center text-slate-400 px-1">{{ $t('team.colErr') }}</span>
-                            <span class="text-center text-slate-400 px-1">{{ $t('team.colPts') }}</span>
-                            <span class="text-center text-slate-400 px-1">{{ $t('team.colDiff') }}</span>
-                            <template v-for="row in rotationCells" :key="row.n">
-                                <span class="font-semibold text-slate-300 px-1">R{{ row.n }}</span>
-                                <span class="text-center rounded-md py-1.5" :style="row.so.style">{{ row.so.text }}</span>
-                                <span class="text-center rounded-md py-1.5" :style="row.br.style">{{ row.br.text }}</span>
-                                <span class="text-center rounded-md py-1.5" :style="row.rec.style">{{ row.rec.text }}</span>
-                                <span class="text-center rounded-md py-1.5" :style="row.kill.style">{{ row.kill.text }}</span>
-                                <span class="text-center rounded-md py-1.5" :style="row.err.style">{{ row.err.text }}</span>
-                                <span class="text-center py-1.5 text-slate-300">{{ row.pts }}</span>
-                                <span class="text-center rounded-md py-1.5" :style="row.diff.style">{{ row.diff.text }}</span>
+                            <span class="w-16 text-center text-xs text-slate-400">{{ $t('team.colRaw') }}</span>
+                            <span class="w-14 text-center text-xs text-slate-400">{{ $t('stats.colKillPct') }}</span>
+                            <template v-for="row in setterRows" :key="row.key">
+                                <span class="text-slate-300 py-1 truncate">{{ row.setter }} → {{ row.attacker }}</span>
+                                <span class="w-16 text-center py-1">{{ row.kills }}/{{ row.attempts }}</span>
+                                <span class="w-14 text-center py-1 font-semibold" :class="row.color">{{ row.pct }}</span>
                             </template>
-                            <span class="font-semibold text-slate-400 px-1 pt-2 border-t border-white/10">{{ $t('team.rotationsAverages') }}</span>
-                            <span class="text-center pt-2 border-t border-white/10 text-slate-300">{{ pct(kpiSideOut.won, kpiSideOut.total) }}</span>
-                            <span class="text-center pt-2 border-t border-white/10 text-slate-300">{{ pct(kpiBreak.won, kpiBreak.total) }}</span>
-                            <span class="text-center pt-2 border-t border-white/10 text-slate-300">{{ rotationAverages.rec.toFixed(1) }}</span>
-                            <span class="text-center pt-2 border-t border-white/10 text-slate-300">{{ Math.round(rotationAverages.kill * 100) }}%</span>
-                            <span class="text-center pt-2 border-t border-white/10 text-slate-300">{{ Math.round(rotationAverages.err * 100) }}%</span>
-                            <span class="text-center pt-2 border-t border-white/10 text-slate-300">{{ rotationAverages.rallies }}</span>
-                            <span class="text-center pt-2 border-t border-white/10 text-slate-500">—</span>
                         </div>
-                    </div>
-                </article>
+                    </article>
+                </template>
 
-                <!-- ============ ATAQUE POR FASE K1/K2 ============ -->
-                <article v-if="attackPhases.some((p) => p.attempts > 0)" class="card w-full p-4">
-                    <p class="text-sm font-semibold mb-3">{{ $t('stats.attackByPhase') }}</p>
-                    <div class="grid grid-cols-2 gap-2">
-                        <div v-for="ph in attackPhases" :key="ph.label" class="text-center rounded-xl bg-white/[0.04] border border-white/10 py-3">
-                            <p class="text-2xl font-display font-bold" :class="ph.color">{{ ph.killPct }}</p>
-                            <p class="text-xs text-slate-400 leading-4 mt-1">
-                                {{ ph.label }}<br />{{ ph.kills }}/{{ ph.attempts }} · {{ $t('stats.effShort', { eff: ph.eff }) }}
-                            </p>
+                <!-- ============ 3. DATOS ABSOLUTOS (6 pies serve/receive/block/dig/set/attack) ============ -->
+                <template v-else-if="statsTab === 'absolute'">
+                    <article v-if="areaDonuts.length" class="card w-full p-4">
+                        <p class="text-sm font-semibold mb-3">{{ $t('team.byArea') }}</p>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div v-for="d in areaDonuts" :key="d.area">
+                                <p class="text-xs text-slate-400 mb-1 text-center">{{ d.label }} · {{ d.total }}</p>
+                                <VueApexCharts type="donut" height="220" :options="d.chartOptions" :series="d.series" />
+                            </div>
                         </div>
-                    </div>
-                </article>
+                    </article>
 
-                <!-- ============ ATAQUE SEGÚN LA RECEPCIÓN ============ -->
-                <article v-if="receptionGradeRows.length" class="card w-full p-4">
-                    <p class="text-sm font-semibold mb-3">{{ $t('stats.attackByReception') }}</p>
-                    <VueApexCharts type="donut" height="240" :options="receptionGradeChart.chartOptions" :series="receptionGradeChart.series" />
-                </article>
-
-                <!-- ============ ATAQUE POR TÉCNICA ============ -->
-                <article v-if="techniqueRows.length" class="card w-full p-4">
-                    <p class="text-sm font-semibold mb-3">{{ $t('team.technique') }}</p>
-                    <VueApexCharts type="donut" height="240" :options="techniqueChart.chartOptions" :series="techniqueChart.series" />
-                </article>
-
-                <!-- ============ COLOCADORA → ATACANTE ============ -->
-                <article v-if="setterRows.length" class="card w-full p-4">
-                    <p class="text-sm font-semibold mb-3">{{ $t('stats.setterConnections') }}</p>
-                    <div class="grid grid-cols-[1fr_auto_auto] gap-y-1.5 text-sm items-center">
-                        <span></span>
-                        <span class="w-16 text-center text-xs text-slate-400">{{ $t('team.colRaw') }}</span>
-                        <span class="w-14 text-center text-xs text-slate-400">{{ $t('stats.colKillPct') }}</span>
-                        <template v-for="row in setterRows" :key="row.key">
-                            <span class="text-slate-300 py-1 truncate">{{ row.setter }} → {{ row.attacker }}</span>
-                            <span class="w-16 text-center py-1">{{ row.kills }}/{{ row.attempts }}</span>
-                            <span class="w-14 text-center py-1 font-semibold" :class="row.color">{{ row.pct }}</span>
-                        </template>
-                    </div>
-                </article>
-
-                <!-- ============ TABLAS POR DESTREZA ============ -->
-                <article class="card w-full p-4">
-                    <p class="text-sm font-semibold mb-3">{{ $t('team.tablesTitle') }}</p>
-                    <div class="flex items-center gap-2 overflow-x-auto pb-1 mb-3">
-                        <button
-                            v-for="sk in SKILL_DEFS"
-                            :key="sk.key"
-                            class="shrink-0 rounded-full px-3 py-1.5 text-xs border transition-colors"
-                            :class="selectedSkill === sk.key
-                                ? 'bg-white text-slate-900 border-white font-semibold'
-                                : 'border-white/10 bg-white/[0.04] text-slate-300 hover:border-white/30'"
-                            @click="selectedSkill = sk.key"
-                        >
-                            {{ $t(sk.labelKey) }}
-                        </button>
-                    </div>
-
-                    <div v-if="selectedSkill === 'downhit'" class="grid grid-cols-3 gap-2">
-                        <div class="text-center rounded-xl bg-white/[0.04] border border-white/10 py-3">
-                            <p class="text-lg font-display font-bold text-brand-300">{{ downhitCard.total }}</p>
-                            <p class="text-[11px] text-slate-400 mt-1">{{ $t('team.colTotal') }}</p>
+                    <!-- Áreas extra (7-9), solo si el partido tiene datos en ellas -->
+                    <article v-if="extraAreaDonuts.length" class="card w-full p-4">
+                        <p class="text-sm font-semibold mb-3">{{ $t('team.byAreaExtra') }}</p>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div v-for="d in extraAreaDonuts" :key="d.area">
+                                <p class="text-xs text-slate-400 mb-1 text-center">{{ d.label }} · {{ d.total }}</p>
+                                <VueApexCharts type="donut" height="220" :options="d.chartOptions" :series="d.series" />
+                            </div>
                         </div>
-                        <div class="text-center rounded-xl bg-white/[0.04] border border-white/10 py-3">
-                            <p class="text-lg font-display font-bold text-volt-400">{{ downhitCard.won }}</p>
-                            <p class="text-[11px] text-slate-400 mt-1">{{ $t('team.colWon') }}</p>
-                        </div>
-                        <div class="text-center rounded-xl bg-white/[0.04] border border-white/10 py-3">
-                            <p class="text-lg font-display font-bold text-red-400">{{ downhitCard.errors }}</p>
-                            <p class="text-[11px] text-slate-400 mt-1">{{ $t('team.colErrors') }}</p>
-                        </div>
-                    </div>
+                    </article>
+                </template>
 
-                    <div v-else-if="currentSkillTable" class="overflow-x-auto">
-                        <table class="w-full text-sm border-collapse min-w-[420px]">
-                            <thead>
-                                <tr class="text-xs text-slate-400">
-                                    <th class="text-left font-normal pb-2 pr-2">{{ $t('team.colPlayer') }}</th>
-                                    <th v-for="c in currentSkillTable.columns" :key="c.key" class="text-center font-normal pb-2 px-1 w-12">
-                                        {{ $t(c.labelKey) }}
-                                    </th>
-                                    <th v-if="currentSkillTable.markLabelKey" class="text-center font-normal pb-2 px-1 w-14">
-                                        {{ $t(currentSkillTable.markLabelKey) }}
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr v-for="row in currentSkillTable.rows" :key="row.id" class="border-t border-white/5">
-                                    <td class="py-1.5 pr-2 truncate max-w-[140px]">{{ row.name }}</td>
-                                    <td v-for="c in currentSkillTable.columns" :key="c.key" class="text-center py-1.5 px-1">
-                                        {{ row.values[c.key] }}
-                                    </td>
-                                    <td v-if="currentSkillTable.markLabelKey" class="text-center py-1.5 px-1 font-semibold text-brand-300">
-                                        {{ row.mark }}
-                                    </td>
-                                </tr>
-                                <tr class="border-t border-white/10 font-semibold text-slate-200">
-                                    <td class="py-1.5 pr-2">{{ $t('team.rowTotal') }}</td>
-                                    <td v-for="c in currentSkillTable.columns" :key="c.key" class="text-center py-1.5 px-1">
-                                        {{ currentSkillTable.total.values[c.key] }}
-                                    </td>
-                                    <td v-if="currentSkillTable.markLabelKey" class="text-center py-1.5 px-1 text-brand-300">
-                                        {{ currentSkillTable.total.mark }}
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                        <p v-if="currentSkillTable.rows.length === 0" class="text-xs text-slate-500 mt-2">{{ $t('team.tableEmpty') }}</p>
-                    </div>
-                </article>
+                <!-- ============ 4. HISTÓRICO ============ -->
+                <template v-else-if="statsTab === 'historic'">
+                    <article v-if="matchLabels.length > 1" class="card w-full p-4">
+                        <p class="text-sm font-semibold mb-1">{{ $t('team.serveHistory') }}</p>
+                        <VueApexCharts type="line" height="200" :options="serveChart.chartOptions" :series="serveChart.series" />
+                    </article>
+                    <article v-if="matchLabels.length > 1" class="card w-full p-4">
+                        <p class="text-sm font-semibold mb-1">{{ $t('team.receptionHistory') }}</p>
+                        <VueApexCharts type="line" height="200" :options="receptionChart.chartOptions" :series="receptionChart.series" />
+                    </article>
+                    <article v-if="matchLabels.length > 1" class="card w-full p-4">
+                        <p class="text-sm font-semibold mb-1">{{ $t('team.attackHistory') }}</p>
+                        <VueApexCharts type="line" height="200" :options="attackChart.chartOptions" :series="attackChart.series" />
+                    </article>
+                </template>
 
-                <!-- ============ DIRECCIONES DE EQUIPO (mapa de pista) ============ -->
-                <article class="card w-full p-4">
-                    <p class="text-sm font-semibold mb-3">{{ $t('team.directionsTitle') }}</p>
-                    <div class="flex flex-wrap items-center gap-2 mb-3">
-                        <div class="flex items-center gap-1.5">
-                            <button
-                                v-for="f in DIRECTION_FAMILIES"
-                                :key="f.key"
-                                class="shrink-0 rounded-full px-3 py-1.5 text-xs border transition-colors"
-                                :class="directionsFamily === f.key
-                                    ? 'bg-white text-slate-900 border-white font-semibold'
-                                    : 'border-white/10 bg-white/[0.04] text-slate-300 hover:border-white/30'"
-                                @click="directionsFamily = f.key"
-                            >
-                                {{ $t(f.labelKey) }}
-                            </button>
+                <!-- ============ 5. DIRECCIONES ============ -->
+                <template v-else-if="statsTab === 'directions'">
+                    <article class="card w-full p-4">
+                        <p class="text-sm font-semibold mb-3">{{ $t('team.directionsTitle') }}</p>
+                        <div class="flex flex-wrap items-center gap-2 mb-3">
+                            <div class="flex items-center gap-1.5">
+                                <button
+                                    v-for="f in DIRECTION_FAMILIES"
+                                    :key="f.key"
+                                    class="shrink-0 rounded-full px-3 py-1.5 text-xs border transition-colors"
+                                    :class="directionsFamily === f.key
+                                        ? 'bg-white text-slate-900 border-white font-semibold'
+                                        : 'border-white/10 bg-white/[0.04] text-slate-300 hover:border-white/30'"
+                                    @click="directionsFamily = f.key"
+                                >
+                                    {{ $t(f.labelKey) }}
+                                </button>
+                            </div>
+                            <div class="flex items-center gap-1.5 ml-auto">
+                                <button
+                                    class="shrink-0 rounded-full px-3 py-1.5 text-xs border transition-colors"
+                                    :class="directionsSide === 'us'
+                                        ? 'bg-white text-slate-900 border-white font-semibold'
+                                        : 'border-white/10 bg-white/[0.04] text-slate-300 hover:border-white/30'"
+                                    @click="directionsSide = 'us'"
+                                >
+                                    {{ $t('team.directionsUs') }}
+                                </button>
+                                <button
+                                    class="shrink-0 rounded-full px-3 py-1.5 text-xs border transition-colors"
+                                    :class="directionsSide === 'rival'
+                                        ? 'bg-white text-slate-900 border-white font-semibold'
+                                        : 'border-white/10 bg-white/[0.04] text-slate-300 hover:border-white/30'"
+                                    @click="directionsSide = 'rival'"
+                                >
+                                    {{ $t('team.directionsRival') }}
+                                </button>
+                            </div>
                         </div>
-                        <div class="flex items-center gap-1.5 ml-auto">
+                        <div v-if="directionsSide === 'us' && rosterPlayers.length" class="flex items-center gap-2 overflow-x-auto pb-1 mb-3">
                             <button
                                 class="shrink-0 rounded-full px-3 py-1.5 text-xs border transition-colors"
-                                :class="directionsSide === 'us'
+                                :class="directionsPlayerId === 'all'
                                     ? 'bg-white text-slate-900 border-white font-semibold'
                                     : 'border-white/10 bg-white/[0.04] text-slate-300 hover:border-white/30'"
-                                @click="directionsSide = 'us'"
+                                @click="directionsPlayerId = 'all'"
                             >
-                                {{ $t('team.directionsUs') }}
+                                {{ $t('team.allPlayers') }}
                             </button>
                             <button
+                                v-for="p in rosterPlayers"
+                                :key="p.id"
                                 class="shrink-0 rounded-full px-3 py-1.5 text-xs border transition-colors"
-                                :class="directionsSide === 'rival'
+                                :class="directionsPlayerId === p.id
                                     ? 'bg-white text-slate-900 border-white font-semibold'
                                     : 'border-white/10 bg-white/[0.04] text-slate-300 hover:border-white/30'"
-                                @click="directionsSide = 'rival'"
+                                @click="directionsPlayerId = p.id"
                             >
-                                {{ $t('team.directionsRival') }}
+                                {{ p.name }}
                             </button>
                         </div>
-                    </div>
-                    <div v-if="directionsSide === 'us' && rosterPlayers.length" class="flex items-center gap-2 overflow-x-auto pb-1 mb-3">
-                        <button
-                            class="shrink-0 rounded-full px-3 py-1.5 text-xs border transition-colors"
-                            :class="directionsPlayerId === 'all'
-                                ? 'bg-white text-slate-900 border-white font-semibold'
-                                : 'border-white/10 bg-white/[0.04] text-slate-300 hover:border-white/30'"
-                            @click="directionsPlayerId = 'all'"
-                        >
-                            {{ $t('team.allPlayers') }}
-                        </button>
-                        <button
-                            v-for="p in rosterPlayers"
-                            :key="p.id"
-                            class="shrink-0 rounded-full px-3 py-1.5 text-xs border transition-colors"
-                            :class="directionsPlayerId === p.id
-                                ? 'bg-white text-slate-900 border-white font-semibold'
-                                : 'border-white/10 bg-white/[0.04] text-slate-300 hover:border-white/30'"
-                            @click="directionsPlayerId = p.id"
-                        >
-                            {{ p.name }}
-                        </button>
-                    </div>
-                    <CourtMap :stats="directionsStats" :rival="directionsSide === 'rival'" :action-ids="directionsIds" />
-                </article>
+                        <CourtMap :stats="directionsStats" :rival="directionsSide === 'rival'" :action-ids="directionsIds" />
+                    </article>
+                </template>
 
-                <!-- Histórico por partido -->
-                <article v-if="matchLabels.length > 1" class="card w-full p-4">
-                    <p class="text-sm font-semibold mb-1">{{ $t('team.serveHistory') }}</p>
-                    <VueApexCharts type="line" height="200" :options="serveChart.chartOptions" :series="serveChart.series" />
-                </article>
-                <article v-if="matchLabels.length > 1" class="card w-full p-4">
-                    <p class="text-sm font-semibold mb-1">{{ $t('team.receptionHistory') }}</p>
-                    <VueApexCharts type="line" height="200" :options="receptionChart.chartOptions" :series="receptionChart.series" />
-                </article>
-                <article v-if="matchLabels.length > 1" class="card w-full p-4">
-                    <p class="text-sm font-semibold mb-1">{{ $t('team.attackHistory') }}</p>
-                    <VueApexCharts type="line" height="200" :options="attackChart.chartOptions" :series="attackChart.series" />
-                </article>
+                <!-- ============ 6. POR JUGADORA ============ -->
+                <template v-else-if="statsTab === 'byPlayer'">
+                    <article v-if="rosterPlayers.length" class="card w-full p-4">
+                        <p class="text-sm font-semibold mb-3">{{ $t('team.radarByPlayer') }}</p>
+                        <div class="flex items-center gap-2 overflow-x-auto pb-1 mb-2">
+                            <button
+                                v-for="p in rosterPlayers"
+                                :key="p.id"
+                                class="shrink-0 rounded-full px-3 py-1.5 text-xs border transition-colors"
+                                :class="currentPlayerId === p.id
+                                    ? 'bg-white text-slate-900 border-white font-semibold'
+                                    : 'border-white/10 bg-white/[0.04] text-slate-300 hover:border-white/30'"
+                                @click="selectedPlayerId = p.id"
+                            >
+                                {{ p.name }}
+                            </button>
+                        </div>
+                        <VueApexCharts type="radar" height="280" :options="radarPlayerChart.chartOptions" :series="radarPlayerChart.series" />
+                    </article>
+                    <EmptyState
+                        v-else
+                        :title="$t('team.statsEmptyTitle')"
+                        :message="$t('team.statsEmptyMessage')"
+                    />
+                </template>
+
+                <!-- ============ 7. TABLAS POR DESTREZA ============ -->
+                <template v-else-if="statsTab === 'tables'">
+                    <article class="card w-full p-4">
+                        <p class="text-sm font-semibold mb-3">{{ $t('team.tablesTitle') }}</p>
+                        <div class="flex items-center gap-2 overflow-x-auto pb-1 mb-3">
+                            <button
+                                v-for="sk in SKILL_DEFS"
+                                :key="sk.key"
+                                class="shrink-0 rounded-full px-3 py-1.5 text-xs border transition-colors"
+                                :class="selectedSkill === sk.key
+                                    ? 'bg-white text-slate-900 border-white font-semibold'
+                                    : 'border-white/10 bg-white/[0.04] text-slate-300 hover:border-white/30'"
+                                @click="selectedSkill = sk.key"
+                            >
+                                {{ $t(sk.labelKey) }}
+                            </button>
+                        </div>
+
+                        <div v-if="selectedSkill === 'downhit'" class="grid grid-cols-3 gap-2">
+                            <div class="text-center rounded-xl bg-white/[0.04] border border-white/10 py-3">
+                                <p class="text-lg font-display font-bold text-brand-300">{{ downhitCard.total }}</p>
+                                <p class="text-[11px] text-slate-400 mt-1">{{ $t('team.colTotal') }}</p>
+                            </div>
+                            <div class="text-center rounded-xl bg-white/[0.04] border border-white/10 py-3">
+                                <p class="text-lg font-display font-bold text-volt-400">{{ downhitCard.won }}</p>
+                                <p class="text-[11px] text-slate-400 mt-1">{{ $t('team.colWon') }}</p>
+                            </div>
+                            <div class="text-center rounded-xl bg-white/[0.04] border border-white/10 py-3">
+                                <p class="text-lg font-display font-bold text-red-400">{{ downhitCard.errors }}</p>
+                                <p class="text-[11px] text-slate-400 mt-1">{{ $t('team.colErrors') }}</p>
+                            </div>
+                        </div>
+
+                        <div v-else-if="currentSkillTable" class="overflow-x-auto">
+                            <table class="w-full text-sm border-collapse min-w-[420px]">
+                                <thead>
+                                    <tr class="text-xs text-slate-400">
+                                        <th class="text-left font-normal pb-2 pr-2">{{ $t('team.colPlayer') }}</th>
+                                        <th v-for="c in currentSkillTable.columns" :key="c.key" class="text-center font-normal pb-2 px-1 w-12">
+                                            {{ $t(c.labelKey) }}
+                                        </th>
+                                        <th v-if="currentSkillTable.markLabelKey" class="text-center font-normal pb-2 px-1 w-14">
+                                            {{ $t(currentSkillTable.markLabelKey) }}
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="row in currentSkillTable.rows" :key="row.id" class="border-t border-white/5">
+                                        <td class="py-1.5 pr-2 truncate max-w-[140px]">{{ row.name }}</td>
+                                        <td v-for="c in currentSkillTable.columns" :key="c.key" class="text-center py-1.5 px-1">
+                                            {{ row.values[c.key] }}
+                                        </td>
+                                        <td v-if="currentSkillTable.markLabelKey" class="text-center py-1.5 px-1 font-semibold text-brand-300">
+                                            {{ row.mark }}
+                                        </td>
+                                    </tr>
+                                    <tr class="border-t border-white/10 font-semibold text-slate-200">
+                                        <td class="py-1.5 pr-2">{{ $t('team.rowTotal') }}</td>
+                                        <td v-for="c in currentSkillTable.columns" :key="c.key" class="text-center py-1.5 px-1">
+                                            {{ currentSkillTable.total.values[c.key] }}
+                                        </td>
+                                        <td v-if="currentSkillTable.markLabelKey" class="text-center py-1.5 px-1 text-brand-300">
+                                            {{ currentSkillTable.total.mark }}
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <p v-if="currentSkillTable.rows.length === 0" class="text-xs text-slate-500 mt-2">{{ $t('team.tableEmpty') }}</p>
+                        </div>
+                    </article>
+                </template>
             </template>
         </template>
     </section>
@@ -457,7 +493,6 @@ import EmptyState from "../components/EmptyState.vue";
 import CourtMap from "../components/CourtMap.vue";
 import { useTeamStats } from "../composables/useTeamStats";
 import {
-    AREA_LABEL_KEYS,
     ATTACK_IDS,
     SERVE_ERR_IDS,
     TEAM_RADAR_FILTERS,
@@ -517,6 +552,22 @@ const {
 } = useTeamStats(teamId);
 
 const view = ref<"matches" | "stats">("matches");
+
+// Sub-pestañas de "Estadísticas", mismo orden/agrupación que la app
+// iOS/Android. `v-if` en la plantilla (no `v-show`): solo la pestaña activa
+// monta sus gráficas ApexCharts y lee sus computeds — cambiar de pestaña no
+// debe recomputar/renderizar las demás.
+const STATS_TABS = [
+    { key: "general", labelKey: "team.statsTabGeneral" },
+    { key: "rotations", labelKey: "team.statsTabRotations" },
+    { key: "absolute", labelKey: "team.statsTabAbsolute" },
+    { key: "historic", labelKey: "team.statsTabHistoric" },
+    { key: "directions", labelKey: "team.statsTabDirections" },
+    { key: "byPlayer", labelKey: "team.statsTabByPlayer" },
+    { key: "tables", labelKey: "team.statsTabTables" },
+] as const;
+type StatsTabKey = (typeof STATS_TABS)[number]["key"];
+const statsTab = ref<StatsTabKey>("general");
 
 const notFound = computed(() => team.value === null);
 const teamName = computed(() => team.value?.name ?? t("team.teamFallback"));
@@ -647,6 +698,51 @@ const kpiUnforced = computed(() => unforcedShare(pointEnders.value));
 
 // --- por área ---
 const areaRows = computed(() => areaTotals(gameStats.value));
+
+// "Datos absolutos" en la app son 6 pies (serve/receive/block/dig/set/attack)
+// con total/ganados/errores, no una tabla — reutiliza `areaRows` (misma
+// fórmula, sin tocarla) y solo cambia cómo se presenta. Áreas extra 7-9
+// (ajuste/free/downhit) se muestran como pies adicionales solo si el equipo
+// tiene datos ahí (la tabla original de faltas/ajuste no era parte del
+// formato de la app).
+const AREA_DONUT_COLORS = ["#CBFB45", "#F87171", "rgba(148,163,184,0.35)"];
+const AREA_DONUT_DEFS = [
+    { area: 4, labelKey: "stats.areas.serve" },
+    { area: 0, labelKey: "stats.areas.reception" },
+    { area: 1, labelKey: "stats.areas.block" },
+    { area: 2, labelKey: "stats.areas.defense" },
+    { area: 3, labelKey: "stats.areas.setting" },
+    { area: 5, labelKey: "stats.areas.attack" },
+] as const;
+const EXTRA_AREA_DONUT_DEFS = [
+    { area: 7, labelKey: "stats.areas.adjust" },
+    { area: 8, labelKey: "stats.areas.freeball" },
+    { area: 9, labelKey: "stats.areas.downhit" },
+] as const;
+
+function areaDonut(def: { area: number; labelKey: string }) {
+    const row = areaRows.value.find((r) => r.area === def.area);
+    const total = row?.total ?? 0;
+    const won = row?.won ?? 0;
+    const errors = row?.errors ?? 0;
+    const other = Math.max(total - won - errors, 0);
+    return {
+        area: def.area,
+        label: t(def.labelKey),
+        total,
+        series: [won, errors, other],
+        chartOptions: <ApexOptions>{
+            chart: { type: "donut", background: "transparent" },
+            labels: [t("team.colWon"), t("team.colErrors"), t("team.colOther")],
+            colors: AREA_DONUT_COLORS,
+            legend: { labels: { colors: "#cbd5e1" }, position: "bottom", fontSize: "11px" },
+            dataLabels: { enabled: total > 0, formatter: (val: number) => Math.round(val) + "%" },
+            tooltip: { theme: "dark" },
+        },
+    };
+}
+const areaDonuts = computed(() => AREA_DONUT_DEFS.map(areaDonut).filter((d) => d.total > 0));
+const extraAreaDonuts = computed(() => EXTRA_AREA_DONUT_DEFS.map(areaDonut).filter((d) => d.total > 0));
 
 // --- B/C: radar de equipo y por jugadora -----------------------------------
 const RADAR_AXIS_ORDER = ["attack", "serve", "block", "dig", "receive"] as const;
