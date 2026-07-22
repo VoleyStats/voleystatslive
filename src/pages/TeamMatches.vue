@@ -287,75 +287,11 @@
 
                 <!-- ============ 2. ROTACIONES ============ -->
                 <template v-else-if="statsTab === 'rotations'">
-                    <article v-if="rotationCells.length" class="card w-full p-4">
-                        <p class="text-sm font-semibold mb-3">{{ $t('team.rotationsTitle') }}</p>
-                        <div class="overflow-x-auto">
-                            <div class="grid grid-cols-[auto_auto_auto_auto_auto_auto_auto_auto] gap-x-1 gap-y-1.5 text-xs items-center min-w-[560px]">
-                                <span></span>
-                                <span class="text-center text-slate-400 px-1">{{ $t('team.colSO') }}</span>
-                                <span class="text-center text-slate-400 px-1">{{ $t('team.colBR') }}</span>
-                                <span class="text-center text-slate-400 px-1">{{ $t('team.colRec') }}</span>
-                                <span class="text-center text-slate-400 px-1">{{ $t('team.colKill') }}</span>
-                                <span class="text-center text-slate-400 px-1">{{ $t('team.colErr') }}</span>
-                                <span class="text-center text-slate-400 px-1">{{ $t('team.colPts') }}</span>
-                                <span class="text-center text-slate-400 px-1">{{ $t('team.colDiff') }}</span>
-                                <template v-for="row in rotationCells" :key="row.n">
-                                    <span class="font-semibold text-slate-300 px-1">R{{ row.n }}</span>
-                                    <span class="text-center rounded-md py-1.5" :style="row.so.style">{{ row.so.text }}</span>
-                                    <span class="text-center rounded-md py-1.5" :style="row.br.style">{{ row.br.text }}</span>
-                                    <span class="text-center rounded-md py-1.5" :style="row.rec.style">{{ row.rec.text }}</span>
-                                    <span class="text-center rounded-md py-1.5" :style="row.kill.style">{{ row.kill.text }}</span>
-                                    <span class="text-center rounded-md py-1.5" :style="row.err.style">{{ row.err.text }}</span>
-                                    <span class="text-center py-1.5 text-slate-300">{{ row.pts }}</span>
-                                    <span class="text-center rounded-md py-1.5" :style="row.diff.style">{{ row.diff.text }}</span>
-                                </template>
-                                <span class="font-semibold text-slate-400 px-1 pt-2 border-t border-white/10">{{ $t('team.rotationsAverages') }}</span>
-                                <span class="text-center pt-2 border-t border-white/10 text-slate-300">{{ pct(kpiSideOut.won, kpiSideOut.total) }}</span>
-                                <span class="text-center pt-2 border-t border-white/10 text-slate-300">{{ pct(kpiBreak.won, kpiBreak.total) }}</span>
-                                <span class="text-center pt-2 border-t border-white/10 text-slate-300">{{ rotationAverages.rec.toFixed(1) }}</span>
-                                <span class="text-center pt-2 border-t border-white/10 text-slate-300">{{ Math.round(rotationAverages.kill * 100) }}%</span>
-                                <span class="text-center pt-2 border-t border-white/10 text-slate-300">{{ Math.round(rotationAverages.err * 100) }}%</span>
-                                <span class="text-center pt-2 border-t border-white/10 text-slate-300">{{ rotationAverages.rallies }}</span>
-                                <span class="text-center pt-2 border-t border-white/10 text-slate-500">—</span>
-                            </div>
-                        </div>
-                    </article>
-
-                    <article v-if="attackPhases.some((p) => p.attempts > 0)" class="card w-full p-4">
-                        <p class="text-sm font-semibold mb-3">{{ $t('stats.attackByPhase') }}</p>
-                        <div class="grid grid-cols-2 gap-2">
-                            <div v-for="ph in attackPhases" :key="ph.label" class="text-center rounded-xl bg-white/[0.04] border border-white/10 py-3">
-                                <p class="text-2xl font-display font-bold" :class="ph.color">{{ ph.killPct }}</p>
-                                <p class="text-xs text-slate-400 leading-4 mt-1">
-                                    {{ ph.label }}<br />{{ ph.kills }}/{{ ph.attempts }} · {{ $t('stats.effShort', { eff: ph.eff }) }}
-                                </p>
-                            </div>
-                        </div>
-                    </article>
-
-                    <article v-if="receptionGradeRows.length" class="card w-full p-4">
-                        <p class="text-sm font-semibold mb-3">{{ $t('stats.attackByReception') }}</p>
-                        <VueApexCharts type="donut" height="240" :options="receptionGradeChart.chartOptions" :series="receptionGradeChart.series" />
-                    </article>
-
-                    <article v-if="techniqueRows.length" class="card w-full p-4">
-                        <p class="text-sm font-semibold mb-3">{{ $t('team.technique') }}</p>
-                        <VueApexCharts type="donut" height="240" :options="techniqueChart.chartOptions" :series="techniqueChart.series" />
-                    </article>
-
-                    <article v-if="setterRows.length" class="card w-full p-4">
-                        <p class="text-sm font-semibold mb-3">{{ $t('stats.setterConnections') }}</p>
-                        <div class="grid grid-cols-[1fr_auto_auto] gap-y-1.5 text-sm items-center">
-                            <span></span>
-                            <span class="w-16 text-center text-xs text-slate-400">{{ $t('team.colRaw') }}</span>
-                            <span class="w-14 text-center text-xs text-slate-400">{{ $t('stats.colKillPct') }}</span>
-                            <template v-for="row in setterRows" :key="row.key">
-                                <span class="text-slate-300 py-1 truncate">{{ row.setter }} → {{ row.attacker }}</span>
-                                <span class="w-16 text-center py-1">{{ row.kills }}/{{ row.attempts }}</span>
-                                <span class="w-14 text-center py-1 font-semibold" :class="row.color">{{ row.pct }}</span>
-                            </template>
-                        </div>
-                    </article>
+                    <Rotations360Section
+                        :stats="gameStats"
+                        :derived-kills="derivedKills"
+                        :reception-grade-buckets="receptionGradeBuckets"
+                    />
                 </template>
 
                 <!-- ============ 3. DATOS ABSOLUTOS (6 pies serve/receive/block/dig/set/attack) ============ -->
@@ -400,67 +336,7 @@
 
                 <!-- ============ 5. DIRECCIONES ============ -->
                 <template v-else-if="statsTab === 'directions'">
-                    <article class="card w-full p-4">
-                        <p class="text-sm font-semibold mb-3">{{ $t('team.directionsTitle') }}</p>
-                        <div class="flex flex-wrap items-center gap-2 mb-3">
-                            <div class="flex items-center gap-1.5">
-                                <button
-                                    v-for="f in DIRECTION_FAMILIES"
-                                    :key="f.key"
-                                    class="shrink-0 rounded-full px-3 py-1.5 text-xs border transition-colors"
-                                    :class="directionsFamily === f.key
-                                        ? 'bg-white text-slate-900 border-white font-semibold'
-                                        : 'border-white/10 bg-white/[0.04] text-slate-300 hover:border-white/30'"
-                                    @click="directionsFamily = f.key"
-                                >
-                                    {{ $t(f.labelKey) }}
-                                </button>
-                            </div>
-                            <div class="flex items-center gap-1.5 ml-auto">
-                                <button
-                                    class="shrink-0 rounded-full px-3 py-1.5 text-xs border transition-colors"
-                                    :class="directionsSide === 'us'
-                                        ? 'bg-white text-slate-900 border-white font-semibold'
-                                        : 'border-white/10 bg-white/[0.04] text-slate-300 hover:border-white/30'"
-                                    @click="directionsSide = 'us'"
-                                >
-                                    {{ $t('team.directionsUs') }}
-                                </button>
-                                <button
-                                    class="shrink-0 rounded-full px-3 py-1.5 text-xs border transition-colors"
-                                    :class="directionsSide === 'rival'
-                                        ? 'bg-white text-slate-900 border-white font-semibold'
-                                        : 'border-white/10 bg-white/[0.04] text-slate-300 hover:border-white/30'"
-                                    @click="directionsSide = 'rival'"
-                                >
-                                    {{ $t('team.directionsRival') }}
-                                </button>
-                            </div>
-                        </div>
-                        <div v-if="directionsSide === 'us' && rosterPlayers.length" class="flex items-center gap-2 overflow-x-auto pb-1 mb-3">
-                            <button
-                                class="shrink-0 rounded-full px-3 py-1.5 text-xs border transition-colors"
-                                :class="directionsPlayerId === 'all'
-                                    ? 'bg-white text-slate-900 border-white font-semibold'
-                                    : 'border-white/10 bg-white/[0.04] text-slate-300 hover:border-white/30'"
-                                @click="directionsPlayerId = 'all'"
-                            >
-                                {{ $t('team.allPlayers') }}
-                            </button>
-                            <button
-                                v-for="p in rosterPlayers"
-                                :key="p.id"
-                                class="shrink-0 rounded-full px-3 py-1.5 text-xs border transition-colors"
-                                :class="directionsPlayerId === p.id
-                                    ? 'bg-white text-slate-900 border-white font-semibold'
-                                    : 'border-white/10 bg-white/[0.04] text-slate-300 hover:border-white/30'"
-                                @click="directionsPlayerId = p.id"
-                            >
-                                {{ p.name }}
-                            </button>
-                        </div>
-                        <CourtMap :stats="directionsStats" :rival="directionsSide === 'rival'" :action-ids="directionsIds" />
-                    </article>
+                    <DirectionsSection :stats="gameStats" />
                 </template>
 
                 <!-- ============ 6. POR JUGADORA ============ -->
@@ -491,74 +367,7 @@
 
                 <!-- ============ 7. TABLAS POR DESTREZA ============ -->
                 <template v-else-if="statsTab === 'tables'">
-                    <article class="card w-full p-4">
-                        <p class="text-sm font-semibold mb-3">{{ $t('team.tablesTitle') }}</p>
-                        <div class="flex items-center gap-2 overflow-x-auto pb-1 mb-3">
-                            <button
-                                v-for="sk in SKILL_DEFS"
-                                :key="sk.key"
-                                class="shrink-0 rounded-full px-3 py-1.5 text-xs border transition-colors"
-                                :class="selectedSkill === sk.key
-                                    ? 'bg-white text-slate-900 border-white font-semibold'
-                                    : 'border-white/10 bg-white/[0.04] text-slate-300 hover:border-white/30'"
-                                @click="selectedSkill = sk.key"
-                            >
-                                {{ $t(sk.labelKey) }}
-                            </button>
-                        </div>
-
-                        <div v-if="selectedSkill === 'downhit'" class="grid grid-cols-3 gap-2">
-                            <div class="text-center rounded-xl bg-white/[0.04] border border-white/10 py-3">
-                                <p class="text-lg font-display font-bold text-brand-300">{{ downhitCard.total }}</p>
-                                <p class="text-[11px] text-slate-400 mt-1">{{ $t('team.colTotal') }}</p>
-                            </div>
-                            <div class="text-center rounded-xl bg-white/[0.04] border border-white/10 py-3">
-                                <p class="text-lg font-display font-bold text-volt-400">{{ downhitCard.won }}</p>
-                                <p class="text-[11px] text-slate-400 mt-1">{{ $t('team.colWon') }}</p>
-                            </div>
-                            <div class="text-center rounded-xl bg-white/[0.04] border border-white/10 py-3">
-                                <p class="text-lg font-display font-bold text-red-400">{{ downhitCard.errors }}</p>
-                                <p class="text-[11px] text-slate-400 mt-1">{{ $t('team.colErrors') }}</p>
-                            </div>
-                        </div>
-
-                        <div v-else-if="currentSkillTable" class="overflow-x-auto">
-                            <table class="w-full text-sm border-collapse min-w-[420px]">
-                                <thead>
-                                    <tr class="text-xs text-slate-400">
-                                        <th class="text-left font-normal pb-2 pr-2">{{ $t('team.colPlayer') }}</th>
-                                        <th v-for="c in currentSkillTable.columns" :key="c.key" class="text-center font-normal pb-2 px-1 w-12">
-                                            {{ $t(c.labelKey) }}
-                                        </th>
-                                        <th v-if="currentSkillTable.markLabelKey" class="text-center font-normal pb-2 px-1 w-14">
-                                            {{ $t(currentSkillTable.markLabelKey) }}
-                                        </th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr v-for="row in currentSkillTable.rows" :key="row.id" class="border-t border-white/5">
-                                        <td class="py-1.5 pr-2 truncate max-w-[140px]">{{ row.name }}</td>
-                                        <td v-for="c in currentSkillTable.columns" :key="c.key" class="text-center py-1.5 px-1">
-                                            {{ row.values[c.key] }}
-                                        </td>
-                                        <td v-if="currentSkillTable.markLabelKey" class="text-center py-1.5 px-1 font-semibold text-brand-300">
-                                            {{ row.mark }}
-                                        </td>
-                                    </tr>
-                                    <tr class="border-t border-white/10 font-semibold text-slate-200">
-                                        <td class="py-1.5 pr-2">{{ $t('team.rowTotal') }}</td>
-                                        <td v-for="c in currentSkillTable.columns" :key="c.key" class="text-center py-1.5 px-1">
-                                            {{ currentSkillTable.total.values[c.key] }}
-                                        </td>
-                                        <td v-if="currentSkillTable.markLabelKey" class="text-center py-1.5 px-1 text-brand-300">
-                                            {{ currentSkillTable.total.mark }}
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                            <p v-if="currentSkillTable.rows.length === 0" class="text-xs text-slate-500 mt-2">{{ $t('team.tableEmpty') }}</p>
-                        </div>
-                    </article>
+                    <SkillTablesSection :stats="gameStats" :all-stats="allStats" />
                 </template>
                 </template>
             </template>
@@ -574,22 +383,20 @@ import { useI18n } from "vue-i18n";
 import VueApexCharts from "vue3-apexcharts";
 import type { ApexOptions } from "apexcharts";
 import EmptyState from "../components/EmptyState.vue";
-import CourtMap from "../components/CourtMap.vue";
 import SkeletonCard from "../components/SkeletonCard.vue";
 import SkeletonChart from "../components/SkeletonChart.vue";
 import SkeletonRow from "../components/SkeletonRow.vue";
+import Rotations360Section from "../components/stats/Rotations360Section.vue";
+import SkillTablesSection from "../components/stats/SkillTablesSection.vue";
+import DirectionsSection from "../components/stats/DirectionsSection.vue";
 import { useTeamStats } from "../composables/useTeamStats";
 import {
-    ATTACK_IDS,
     SERVE_ERR_IDS,
     TEAM_RADAR_FILTERS,
-    activePlayerIds,
     aid,
     areaTotals,
     attackByReceptionGradeForMatch,
-    attackByTechnique,
     attackEfficiency,
-    attackPhaseTotals,
     attackTotals,
     breakStats,
     currentSetsWon,
@@ -603,26 +410,10 @@ import {
     playerRadarFilters,
     radarAxes,
     receptionTotals,
-    rotationBreakdown,
-    setterConnections,
-    shrinkRate,
     sideOutStats,
     unforcedShare,
-    type AttackTotals,
     type StatDoc,
 } from "../utils/volleyStats";
-import {
-    SERVE_TABLE_IDS,
-    attackSkillTable,
-    blockSkillTable,
-    digSkillTable,
-    downhitTotals,
-    faultSkillTable,
-    freeSkillTable,
-    receiveSkillTable,
-    serveSkillTable,
-    setSkillTable,
-} from "../utils/teamTables";
 
 const teamId = useRoute().params.id as string;
 const { t, locale } = useI18n();
@@ -766,13 +557,6 @@ const creditsByCode = computed(() => {
 });
 const derivedKills = computed(() => mergeCredits([...creditsByCode.value.values()]).kills);
 
-// Color compartido de % de remate (mismo criterio que GeneralStats.vue).
-const killColor = (kills: number, attempts: number): string => {
-    if (!attempts) return "text-slate-500";
-    const p = kills / attempts;
-    return p >= 0.4 ? "text-volt-400" : p >= 0.25 ? "text-yellow-400" : "text-red-400";
-};
-
 // --- KPIs ---
 const kpiSideOut = computed(() => sideOutStats(pointEnders.value));
 const kpiBreak = computed(() => breakStats(pointEnders.value));
@@ -883,223 +667,22 @@ const radarPlayerChart = computed(() => ({
     chartOptions: radarChartOptions("#CBFB45"),
 }));
 
-// --- D: rotaciones 360 (heatmap) -------------------------------------------
-const rotationRows = computed(() => rotationBreakdown(gameStats.value, derivedKills.value));
-const rotationAverages = computed(() => {
-    const errSum = rotationRows.value.reduce((a, r) => a + r.ourErrors, 0);
-    const ralliesSum = rotationRows.value.reduce((a, r) => a + r.rallies, 0);
-    return {
-        so: kpiSideOut.value.total ? kpiSideOut.value.won / kpiSideOut.value.total : 0,
-        br: kpiBreak.value.total ? kpiBreak.value.won / kpiBreak.value.total : 0,
-        rec: kpiReception.value.total ? kpiReception.value.sum / kpiReception.value.total : 0,
-        kill: kpiAttack.value.attempts ? kpiAttack.value.kills / kpiAttack.value.attempts : 0,
-        err: ralliesSum ? errSum / ralliesSum : 0,
-        rallies: ralliesSum,
-    };
-});
-
-// Desviación de `value` respecto a `mean` normalizada por `spread`, acotada
-// a [-1,1]. `invert` voltea el signo (usado en "errores": más = peor).
-function heatStyle(value: number, mean: number, spread: number, invert: boolean, hasSample: boolean): Record<string, string> {
-    if (!hasSample) return { background: "rgba(148,163,184,0.05)", color: "#64748b" };
-    let d = spread > 0 ? (value - mean) / spread : 0;
-    if (invert) d = -d;
-    d = Math.max(-1, Math.min(1, d));
-    const good = d >= 0;
-    const intensity = Math.abs(d);
-    const rgb = good ? "203,251,69" : "248,113,113";
-    return {
-        background: `rgba(${rgb},${(0.08 + intensity * 0.32).toFixed(3)})`,
-        color: intensity > 0.35 ? (good ? "#CBFB45" : "#F87171") : "#e2e8f0",
-    };
-}
-
-const rotationCells = computed(() => {
-    const avg = rotationAverages.value;
-    return rotationRows.value.map((r) => {
-        const soRate = r.soTotal ? r.soWon / r.soTotal : 0;
-        const brRate = r.brTotal ? r.brWon / r.brTotal : 0;
-        const recRate = r.recTotal ? r.recSum / r.recTotal : 0;
-        const killRate = r.atkTotal ? r.atkKills / r.atkTotal : 0;
-        const errRate = r.rallies ? r.ourErrors / r.rallies : 0;
-        return {
-            n: r.n,
-            so: { text: r.soTotal ? pct(r.soWon, r.soTotal) : "—", style: heatStyle(soRate, avg.so, 0.15, false, r.soTotal > 0) },
-            br: { text: r.brTotal ? pct(r.brWon, r.brTotal) : "—", style: heatStyle(brRate, avg.br, 0.15, false, r.brTotal > 0) },
-            rec: { text: r.recTotal ? recRate.toFixed(1) : "—", style: heatStyle(recRate, avg.rec, 0.6, false, r.recTotal > 0) },
-            kill: { text: r.atkTotal ? pct(r.atkKills, r.atkTotal) : "—", style: heatStyle(killRate, avg.kill, 0.15, false, r.atkTotal > 0) },
-            err: {
-                text: r.rallies ? `${r.ourErrors} · ${Math.round(errRate * 100)}%` : "—",
-                style: heatStyle(errRate, avg.err, 0.1, true, r.rallies > 0),
-            },
-            pts: r.rallies,
-            diff: { text: (r.netDiff > 0 ? "+" : "") + r.netDiff, style: heatStyle(r.netDiff, 0, 6, false, true) },
-        };
-    });
-});
-
-// --- E: ataque por fase K1/K2, por grado de recepción y por técnica --------
-const attackPhases = computed(() => {
-    const { k1, k2 } = attackPhaseTotals(gameStats.value, derivedKills.value);
-    const mk = (label: string, tt: AttackTotals) => ({
-        label,
-        attempts: tt.attempts,
-        kills: tt.kills,
-        killPct: pct(tt.kills, tt.attempts),
-        eff: attackEfficiency(tt),
-        color: killColor(tt.kills, tt.attempts),
-    });
-    return [mk(t("stats.attackK1"), k1), mk(t("stats.attackK2"), k2)];
-});
-
-const GRADE_COLORS: Record<number, string> = { 3: "#CBFB45", 2: "#6E93FF", 1: "#94a3b8", 0: "#F87171" };
+// --- D/E/F: rotaciones 360, ataque por fase/nota/técnica y colocadora →
+// atacante viven en <Rotations360Section> (src/components/stats/). Solo se
+// calcula aquí lo que es específico del ámbito "equipo" (fusión entre
+// partidos de las notas de recepción, ver comentario de la función): el
+// resto de datos que necesita el componente (rotationCount, derivedKills)
+// ya están disponibles como `gameStats`/`derivedKills` más arriba.
 const receptionGradeBuckets = computed(() => {
     const perMatch = loadedMatches.value.map((m) =>
         attackByReceptionGradeForMatch((m.stats as StatDoc[]).filter(isGameStat), creditsByCode.value.get(m.code)?.kills ?? new Set())
     );
     return mergeGradeBuckets(perMatch);
 });
-const receptionGradeRows = computed(() =>
-    [3, 2, 1, 0]
-        .filter((g) => (receptionGradeBuckets.value.get(g)?.attempts ?? 0) > 0)
-        .map((g) => {
-            const b = receptionGradeBuckets.value.get(g)!;
-            return {
-                grade: g,
-                label: t(`stats.recGrade${g}`),
-                attempts: b.attempts,
-                kills: b.kills,
-                killPct: pct(b.kills, b.attempts),
-                eff: attackEfficiency(b),
-            };
-        })
-);
-const receptionGradeChart = computed(() => ({
-    series: receptionGradeRows.value.map((r) => r.attempts),
-    chartOptions: <ApexOptions>{
-        chart: { type: "donut", background: "transparent" },
-        labels: receptionGradeRows.value.map((r) => r.label),
-        colors: receptionGradeRows.value.map((r) => GRADE_COLORS[r.grade]),
-        legend: { labels: { colors: "#cbd5e1" }, position: "bottom" },
-        dataLabels: { enabled: true, formatter: (val: number) => Math.round(val) + "%" },
-        tooltip: {
-            theme: "dark",
-            y: {
-                formatter: (val: number, opts: { seriesIndex: number }) =>
-                    `${val} · ${receptionGradeRows.value[opts.seriesIndex]?.killPct ?? ""} kill`,
-            },
-        },
-    },
-}));
 
-const TECHNIQUE_LABEL_KEYS: Record<string, string> = {
-    spike: "team.techniqueSpike",
-    tip: "team.techniqueTip",
-    blockout: "team.techniqueBlockout",
-    downhit: "team.techniqueDownhit",
-};
-const TECHNIQUE_COLORS: Record<string, string> = { spike: "#6E93FF", tip: "#CBFB45", blockout: "#F59E0B", downhit: "#94a3b8" };
-const techniqueRows = computed(() =>
-    attackByTechnique(gameStats.value, derivedKills.value).map((b) => ({
-        ...b,
-        label: t(TECHNIQUE_LABEL_KEYS[b.key] ?? b.key),
-        killPct: pct(b.kills, b.attempts),
-    }))
-);
-const techniqueChart = computed(() => ({
-    series: techniqueRows.value.map((r) => r.attempts),
-    chartOptions: <ApexOptions>{
-        chart: { type: "donut", background: "transparent" },
-        labels: techniqueRows.value.map((r) => r.label),
-        colors: techniqueRows.value.map((r) => TECHNIQUE_COLORS[r.key] ?? "#94a3b8"),
-        legend: { labels: { colors: "#cbd5e1" }, position: "bottom" },
-        dataLabels: { enabled: true, formatter: (val: number) => Math.round(val) + "%" },
-        tooltip: {
-            theme: "dark",
-            y: {
-                formatter: (val: number, opts: { seriesIndex: number }) =>
-                    `${val} · ${techniqueRows.value[opts.seriesIndex]?.killPct ?? ""} kill`,
-            },
-        },
-    },
-}));
-
-// --- F: colocadora → atacante -----------------------------------------------
-const setterRows = computed(() => {
-    const activeIds = activePlayerIds(gameStats.value);
-    const qualified = setterConnections(gameStats.value, derivedKills.value, activeIds).filter((c) => c.attempts >= 6);
-    if (!qualified.length) return [];
-    const totalKills = qualified.reduce((a, c) => a + c.kills, 0);
-    const totalAttempts = qualified.reduce((a, c) => a + c.attempts, 0);
-    const base = totalAttempts ? totalKills / totalAttempts : 0;
-    const killAvg = kpiAttack.value.attempts ? kpiAttack.value.kills / kpiAttack.value.attempts : 0;
-    return [...qualified]
-        .sort((a, b) => b.attempts - a.attempts)
-        .map((c) => {
-            const shrunk = shrinkRate(c.kills, c.attempts, base, 12);
-            return {
-                key: c.key,
-                setter: c.setterName,
-                attacker: c.attackerName,
-                attempts: c.attempts,
-                kills: c.kills,
-                pct: Math.round(shrunk * 100) + "%",
-                color: shrunk > killAvg + 0.05 ? "text-volt-400" : shrunk < killAvg - 0.05 ? "text-red-400" : "text-slate-200",
-            };
-        });
-});
-
-// --- G: tablas por destreza (fase 2b) ---------------------------------
-// Etiquetas de pestaña reutilizando `stats.areas.*` (ya cubren las 9
-// destrezas exactas de esta sección, ver AREA_LABEL_KEYS).
-const SKILL_DEFS = [
-    { key: "attack", labelKey: "stats.areas.attack" },
-    { key: "serve", labelKey: "stats.areas.serve" },
-    { key: "receive", labelKey: "stats.areas.reception" },
-    { key: "block", labelKey: "stats.areas.block" },
-    { key: "dig", labelKey: "stats.areas.defense" },
-    { key: "set", labelKey: "stats.areas.setting" },
-    { key: "free", labelKey: "stats.areas.freeball" },
-    { key: "fault", labelKey: "stats.areas.fault" },
-    { key: "downhit", labelKey: "stats.areas.downhit" },
-] as const;
-type SkillKey = (typeof SKILL_DEFS)[number]["key"];
-
-const selectedSkill = ref<SkillKey>("attack");
-
-const skillTables = computed(() => ({
-    attack: attackSkillTable(gameStats.value),
-    serve: serveSkillTable(gameStats.value, allStats.value),
-    receive: receiveSkillTable(gameStats.value),
-    block: blockSkillTable(gameStats.value),
-    dig: digSkillTable(gameStats.value),
-    set: setSkillTable(gameStats.value),
-    free: freeSkillTable(gameStats.value),
-    fault: faultSkillTable(gameStats.value),
-}));
-const currentSkillTable = computed(() =>
-    selectedSkill.value === "downhit" ? null : skillTables.value[selectedSkill.value as Exclude<SkillKey, "downhit">]
-);
-const downhitCard = computed(() => downhitTotals(gameStats.value));
-
-// --- H: direcciones de equipo (mapa de pista agregado) ------------------
-const DIRECTION_FAMILIES = [
-    { key: "attack", labelKey: "stats.areas.attack" },
-    { key: "serve", labelKey: "stats.areas.serve" },
-] as const;
-type DirectionFamily = (typeof DIRECTION_FAMILIES)[number]["key"];
-
-const directionsFamily = ref<DirectionFamily>("attack");
-const directionsSide = ref<"us" | "rival">("us");
-const directionsPlayerId = ref<string>("all");
-
-const directionsIds = computed(() => (directionsFamily.value === "serve" ? SERVE_TABLE_IDS : ATTACK_IDS));
-const directionsStats = computed(() => {
-    if (directionsSide.value === "us" && directionsPlayerId.value !== "all") {
-        return gameStats.value.filter((s) => String(s.player?.id ?? "") === directionsPlayerId.value);
-    }
-    return gameStats.value;
-});
+// --- G/H: tablas por destreza y direcciones de equipo viven en
+// <SkillTablesSection>/<DirectionsSection> (src/components/stats/) — ambas
+// solo necesitan `gameStats`/`allStats`, ya calculados arriba.
 
 // --- histórico por partido ---
 const chronologicalLoaded = computed(() => [...loadedMatches.value].sort((a, b) => a.date - b.date));
