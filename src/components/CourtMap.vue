@@ -74,10 +74,19 @@ import { useI18n } from "vue-i18n";
 // bloqueo "B3"). El atacante (propio o rival) siempre ataca de abajo hacia
 // arriba, igual que registra la app, así el mismo render sirve para ambos.
 
-const props = defineProps<{
-    stats: any[];
-    rival: boolean;
-}>();
+// `actionIds` acota la familia de acciones a agregar (por defecto ataque,
+// como hasta ahora en GeneralStats/PlayerStats). Las estadísticas de equipo
+// (TeamMatches.vue) pasan la familia de saque reutilizando el mismo render:
+// el saque también codifica `direction` como "S5/S6/S1#<zona-caída>" (ver
+// `Capture.swift`), que `fromPoint`/`toPoint` ya interpretan sin cambios.
+const props = withDefaults(
+    defineProps<{
+        stats: any[];
+        rival: boolean;
+        actionIds?: string[];
+    }>(),
+    { actionIds: () => ["6", "9", "10", "11", "16", "17", "47"] }
+);
 
 const { t } = useI18n();
 
@@ -90,7 +99,6 @@ const rowH = (netY - M) / 3;
 const third = rowH; // línea de 3 metros ≈ primera fila
 
 const aid = (s: any): string => String(s?.action?.id ?? "");
-const ATTACK_IDS = ["6", "9", "10", "11", "16", "17", "47"];
 
 // Distribución de zonas idéntica a la app (DirectionsCourt):
 // mitad propia (abajo, de la red hacia fuera) y mitad rival (arriba).
@@ -161,7 +169,7 @@ interface Corridor {
 const attacks = computed(() =>
     props.stats.filter(
         (s) =>
-            ATTACK_IDS.includes(aid(s)) &&
+            props.actionIds.includes(aid(s)) &&
             (String(s.player?.id) === "0") === props.rival &&
             typeof s.direction === "string" &&
             s.direction.includes("#")

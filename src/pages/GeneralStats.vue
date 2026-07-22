@@ -301,38 +301,26 @@ import CourtMap from "../components/CourtMap.vue";
 import EmptyState from "../components/EmptyState.vue";
 import { collection, doc, onSnapshot, orderBy, query } from "firebase/firestore";
 import { db } from "../firebase";
+import {
+    ADMIN_IDS,
+    AREA_LABEL_KEYS,
+    ATTACK_IDS,
+    KILL_IDS,
+    aid,
+    attackByReceptionGradeForMatch,
+    attackEfficiency,
+    attackPhaseTotals,
+    currentSetsWon,
+    deriveCredits,
+    isMatchFinished,
+    isRival,
+    isUnforced,
+    rivalServing,
+} from "../utils/volleyStats";
 
 const props = defineProps({
     id: String,
 });
-
-// ------------------------------------------------------------------ contrato
-// La app envía los ids de acción como String ("9") y los stages como
-// K1=1 / K2=2 / K3=3. Los stats administrativos (tiempo muerto "0",
-// ajuste "98", cambio "99") llevan `to` != 0 pero NO son puntos.
-const ADMIN_IDS = ["0", "98", "99"];
-const aid = (s: any): string => String(s?.action?.id ?? "");
-const isRival = (s: any): boolean => String(s?.player?.id ?? "") === "0";
-const rivalServing = (s: any): boolean => String(s?.server?.id ?? "") === "0";
-
-const KILL_IDS = ["9", "10", "11"];
-const ATTACK_IDS = ["6", "9", "10", "11", "16", "17", "47"];
-const ATTACK_ERR_IDS = ["16", "17"];
-const SERVE_ERR_IDS = ["15", "32"];
-// Nota de recepción: id de acción → nota 0-3 (3 = perfecta).
-const RECEPTION_GRADES: Record<string, number> = { "4": 3, "3": 2, "2": 1, "1": 0, "22": 0 };
-
-// Errores no forzados: puntos del rival regalados sin oposición (error de
-// saque, ataque fallado sin bloqueo, colocación o free). Con la captura en
-// cuadrícula todos los puntos rivales acaban registrados como acción propia,
-// así que el "regalados" bruto rondaba el 100% y no discriminaba; esto sí.
-const isUnforced = (s: any): boolean =>
-    s.to === 2 &&
-    !isRival(s) &&
-    (SERVE_ERR_IDS.includes(aid(s)) ||
-        (ATTACK_ERR_IDS.includes(aid(s)) && s.detail !== "Blocked") ||
-        aid(s) === "24" ||
-        aid(s) === "25");
 
 // Colores compartidos del informe: % de remate y cuota de errores no forzados.
 const killColor = (kills: number, attempts: number): string => {
@@ -348,15 +336,7 @@ const actionLabel = (s: any): string => {
     const key = `stats.actions.a${aid(s)}`;
     return te(key) ? t(key) : s?.action?.name ?? "";
 };
-const AREA_LABELS = computed(() => [
-    t("stats.areas.reception"),
-    t("stats.areas.block"),
-    t("stats.areas.defense"),
-    t("stats.areas.setting"),
-    t("stats.areas.serve"),
-    t("stats.areas.attack"),
-    t("stats.areas.fault"),
-]);
+const AREA_LABELS = computed(() => AREA_LABEL_KEYS.map((key) => t(`stats.areas.${key}`)));
 
 // ------------------------------------------------------------------ datos
 const match = useDocument(doc(db, "live_matches", props?.id ?? "x"));
@@ -397,6 +377,10 @@ const mapRival = ref(false);
 const pointEnders = computed(() => gameStats.value.filter((s) => s.to !== 0));
 const lastPoint = computed(() => pointEnders.value.at(-1));
 
+// Motor de kills/aces derivados (captura en cancha) sobre el ámbito
+// seleccionado (set o partido completo) — se recalcula si cambia `set`.
+const derived = computed(() => deriveCredits(gameStats.value));
+
 // ------------------------------------------------------------------ marcador
 const score = computed(() => [lastPoint.value?.score_us ?? 0, lastPoint.value?.score_them ?? 0]);
 
@@ -408,15 +392,7 @@ const setResult = (n: number): string => {
         : "";
 };
 const setsWon = computed(() => {
-    let us = match.value?.sets_us ?? 0;
-    let them = match.value?.sets_them ?? 0;
-    if (match.value?.set_closed) {
-        const cur = scoreboard.value.find((x) => x.number === currentSet.value);
-        if (cur) {
-            if (cur.score_us > cur.score_them) us++;
-            else if (cur.score_them > cur.score_us) them++;
-        }
-    }
+    const { us, them } = currentSetsWon(match.value);
     return [us, them];
 });
 
@@ -426,12 +402,7 @@ const setsWon = computed(() => {
 // apagar el toggle) la página se convierte en el informe. Fallback para docs
 // de versiones antiguas de la app que nunca actualizan `live`: último set
 // cerrado con mayoría de sets alcanzada.
-const matchOver = computed(() => {
-    if (match.value?.live === false) return true;
-    if (match.value?.set_closed !== true) return false;
-    const majority = Math.floor(nSets.value / 2) + 1;
-    return setsWon.value[0] >= majority || setsWon.value[1] >= majority;
-});
+const matchOver = computed(() => isMatchFinished(match.value));
 
 // ------------------------------------------------------------------ racha y fases
 const streak = computed(() => {
@@ -473,6 +444,7 @@ const timeline = computed(() =>
 
 // ------------------------------------------------------------------ origen de puntos
 const sourceRows = computed(() => {
+    const credits = derived.value;
     const rows = [
         { label: t("stats.originAttack"), us: 0, them: 0 },
         { label: t("stats.originBlock"), us: 0, them: 0 },
@@ -482,6 +454,16 @@ const sourceRows = computed(() => {
     for (const s of pointEnders.value) {
         const rival = isRival(s);
         const id = aid(s);
+        // Punto derivado (captura en cancha): el sentinel rival de error de
+        // recepción/defensa en realidad lo cerró nuestro saque o ataque
+        // anterior — se reatribuye al bucket real en vez de "Errores".
+        if (rival && s.to === 1) {
+            const credit = credits.creditedBy.get(s);
+            if (credit) {
+                rows[credits.aces.has(credit) ? 2 : 0].us++;
+                continue;
+            }
+        }
         const bucket = KILL_IDS.includes(id) ? 0 : id === "13" ? 1 : id === "8" ? 2 : 3;
         if (s.to === 1) {
             // Punto nuestro: si lo cerró el rival, es error suyo.
@@ -495,12 +477,21 @@ const sourceRows = computed(() => {
 
 // ------------------------------------------------------------------ jugadoras
 const topScorers = computed(() => {
+    const credits = derived.value;
     const byPlayer = new Map<string, number>();
     for (const s of pointEnders.value) {
-        if (s.to === 1 && !isRival(s)) {
+        if (s.to !== 1) continue;
+        if (!isRival(s)) {
             const name = s.player?.name ?? "";
             if (name) byPlayer.set(name, (byPlayer.get(name) ?? 0) + 1);
+            continue;
         }
+        // Punto derivado: se atribuye a quien generó el crédito real (la
+        // sacadora del ace o la atacante del kill), nunca al sentinel rival.
+        const credit = credits.creditedBy.get(s);
+        if (!credit) continue;
+        const name = (credits.aces.has(credit) ? credit.server?.name : credit.player?.name) ?? "";
+        if (name) byPlayer.set(name, (byPlayer.get(name) ?? 0) + 1);
     }
     const sorted = [...byPlayer.entries()].sort((a, b) => b[1] - a[1]).slice(0, 6);
     const max = sorted[0]?.[1] ?? 1;
@@ -514,50 +505,23 @@ const topScorers = computed(() => {
 // ------------------------------------------------------------------ informe: ataque por fase y por recepción
 // K1 (side-out): ataques propios con el rival al saque; K2 (break/transición): el resto.
 const attackPhases = computed(() => {
-    const mk = (label: string) => ({ label, attempts: 0, kills: 0, errors: 0, blocked: 0 });
-    const k1 = mk(t("stats.attackK1"));
-    const k2 = mk(t("stats.attackK2"));
-    for (const s of gameStats.value) {
-        if (isRival(s) || !ATTACK_IDS.includes(aid(s))) continue;
-        const ph = rivalServing(s) ? k1 : k2;
-        ph.attempts++;
-        if (KILL_IDS.includes(aid(s))) ph.kills++;
-        else if (s.detail === "Blocked") ph.blocked++;
-        else if (ATTACK_ERR_IDS.includes(aid(s))) ph.errors++;
-    }
-    return [k1, k2].map((ph) => ({
+    const { k1, k2 } = attackPhaseTotals(gameStats.value, derived.value.kills);
+    return [
+        { label: t("stats.attackK1"), ...k1 },
+        { label: t("stats.attackK2"), ...k2 },
+    ].map((ph) => ({
         ...ph,
         killPct: pct(ph.kills, ph.attempts),
-        eff: ph.attempts ? Math.round(((ph.kills - ph.errors - ph.blocked) / ph.attempts) * 100) : 0,
+        eff: attackEfficiency(ph),
         color: killColor(ph.kills, ph.attempts),
     }));
 });
 
-// Ataque según la nota de la recepción previa: se recorre el ámbito en orden,
-// reiniciando entre sets y al cerrarse cada punto (mismo criterio que la app).
+// Ataque según la nota de la recepción previa (helper compartido: recorre el
+// ámbito en orden, reiniciando entre sets y al cerrarse cada punto, y cuenta
+// kills con `isKill` — incluye los derivados de captura en cancha).
 const attackByReception = computed(() => {
-    const buckets = new Map<number, { attempts: number; kills: number; errors: number; blocked: number }>();
-    let lastGrade: number | null = null;
-    let lastSetN: number | null = null;
-    for (const s of gameStats.value) {
-        const n = Number(s.set?.number ?? 0);
-        if (n !== lastSetN) {
-            lastSetN = n;
-            lastGrade = null;
-        }
-        const id = aid(s);
-        if (!isRival(s) && id in RECEPTION_GRADES) {
-            lastGrade = RECEPTION_GRADES[id];
-        } else if (!isRival(s) && ATTACK_IDS.includes(id) && lastGrade !== null) {
-            const b = buckets.get(lastGrade) ?? { attempts: 0, kills: 0, errors: 0, blocked: 0 };
-            b.attempts++;
-            if (KILL_IDS.includes(id)) b.kills++;
-            else if (s.detail === "Blocked") b.blocked++;
-            else if (ATTACK_ERR_IDS.includes(id)) b.errors++;
-            buckets.set(lastGrade, b);
-        }
-        if (s.to !== 0) lastGrade = null;
-    }
+    const buckets = attackByReceptionGradeForMatch(gameStats.value, derived.value.kills);
     return [3, 2, 1, 0]
         .filter((g) => (buckets.get(g)?.attempts ?? 0) > 0)
         .map((g) => {
@@ -568,7 +532,7 @@ const attackByReception = computed(() => {
                 kills: b.kills,
                 attempts: b.attempts,
                 killPct: pct(b.kills, b.attempts),
-                eff: Math.round(((b.kills - b.errors - b.blocked) / b.attempts) * 100),
+                eff: attackEfficiency(b),
                 color: killColor(b.kills, b.attempts),
             };
         });

@@ -140,19 +140,24 @@ import { useDocument } from "vuefire";
 import CourtMap from "../components/CourtMap.vue";
 import EmptyState from "../components/EmptyState.vue";
 import { db } from "../firebase";
+import {
+    ADMIN_IDS,
+    ATTACK_IDS,
+    RECEPTION_IDS,
+    SERVE_ERR_IDS as SERVE_ERR,
+    SERVE_IDS,
+    SERVE_WEIGHTS,
+    aid,
+    attackEfficiency,
+    attackTotals,
+    deriveCredits,
+    isAce,
+} from "../utils/volleyStats";
 
 const matchId = useRoute().params.id as string;
 const { t } = useI18n();
 
-// Contrato con la app: ids de acción como String.
-const aid = (s: any): string => String(s?.action?.id ?? "");
-const ADMIN_IDS = ["0", "98", "99"];
-const ATTACK_IDS = ["6", "9", "10", "11", "16", "17", "47"];
-const KILL_IDS = ["9", "10", "11"];
-const ATTACK_ERR = ["16", "17"];
-const RECEPTION_IDS = ["1", "2", "3", "4", "22"];
-const SERVE_IDS = ["8", "15", "32", "39", "40", "41"];
-const SERVE_ERR = ["15", "32"];
+// Ids de área específicos de esta página (no compartidos con el resto).
 const DIG_IDS = ["5", "43", "44", "45", "46"];
 const FREE_IDS = ["35", "36", "37"];
 
@@ -170,13 +175,21 @@ const set = ref(0);
 const expanded = ref<string | null>(null);
 const toggle = (name: string) => { expanded.value = expanded.value === name ? null : name; };
 
+// Motor de kills/aces derivados (captura en cancha): necesita la secuencia
+// completa del ámbito seleccionado (set o partido), SIN filtrar al sentinel
+// rival (player.id "0") — es la única forma de detectar el error rival que
+// cierra el punto y reatribuírselo a la jugadora propia que lo generó.
+const scopedGameStats = computed(() =>
+    baseStats.data.filter(
+        (s) => !ADMIN_IDS.includes(aid(s)) && (set.value === 0 || s.set?.number == set.value)
+    )
+);
+const derived = computed(() => deriveCredits(scopedGameStats.value));
+
 const players = computed(() => {
-    const pool = baseStats.data.filter(
-        (s) =>
-            !ADMIN_IDS.includes(aid(s)) &&
-            String(s.player?.id) !== "0" &&
-            (set.value === 0 || s.set?.number == set.value)
-    );
+    const derivedKills = derived.value.kills;
+    const derivedAces = derived.value.aces;
+    const pool = scopedGameStats.value.filter((s) => String(s.player?.id) !== "0");
     const grouped = new Map<string, any[]>();
     for (const s of pool) {
         const name = s.player?.name ?? "";
@@ -189,10 +202,14 @@ const players = computed(() => {
         const count = (ids: string[]) => list.filter((s) => ids.includes(aid(s))).length;
         const points = list.filter((s) => s.to === 1).length;
 
-        const attackTotal = count(ATTACK_IDS);
-        const kills = count(KILL_IDS);
-        const attackErrors = count(ATTACK_ERR);
-        const eff = attackTotal > 0 ? Math.round((kills / attackTotal) * 100) : 0;
+        // Ataque (helper compartido): kills vía `isKill` — incluye los
+        // derivados de captura en cancha (remate/toque in-play que forzó el
+        // error rival que cerró el punto). Eficiencia FIVB, no kill%.
+        const atk = attackTotals(list, derivedKills);
+        const attackTotal = atk.attempts;
+        const kills = atk.kills;
+        const attackErrors = atk.errors;
+        const eff = attackEfficiency(atk);
 
         const recTotal = count(RECEPTION_IDS);
         const perfect = count(["4"]);
@@ -202,16 +219,15 @@ const players = computed(() => {
         const mark = recTotal > 0 ? ((perfect * 3 + good * 2 + bad) / recTotal).toFixed(1) : "0.0";
 
         const serveTotal = count(SERVE_IDS);
-        const aces = count(["8"]);
+        // Aces vía `isAce` — incluye el saque derivado (id 39/40/41 in-play
+        // que forzó el error rival que cerró el punto).
+        const aces = list.filter((s) => isAce(s, derivedAces)).length;
         const serveErrors = count(SERVE_ERR);
-        // Nota de saque 0-3, misma fórmula que la app iPad: los errores solo
-        // cuentan en el denominador. op = el rival la devuelve fácil.
-        const serveOp = count(["41"]);
-        const serve1 = count(["40"]);
-        const serve2 = count(["39"]);
-        const serveMark = serveTotal > 0
-            ? ((serveOp / 2 + serve1 + 2 * serve2 + 3 * aces) / serveTotal).toFixed(1)
-            : "0.0";
+        // Nota de saque 0-3 (misma fórmula que la app iPad, pesos en
+        // SERVE_WEIGHTS — ids fuera del mapa, como los errores, pesan 0).
+        let serveWeightSum = 0;
+        for (const s of list) serveWeightSum += SERVE_WEIGHTS[aid(s)] ?? 0;
+        const serveMark = serveTotal > 0 ? (serveWeightSum / serveTotal).toFixed(1) : "0.0";
 
         const blockPoints = count(["13"]);
         const blockTouches = count(["7"]);
