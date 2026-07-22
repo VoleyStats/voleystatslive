@@ -140,8 +140,12 @@
         </template>
 
         <!-- ============ ESTADÍSTICAS AGREGADAS ============ -->
-        <template v-else-if="matchRows.length > 0">
-            <template v-if="progress.loading">
+        <!-- `progress.loading` cubre el caso (raro con la fase de docs ya
+             rápida) de abrir esta pestaña antes de que lleguen los docs de la
+             temporada seleccionada: sin él, `matchRows` seguiría a 0 y no
+             habría ni skeleton que mostrar. -->
+        <template v-else-if="matchRows.length > 0 || progress.loading">
+            <template v-if="progress.loading || statsProgress.loading">
                 <!-- Sub-pestañas reales (ya se pueden pulsar mientras carga: cada
                      una tiene su propio skeleton, a la altura del gráfico real). -->
                 <div class="w-full flex items-center gap-1.5 overflow-x-auto pb-1">
@@ -188,9 +192,10 @@
                     <SkeletonCard :lines="6" />
                 </template>
 
-                <!-- Progreso de carga (misma cifra que en la pestaña Partidos). -->
+                <!-- Progreso de carga: de la fase de stats si ya arrancó, si
+                     no de la fase de docs (ver `statsAreaProgress`). -->
                 <p class="text-xs text-slate-500 text-center">
-                    {{ $t('team.loadingProgress', { done: progress.done, total: progress.total }) }}
+                    {{ $t('team.loadingProgress', { done: statsAreaProgress.done, total: statsAreaProgress.total }) }}
                 </p>
             </template>
 
@@ -376,7 +381,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref } from "vue";
+import { computed, ref, watch } from "vue";
 import { RouterLink, useRoute } from "vue-router";
 import { useI18n } from "vue-i18n";
 // Registro local (no global en main.ts): solo esta página paga por ApexCharts.
@@ -422,6 +427,8 @@ const {
     team,
     filteredMatches,
     progress,
+    statsProgress,
+    ensureStatsLoaded,
     hasSeasons,
     seasonsMap,
     seasonIds,
@@ -430,6 +437,23 @@ const {
 } = useTeamStats(teamId);
 
 const view = ref<"matches" | "stats">("matches");
+// La subcolección `stats` de cada partido no se pide hasta que el usuario
+// abre la pestaña "Estadísticas" — si nunca la abre, no se descarga ni una
+// stat (ver useTeamStats.ts, fase 2). `watch` en vez de en el propio botón:
+// cubre también un futuro cambio de `view` que no venga de un click directo.
+watch(
+    view,
+    (v) => {
+        if (v === "stats") ensureStatsLoaded();
+    },
+    { immediate: true }
+);
+
+// Progreso a mostrar en el skeleton de "Estadísticas": mientras la fase de
+// stats esté en curso se usa la suya; si aún no ha arrancado (p.ej. los docs
+// de la temporada seleccionada siguen llegando) se cae al progreso de docs,
+// para no dejar el contador a 0/0.
+const statsAreaProgress = computed(() => (statsProgress.loading ? statsProgress : progress));
 
 // Sub-pestañas de "Estadísticas", mismo orden/agrupación que la app
 // iOS/Android. `v-if` en la plantilla (no `v-show`): solo la pestaña activa

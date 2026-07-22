@@ -291,6 +291,33 @@ export function isMatchFinished(match: StatDoc): boolean {
     return us >= majority || them >= majority;
 }
 
+// Ventana de tolerancia usada solo por `isMatchCacheable` (ver abajo).
+const STALE_LIVE_MATCH_MS = 24 * 60 * 60 * 1000;
+
+// Criterio de "partido cacheable/estable" para la capa de caché de
+// useTeamStats.ts (localStorage + qué se reintenta al recargar) — NO
+// sustituye a `isMatchFinished()`, que sigue siendo el criterio "estricto"
+// usado en el resto de la app (p.ej. `matchOver` en GeneralStats.vue, o los
+// récords/rachas agregados de equipo).
+//
+// Motivo: hay docs `live_matches/{code}` publicados con `live:true` y
+// `set_closed:false` de forma permanente por un bug ya corregido del
+// backfill de la app (`Match.backfillLiveStats()`); esos partidos son en
+// realidad partidos históricos, pero `isMatchFinished()` nunca los marca
+// como terminados hasta que el usuario re-sincroniza desde el móvil. Sin
+// tolerancia, useTeamStats.ts los trataría como "en vivo" para siempre y
+// volvería a descargar doc + stats en cada recarga de la página de equipo.
+// Como red de seguridad adicional, si el partido lleva más de 24h desde su
+// `date` se asume terminado a efectos de caché (ningún partido real dura
+// tanto) — se acepta `fallbackDateSec` (p.ej. la fecha del índice
+// `teams/{id}.matches[]`) por si el doc no llegase a publicar `date`.
+export function isMatchCacheable(match: StatDoc, now: number = Date.now(), fallbackDateSec?: number): boolean {
+    if (isMatchFinished(match)) return true;
+    const dateSec = Number(match?.date ?? fallbackDateSec ?? 0);
+    if (!dateSec) return false;
+    return now - dateSec * 1000 > STALE_LIVE_MATCH_MS;
+}
+
 // ------------------------------------------------------------------------
 // B/C. Radar de equipo / por jugadora (5 ejes, 0-100)
 // ------------------------------------------------------------------------
