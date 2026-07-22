@@ -24,11 +24,29 @@
             </button>
         </div>
 
-        <EmptyState
-            v-if="players.length === 0"
-            :title="$t('players.emptyTitle')"
-            :message="$t('players.emptyMessage')"
-        />
+        <!-- ============ CARGANDO: SKELETON DE JUGADORAS ============ -->
+        <template v-if="!baseStats.loaded">
+            <article v-for="n in 4" :key="n" class="card w-full p-4">
+                <SkeletonRow avatar trailing-label />
+                <div class="mt-3 grid grid-cols-3 gap-2">
+                    <div
+                        v-for="m in 3"
+                        :key="m"
+                        class="rounded-lg bg-white/[0.04] border border-white/10 py-2 flex flex-col items-center gap-1.5 animate-pulse"
+                    >
+                        <div class="h-3.5 w-8 rounded bg-white/[0.06]"></div>
+                        <div class="h-2.5 w-10 rounded bg-white/[0.06]"></div>
+                    </div>
+                </div>
+            </article>
+        </template>
+
+        <template v-else>
+            <EmptyState
+                v-if="players.length === 0"
+                :title="$t('players.emptyTitle')"
+                :message="$t('players.emptyMessage')"
+            />
 
         <article v-for="p in players" :key="p.name" class="card w-full p-4">
             <!-- Cabecera jugadora -->
@@ -128,6 +146,7 @@
                 </div>
             </div>
         </article>
+        </template>
     </section>
 </template>
 
@@ -139,6 +158,7 @@ import { useI18n } from "vue-i18n";
 import { useDocument } from "vuefire";
 import CourtMap from "../components/CourtMap.vue";
 import EmptyState from "../components/EmptyState.vue";
+import SkeletonRow from "../components/SkeletonRow.vue";
 import { db } from "../firebase";
 import {
     ADMIN_IDS,
@@ -162,11 +182,16 @@ const DIG_IDS = ["5", "43", "44", "45", "46"];
 const FREE_IDS = ["35", "36", "37"];
 
 const match = useDocument(doc(db, "live_matches", matchId));
-const baseStats = reactive({ data: [] as any[] });
+// `loaded` sigue el mismo patrón que GeneralStats.vue: evita el flash
+// engañoso del EmptyState/skeleton antes de recibir el primer snapshot.
+const baseStats = reactive({ data: [] as any[], loaded: false });
 
 onSnapshot(
     query(collection(db, "live_matches", matchId, "stats"), orderBy("order")),
-    (q) => { baseStats.data = q.docs.map((d) => d.data()); }
+    (q) => {
+        baseStats.data = q.docs.map((d) => d.data());
+        baseStats.loaded = true;
+    }
 );
 
 const nSets = computed(() => match.value?.n_sets ?? 5);

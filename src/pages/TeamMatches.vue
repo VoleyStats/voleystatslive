@@ -6,8 +6,19 @@
     />
 
     <section v-else class="min-h-screen px-4 pb-16 flex flex-col gap-4 items-center max-w-3xl mx-auto">
-        <!-- Cabecera del equipo -->
-        <article class="card w-full p-5 flex flex-col gap-4">
+        <!-- Cabecera del equipo: skeleton mientras `teams/{id}` está cargando
+             (undefined, distinto de null = no existe, ya cubierto por `notFound`). -->
+        <article v-if="teamLoading" class="card w-full p-5 flex flex-col gap-4 animate-pulse">
+            <div class="flex items-center gap-4">
+                <div class="h-12 w-12 shrink-0 rounded-2xl bg-white/[0.06]"></div>
+                <div class="flex-1 min-w-0 space-y-2">
+                    <div class="h-4 w-1/2 rounded bg-white/[0.06]"></div>
+                    <div class="h-3 w-1/3 rounded bg-white/[0.06]"></div>
+                </div>
+            </div>
+        </article>
+
+        <article v-else class="card w-full p-5 flex flex-col gap-4">
             <div class="flex items-center gap-4">
                 <span
                     class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-white/10 font-display font-bold text-lg"
@@ -79,8 +90,9 @@
             </button>
         </div>
 
-        <!-- Progreso de carga de partidos -->
-        <p v-if="progress.loading" class="text-xs text-slate-500">
+        <!-- Progreso de carga de partidos (pestaña Partidos; en Estadísticas
+             el mismo contador se muestra bajo su propio skeleton, más abajo). -->
+        <p v-if="progress.loading && view === 'matches'" class="text-xs text-slate-500">
             {{ $t('team.loadingProgress', { done: progress.done, total: progress.total }) }}
         </p>
 
@@ -92,44 +104,46 @@
 
         <!-- ============ PARTIDOS ============ -->
         <template v-if="view === 'matches'">
-            <RouterLink
-                v-for="m in matchRows"
-                :key="m.code"
-                :to="{ name: 'stats', params: { id: m.code } }"
-                class="card w-full p-4 flex items-center gap-3 hover:border-brand-500/40 transition-colors"
-            >
-                <span class="flex-1 min-w-0">
-                    <span class="block font-semibold truncate">{{ $t('team.vs', { opponent: m.opponent }) }}</span>
-                    <span class="block text-xs text-slate-400">{{ m.dateLabel }}</span>
-                </span>
-                <span
-                    v-if="m.live"
-                    class="inline-flex items-center gap-1.5 rounded-full bg-volt-400 px-2.5 py-1 text-xs font-bold text-ink-950"
+            <template v-if="progress.loading">
+                <article v-for="n in 4" :key="n" class="card w-full p-4">
+                    <SkeletonRow trailing />
+                </article>
+            </template>
+            <template v-else>
+                <RouterLink
+                    v-for="m in matchRows"
+                    :key="m.code"
+                    :to="{ name: 'stats', params: { id: m.code } }"
+                    class="card w-full p-4 flex items-center gap-3 hover:border-brand-500/40 transition-colors"
                 >
-                    <span class="h-1.5 w-1.5 rounded-full bg-ink-950 animate-pulse"></span>
-                    {{ $t('team.live') }}
-                </span>
-                <span
-                    v-else-if="m.result"
-                    class="rounded-full border px-2.5 py-1 font-display text-sm font-bold"
-                    :class="m.won ? 'border-brand-500/40 bg-brand-500/15 text-brand-300' : 'border-red-500/40 bg-red-500/15 text-red-400'"
-                >
-                    {{ m.result }}
-                </span>
-                <i class="bi bi-chevron-right text-slate-500"></i>
-            </RouterLink>
+                    <span class="flex-1 min-w-0">
+                        <span class="block font-semibold truncate">{{ $t('team.vs', { opponent: m.opponent }) }}</span>
+                        <span class="block text-xs text-slate-400">{{ m.dateLabel }}</span>
+                    </span>
+                    <span
+                        v-if="m.live"
+                        class="inline-flex items-center gap-1.5 rounded-full bg-volt-400 px-2.5 py-1 text-xs font-bold text-ink-950"
+                    >
+                        <span class="h-1.5 w-1.5 rounded-full bg-ink-950 animate-pulse"></span>
+                        {{ $t('team.live') }}
+                    </span>
+                    <span
+                        v-else-if="m.result"
+                        class="rounded-full border px-2.5 py-1 font-display text-sm font-bold"
+                        :class="m.won ? 'border-brand-500/40 bg-brand-500/15 text-brand-300' : 'border-red-500/40 bg-red-500/15 text-red-400'"
+                    >
+                        {{ m.result }}
+                    </span>
+                    <i class="bi bi-chevron-right text-slate-500"></i>
+                </RouterLink>
+            </template>
         </template>
 
         <!-- ============ ESTADÍSTICAS AGREGADAS ============ -->
         <template v-else-if="matchRows.length > 0">
-            <EmptyState
-                v-if="loadedMatches.length === 0"
-                :title="$t('team.statsEmptyTitle')"
-                :message="$t('team.statsEmptyMessage')"
-            />
-
-            <template v-else>
-                <!-- Sub-pestañas de "Estadísticas" (mismo orden que la app) -->
+            <template v-if="progress.loading">
+                <!-- Sub-pestañas reales (ya se pueden pulsar mientras carga: cada
+                     una tiene su propio skeleton, a la altura del gráfico real). -->
                 <div class="w-full flex items-center gap-1.5 overflow-x-auto pb-1">
                     <button
                         v-for="tab in STATS_TABS"
@@ -144,7 +158,66 @@
                     </button>
                 </div>
 
-                <!-- ============ 1. GENERAL ============ -->
+                <template v-if="statsTab === 'general'">
+                    <SkeletonCard :lines="3" />
+                    <SkeletonCard :lines="5" />
+                    <SkeletonChart :height="280" />
+                </template>
+                <template v-else-if="statsTab === 'rotations'">
+                    <SkeletonCard height="h-48" />
+                    <SkeletonCard :lines="3" />
+                    <SkeletonChart :height="240" />
+                    <SkeletonChart :height="240" />
+                </template>
+                <template v-else-if="statsTab === 'absolute'">
+                    <SkeletonChart :height="220" />
+                    <SkeletonChart :height="220" />
+                </template>
+                <template v-else-if="statsTab === 'historic'">
+                    <SkeletonChart :height="200" />
+                    <SkeletonChart :height="200" />
+                    <SkeletonChart :height="200" />
+                </template>
+                <template v-else-if="statsTab === 'directions'">
+                    <SkeletonCard height="h-72" />
+                </template>
+                <template v-else-if="statsTab === 'byPlayer'">
+                    <SkeletonChart :height="280" />
+                </template>
+                <template v-else-if="statsTab === 'tables'">
+                    <SkeletonCard :lines="6" />
+                </template>
+
+                <!-- Progreso de carga (misma cifra que en la pestaña Partidos). -->
+                <p class="text-xs text-slate-500 text-center">
+                    {{ $t('team.loadingProgress', { done: progress.done, total: progress.total }) }}
+                </p>
+            </template>
+
+            <template v-else>
+                <EmptyState
+                    v-if="loadedMatches.length === 0"
+                    :title="$t('team.statsEmptyTitle')"
+                    :message="$t('team.statsEmptyMessage')"
+                />
+
+                <template v-else>
+                    <!-- Sub-pestañas de "Estadísticas" (mismo orden que la app) -->
+                    <div class="w-full flex items-center gap-1.5 overflow-x-auto pb-1">
+                        <button
+                            v-for="tab in STATS_TABS"
+                            :key="tab.key"
+                            class="shrink-0 rounded-full px-3 py-1.5 text-xs border transition-colors"
+                            :class="statsTab === tab.key
+                                ? 'bg-white text-slate-900 border-white font-semibold'
+                                : 'border-white/10 bg-white/[0.04] text-slate-300 hover:border-white/30'"
+                            @click="statsTab = tab.key"
+                        >
+                            {{ $t(tab.labelKey) }}
+                        </button>
+                    </div>
+
+                    <!-- ============ 1. GENERAL ============ -->
                 <template v-if="statsTab === 'general'">
                     <!-- Resumen -->
                     <article class="card w-full p-4">
@@ -487,6 +560,7 @@
                         </div>
                     </article>
                 </template>
+                </template>
             </template>
         </template>
     </section>
@@ -501,6 +575,9 @@ import VueApexCharts from "vue3-apexcharts";
 import type { ApexOptions } from "apexcharts";
 import EmptyState from "../components/EmptyState.vue";
 import CourtMap from "../components/CourtMap.vue";
+import SkeletonCard from "../components/SkeletonCard.vue";
+import SkeletonChart from "../components/SkeletonChart.vue";
+import SkeletonRow from "../components/SkeletonRow.vue";
 import { useTeamStats } from "../composables/useTeamStats";
 import {
     ATTACK_IDS,
@@ -580,6 +657,9 @@ type StatsTabKey = (typeof STATS_TABS)[number]["key"];
 const statsTab = ref<StatsTabKey>("general");
 
 const notFound = computed(() => team.value === null);
+// `useDocument` deja el ref en `undefined` mientras resuelve el primer
+// snapshot; `null` significa que el doc no existe (ver `notFound` arriba).
+const teamLoading = computed(() => team.value === undefined);
 const teamName = computed(() => team.value?.name ?? t("team.teamFallback"));
 const teamColor = computed(() => {
     const hex = String(team.value?.color ?? "").replace("#", "");

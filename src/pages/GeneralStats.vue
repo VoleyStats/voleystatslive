@@ -7,80 +7,112 @@
     />
 
     <section v-else class="min-h-screen px-4 pb-24 flex flex-col gap-4 items-center max-w-3xl mx-auto">
-        <!-- ============ MARCADOR ============ -->
-        <article class="card w-full p-5">
-            <div class="flex items-center justify-between mb-3">
-                <span v-if="matchOver" class="inline-flex items-center gap-2 text-xs font-semibold text-slate-300">
-                    <i class="bi bi-flag-fill"></i>
-                    {{ $t('stats.final') }}
-                </span>
-                <span v-else class="inline-flex items-center gap-2 text-xs font-semibold text-volt-400">
-                    <span class="h-2 w-2 rounded-full bg-volt-400 animate-pulse"></span>
-                    {{ $t('stats.liveSet', { n: currentSet }) }}
-                </span>
-                <span class="text-xs text-slate-500">{{ $t('stats.inSets', { us: setsWon[0], them: setsWon[1] }) }}</span>
-            </div>
-
-            <div class="grid grid-cols-2 gap-2">
-                <div class="text-center rounded-xl bg-brand-500/10 border border-brand-500/20 py-4">
-                    <p class="text-5xl md:text-6xl font-display font-bold text-brand-300">{{ score[0] }}</p>
-                    <p class="text-xs text-slate-400 mt-2 truncate px-2">{{ usName }}</p>
-                    <RouterLink
-                        v-if="teamId"
-                        :to="{ name: 'team', params: { id: teamId } }"
-                        class="mt-1.5 inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/[0.04] px-2 py-0.5 text-[11px] text-slate-300 hover:text-white hover:border-brand-500/40 transition-colors"
-                    >
-                        <i class="bi bi-people-fill text-brand-300"></i>
-                        {{ $t('stats.viewTeam') }}
-                    </RouterLink>
+        <!-- ============ CARGANDO: SKELETON ============ -->
+        <template v-if="!baseStats.loaded">
+            <!-- Skeleton de marcador: evita el flash de "0-0" con nombres fallback. -->
+            <article class="card w-full p-5 animate-pulse">
+                <div class="flex items-center justify-between mb-3">
+                    <div class="h-3.5 w-24 rounded bg-white/[0.06]"></div>
+                    <div class="h-3 w-16 rounded bg-white/[0.06]"></div>
                 </div>
-                <div class="text-center rounded-xl bg-white/[0.04] border border-white/10 py-4">
-                    <p class="text-5xl md:text-6xl font-display font-bold text-slate-300">{{ score[1] }}</p>
-                    <p class="text-xs text-slate-400 mt-2 truncate px-2">{{ themName }}</p>
+                <div class="grid grid-cols-2 gap-2">
+                    <div class="flex flex-col items-center gap-2 rounded-xl bg-white/[0.04] border border-white/10 py-4">
+                        <div class="h-12 w-14 rounded bg-white/[0.06]"></div>
+                        <div class="h-2.5 w-16 rounded bg-white/[0.06]"></div>
+                    </div>
+                    <div class="flex flex-col items-center gap-2 rounded-xl bg-white/[0.04] border border-white/10 py-4">
+                        <div class="h-12 w-14 rounded bg-white/[0.06]"></div>
+                        <div class="h-2.5 w-16 rounded bg-white/[0.06]"></div>
+                    </div>
                 </div>
-            </div>
+                <div class="mt-4 flex items-center gap-2">
+                    <div v-for="n in 4" :key="n" class="h-7 w-14 shrink-0 rounded-full bg-white/[0.06]"></div>
+                </div>
+            </article>
 
-            <!-- Selector de sets (con "Partido" completo en el informe) -->
-            <div class="mt-4 flex items-center gap-2 overflow-x-auto">
-                <button
-                    v-if="matchOver"
-                    class="shrink-0 rounded-full px-3 py-1.5 text-sm border transition-colors"
-                    :class="set === 0
-                        ? 'bg-white text-slate-900 border-white font-semibold'
-                        : 'border-white/10 bg-white/[0.04] text-slate-300 hover:border-white/30'"
-                    @click="pickSet(0)"
-                >
-                    {{ $t('stats.fullMatch') }}
-                </button>
-                <button
-                    v-for="n in nSets"
-                    :key="n"
-                    class="shrink-0 rounded-full px-3 py-1.5 text-sm border transition-colors"
-                    :class="set === n
-                        ? 'bg-white text-slate-900 border-white font-semibold'
-                        : 'border-white/10 bg-white/[0.04] text-slate-300 hover:border-white/30'"
-                    @click="pickSet(n)"
-                >
-                    {{ $t('stats.setN', { n }) }}
-                    <span v-if="setResult(n)" class="ml-1 text-xs opacity-70">{{ setResult(n) }}</span>
-                </button>
-                <button
-                    v-if="!matchOver && manualSet !== null && manualSet !== currentSet"
-                    class="shrink-0 rounded-full px-3 py-1.5 text-xs border border-volt-500/40 text-volt-400"
-                    @click="manualSet = null"
-                >
-                    <i class="bi bi-broadcast"></i> {{ $t('stats.backToLive') }}
-                </button>
-            </div>
-        </article>
-
-        <EmptyState
-            v-if="setStats.length === 0"
-            :title="$t('stats.emptySetTitle')"
-            :message="$t('stats.emptySetMessage')"
-        />
+            <!-- Skeleton de secciones: sustituye al flash de EmptyState mientras carga. -->
+            <SkeletonCard :lines="2" />
+            <SkeletonCard :lines="4" />
+            <SkeletonChart :height="220" />
+            <SkeletonCard :lines="5" />
+            <SkeletonChart :height="220" />
+        </template>
 
         <template v-else>
+            <!-- ============ MARCADOR ============ -->
+            <article class="card w-full p-5">
+                <div class="flex items-center justify-between mb-3">
+                    <span v-if="matchOver" class="inline-flex items-center gap-2 text-xs font-semibold text-slate-300">
+                        <i class="bi bi-flag-fill"></i>
+                        {{ $t('stats.final') }}
+                    </span>
+                    <span v-else class="inline-flex items-center gap-2 text-xs font-semibold text-volt-400">
+                        <span class="h-2 w-2 rounded-full bg-volt-400 animate-pulse"></span>
+                        {{ $t('stats.liveSet', { n: currentSet }) }}
+                    </span>
+                    <span class="text-xs text-slate-500">{{ $t('stats.inSets', { us: setsWon[0], them: setsWon[1] }) }}</span>
+                </div>
+
+                <div class="grid grid-cols-2 gap-2">
+                    <div class="text-center rounded-xl bg-brand-500/10 border border-brand-500/20 py-4">
+                        <p class="text-5xl md:text-6xl font-display font-bold text-brand-300">{{ score[0] }}</p>
+                        <p class="text-xs text-slate-400 mt-2 truncate px-2">{{ usName }}</p>
+                        <RouterLink
+                            v-if="teamId"
+                            :to="{ name: 'team', params: { id: teamId } }"
+                            class="mt-1.5 inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/[0.04] px-2 py-0.5 text-[11px] text-slate-300 hover:text-white hover:border-brand-500/40 transition-colors"
+                        >
+                            <i class="bi bi-people-fill text-brand-300"></i>
+                            {{ $t('stats.viewTeam') }}
+                        </RouterLink>
+                    </div>
+                    <div class="text-center rounded-xl bg-white/[0.04] border border-white/10 py-4">
+                        <p class="text-5xl md:text-6xl font-display font-bold text-slate-300">{{ score[1] }}</p>
+                        <p class="text-xs text-slate-400 mt-2 truncate px-2">{{ themName }}</p>
+                    </div>
+                </div>
+
+                <!-- Selector de sets (con "Partido" completo en el informe) -->
+                <div class="mt-4 flex items-center gap-2 overflow-x-auto">
+                    <button
+                        v-if="matchOver"
+                        class="shrink-0 rounded-full px-3 py-1.5 text-sm border transition-colors"
+                        :class="set === 0
+                            ? 'bg-white text-slate-900 border-white font-semibold'
+                            : 'border-white/10 bg-white/[0.04] text-slate-300 hover:border-white/30'"
+                        @click="pickSet(0)"
+                    >
+                        {{ $t('stats.fullMatch') }}
+                    </button>
+                    <button
+                        v-for="n in nSets"
+                        :key="n"
+                        class="shrink-0 rounded-full px-3 py-1.5 text-sm border transition-colors"
+                        :class="set === n
+                            ? 'bg-white text-slate-900 border-white font-semibold'
+                            : 'border-white/10 bg-white/[0.04] text-slate-300 hover:border-white/30'"
+                        @click="pickSet(n)"
+                    >
+                        {{ $t('stats.setN', { n }) }}
+                        <span v-if="setResult(n)" class="ml-1 text-xs opacity-70">{{ setResult(n) }}</span>
+                    </button>
+                    <button
+                        v-if="!matchOver && manualSet !== null && manualSet !== currentSet"
+                        class="shrink-0 rounded-full px-3 py-1.5 text-xs border border-volt-500/40 text-volt-400"
+                        @click="manualSet = null"
+                    >
+                        <i class="bi bi-broadcast"></i> {{ $t('stats.backToLive') }}
+                    </button>
+                </div>
+            </article>
+
+            <EmptyState
+                v-if="setStats.length === 0"
+                :title="$t('stats.emptySetTitle')"
+                :message="$t('stats.emptySetMessage')"
+            />
+
+            <template v-else>
             <!-- ============ EN VIVO: RACHA ============ -->
             <article v-if="!matchOver" class="card w-full p-3 flex items-center justify-center gap-3">
                 <p class="text-2xl font-display font-bold" :class="streak.ours ? 'text-volt-400' : 'text-red-400'">
@@ -284,6 +316,7 @@
                 <VueApexCharts type="bar" height="220" :options="errors.chartOptions" :series="errors.series" />
             </article>
         </template>
+        </template>
     </section>
 </template>
 
@@ -299,6 +332,8 @@ import type { ApexOptions } from "apexcharts";
 const { t, te } = useI18n();
 import CourtMap from "../components/CourtMap.vue";
 import EmptyState from "../components/EmptyState.vue";
+import SkeletonCard from "../components/SkeletonCard.vue";
+import SkeletonChart from "../components/SkeletonChart.vue";
 import { collection, doc, onSnapshot, orderBy, query } from "firebase/firestore";
 import { db } from "../firebase";
 import {
