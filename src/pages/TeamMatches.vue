@@ -7,17 +7,54 @@
 
     <section v-else class="min-h-screen px-4 pb-16 flex flex-col gap-4 items-center max-w-3xl mx-auto">
         <!-- Cabecera del equipo -->
-        <article class="card w-full p-5 flex items-center gap-4">
-            <span
-                class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-white/10 font-display font-bold text-lg"
-                :style="{ background: teamColor + '33', color: teamColor }"
-            >
-                {{ initials }}
-            </span>
-            <span class="flex-1 min-w-0">
-                <span class="block text-lg font-bold truncate">{{ teamName }}</span>
-                <span class="block text-xs text-slate-400">{{ $t('team.sharedMatches', matchRows.length) }}</span>
-            </span>
+        <article class="card w-full p-5 flex flex-col gap-4">
+            <div class="flex items-center gap-4">
+                <span
+                    class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-white/10 font-display font-bold text-lg"
+                    :style="{ background: teamColor + '33', color: teamColor }"
+                >
+                    {{ initials }}
+                </span>
+                <span class="flex-1 min-w-0">
+                    <span class="block text-lg font-bold truncate">{{ teamName }}</span>
+                    <span class="block text-xs text-slate-400">{{ $t('team.sharedMatches', matchRows.length) }}</span>
+                </span>
+            </div>
+
+            <!-- Selector de temporada (global: afecta a Partidos y Estadísticas) -->
+            <!-- solo si el equipo ya publica current_season -->
+            <div v-if="hasSeasons" class="w-full flex items-center gap-2 overflow-x-auto">
+                <button
+                    class="shrink-0 rounded-full px-3 py-1.5 text-xs border transition-colors"
+                    :class="selectedSeason === 'all'
+                        ? 'bg-white text-slate-900 border-white font-semibold'
+                        : 'border-white/10 bg-white/[0.04] text-slate-300 hover:border-white/30'"
+                    @click="selectedSeason = 'all'"
+                >
+                    {{ $t('team.allSeasons') }}
+                </button>
+                <button
+                    v-for="sid in seasonIds"
+                    :key="sid"
+                    class="shrink-0 rounded-full px-3 py-1.5 text-xs border transition-colors"
+                    :class="selectedSeason === sid
+                        ? 'bg-white text-slate-900 border-white font-semibold'
+                        : 'border-white/10 bg-white/[0.04] text-slate-300 hover:border-white/30'"
+                    @click="selectedSeason = sid"
+                >
+                    {{ seasonsMap?.[sid] ?? sid }}
+                </button>
+                <button
+                    v-if="hasUnseasonedMatches"
+                    class="shrink-0 rounded-full px-3 py-1.5 text-xs border transition-colors"
+                    :class="selectedSeason === '__none__'
+                        ? 'bg-white text-slate-900 border-white font-semibold'
+                        : 'border-white/10 bg-white/[0.04] text-slate-300 hover:border-white/30'"
+                    @click="selectedSeason = '__none__'"
+                >
+                    {{ $t('team.noSeason') }}
+                </button>
+            </div>
         </article>
 
         <!-- Pestañas: partidos / estadísticas agregadas -->
@@ -39,40 +76,6 @@
                 @click="view = 'stats'"
             >
                 {{ $t('team.tabStats') }}
-            </button>
-        </div>
-
-        <!-- Selector de temporada: solo si el equipo ya publica current_season -->
-        <div v-if="hasSeasons" class="w-full flex items-center gap-2 overflow-x-auto">
-            <button
-                class="shrink-0 rounded-full px-3 py-1.5 text-xs border transition-colors"
-                :class="selectedSeason === 'all'
-                    ? 'bg-white text-slate-900 border-white font-semibold'
-                    : 'border-white/10 bg-white/[0.04] text-slate-300 hover:border-white/30'"
-                @click="selectedSeason = 'all'"
-            >
-                {{ $t('team.allSeasons') }}
-            </button>
-            <button
-                v-for="sid in seasonIds"
-                :key="sid"
-                class="shrink-0 rounded-full px-3 py-1.5 text-xs border transition-colors"
-                :class="selectedSeason === sid
-                    ? 'bg-white text-slate-900 border-white font-semibold'
-                    : 'border-white/10 bg-white/[0.04] text-slate-300 hover:border-white/30'"
-                @click="selectedSeason = sid"
-            >
-                {{ seasonsMap?.[sid] ?? sid }}
-            </button>
-            <button
-                v-if="hasUnseasonedMatches"
-                class="shrink-0 rounded-full px-3 py-1.5 text-xs border transition-colors"
-                :class="selectedSeason === '__none__'
-                    ? 'bg-white text-slate-900 border-white font-semibold'
-                    : 'border-white/10 bg-white/[0.04] text-slate-300 hover:border-white/30'"
-                @click="selectedSeason = '__none__'"
-            >
-                {{ $t('team.noSeason') }}
             </button>
         </div>
 
@@ -99,11 +102,18 @@
                     <span class="block font-semibold truncate">{{ $t('team.vs', { opponent: m.opponent }) }}</span>
                     <span class="block text-xs text-slate-400">{{ m.dateLabel }}</span>
                 </span>
-                <span v-if="m.live" class="inline-flex items-center gap-1.5 text-xs font-semibold text-volt-400">
-                    <span class="h-2 w-2 rounded-full bg-volt-400 animate-pulse"></span>
+                <span
+                    v-if="m.live"
+                    class="inline-flex items-center gap-1.5 rounded-full bg-volt-400 px-2.5 py-1 text-xs font-bold text-ink-950"
+                >
+                    <span class="h-1.5 w-1.5 rounded-full bg-ink-950 animate-pulse"></span>
                     {{ $t('team.live') }}
                 </span>
-                <span v-else-if="m.result" class="font-display font-bold" :class="m.won ? 'text-volt-400' : 'text-red-400'">
+                <span
+                    v-else-if="m.result"
+                    class="rounded-full border px-2.5 py-1 font-display text-sm font-bold"
+                    :class="m.won ? 'border-brand-500/40 bg-brand-500/15 text-brand-300' : 'border-red-500/40 bg-red-500/15 text-red-400'"
+                >
                     {{ m.result }}
                 </span>
                 <i class="bi bi-chevron-right text-slate-500"></i>
@@ -149,7 +159,7 @@
                                 <p class="text-[11px] text-slate-400 mt-1">{{ $t('team.setsRecord') }}</p>
                             </div>
                             <div class="text-center rounded-xl bg-white/[0.04] border border-white/10 py-3">
-                                <p class="text-lg font-display font-bold" :class="currentStreak.count ? (currentStreak.won ? 'text-volt-400' : 'text-red-400') : 'text-slate-300'">
+                                <p class="text-lg font-display font-bold" :class="currentStreak.count ? (currentStreak.won ? 'text-brand-300' : 'text-red-400') : 'text-slate-300'">
                                     {{ currentStreak.count || "—" }}
                                 </p>
                                 <p class="text-[11px] text-slate-400 mt-1">{{ currentStreak.won ? $t('team.streakWon') : $t('team.streakLost') }}</p>
@@ -160,7 +170,7 @@
                                 v-for="(w, i) in recentForm"
                                 :key="i"
                                 class="h-2.5 w-2.5 rounded-full"
-                                :class="w ? 'bg-volt-400' : 'bg-red-400'"
+                                :class="w ? 'bg-brand-400' : 'bg-red-400'"
                             ></span>
                             <span class="text-[11px] text-slate-500 ml-1">{{ $t('team.recentForm') }}</span>
                         </div>
