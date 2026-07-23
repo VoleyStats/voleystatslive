@@ -59,7 +59,11 @@
                 <SkeletonChart :height="240" />
             </template>
             <template v-else-if="activeTab === 'players'">
-                <SkeletonCard v-for="n in 4" :key="n" :lines="3" />
+                <SkeletonCard :lines="1" />
+                <SkeletonCard height="h-14" />
+                <SkeletonChart :height="280" />
+                <SkeletonCard :lines="3" />
+                <SkeletonCard :lines="3" />
             </template>
             <template v-else-if="activeTab === 'tables'">
                 <SkeletonCard :lines="6" />
@@ -264,12 +268,15 @@
 
             <!-- ============ 3. POR JUGADORA ============ -->
             <template v-else-if="activeTab === 'players'">
-                <PlayersSection
+                <PlayerDetailSection
+                    v-model:player-id="selectedPlayerId"
                     :stats="gameStats"
-                    :n-sets="nSets"
-                    :set="set"
+                    :all-stats="setStats"
                     :derived-kills="derived.kills"
                     :derived-aces="derived.aces"
+                    :credited-by="derived.creditedBy"
+                    :n-sets="nSets"
+                    :set="set"
                 />
             </template>
 
@@ -326,7 +333,7 @@ import EmptyState from "../components/EmptyState.vue";
 import SkeletonCard from "../components/SkeletonCard.vue";
 import SkeletonChart from "../components/SkeletonChart.vue";
 import Rotations360Section from "../components/stats/Rotations360Section.vue";
-import PlayersSection from "../components/stats/PlayersSection.vue";
+import PlayerDetailSection from "../components/stats/PlayerDetailSection.vue";
 import SkillTablesSection from "../components/stats/SkillTablesSection.vue";
 import DirectionsSection from "../components/stats/DirectionsSection.vue";
 import { collection, doc, onSnapshot, orderBy, query } from "firebase/firestore";
@@ -430,6 +437,11 @@ const lastPoint = computed(() => pointEnders.value.at(-1));
 // Motor de kills/aces derivados (captura en cancha) sobre el ámbito
 // seleccionado (set o partido completo) — se recalcula si cambia `set`.
 const derived = computed(() => deriveCredits(gameStats.value));
+
+// Selector global de jugadora del tab "Por jugadora" (PlayerDetailSection):
+// vive aquí, no dentro del componente, para sobrevivir al cambio de pestaña
+// (las pestañas se montan con `v-if`, ver `activeTab`).
+const selectedPlayerId = ref<string>("");
 
 // Ataque según la nota de la recepción previa, para el tab "Rotaciones"
 // (recorre el ámbito en orden, reiniciando entre sets y al cerrarse cada

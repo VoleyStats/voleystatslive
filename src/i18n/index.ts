@@ -25,9 +25,6 @@ export const i18n = createI18n({
     globalInjection: true,
     locale: detectLocale(),
     fallbackLocale: "es",
-    // Algunos mensajes (bloques de PlayersSection) llevan <br>/<b> y se pintan
-    // con v-html a propósito; silenciamos el aviso de desarrollo.
-    warnHtmlMessage: false,
     messages: { es, en },
 });
 

@@ -186,7 +186,11 @@
                     <SkeletonCard height="h-72" />
                 </template>
                 <template v-else-if="statsTab === 'byPlayer'">
+                    <SkeletonCard :lines="1" />
+                    <SkeletonCard height="h-14" />
                     <SkeletonChart :height="280" />
+                    <SkeletonCard :lines="3" />
+                    <SkeletonCard :lines="3" />
                 </template>
                 <template v-else-if="statsTab === 'tables'">
                     <SkeletonCard :lines="6" />
@@ -346,27 +350,14 @@
 
                 <!-- ============ 6. POR JUGADORA ============ -->
                 <template v-else-if="statsTab === 'byPlayer'">
-                    <article v-if="rosterPlayers.length" class="card w-full p-4">
-                        <p class="text-sm font-semibold mb-3">{{ $t('team.radarByPlayer') }}</p>
-                        <div class="flex items-center gap-2 overflow-x-auto pb-1 mb-2">
-                            <button
-                                v-for="p in rosterPlayers"
-                                :key="p.id"
-                                class="shrink-0 rounded-full px-3 py-1.5 text-xs border transition-colors"
-                                :class="currentPlayerId === p.id
-                                    ? 'bg-white text-slate-900 border-white font-semibold'
-                                    : 'border-white/10 bg-white/[0.04] text-slate-300 hover:border-white/30'"
-                                @click="selectedPlayerId = p.id"
-                            >
-                                {{ p.name }}
-                            </button>
-                        </div>
-                        <VueApexCharts type="radar" height="280" :options="radarPlayerChart.chartOptions" :series="radarPlayerChart.series" />
-                    </article>
-                    <EmptyState
-                        v-else
-                        :title="$t('team.statsEmptyTitle')"
-                        :message="$t('team.statsEmptyMessage')"
+                    <PlayerDetailSection
+                        v-model:player-id="selectedPlayerId"
+                        :stats="gameStats"
+                        :all-stats="allStats"
+                        :derived-kills="derivedKills"
+                        :derived-aces="derivedAces"
+                        :credited-by="derivedCredits.creditedBy"
+                        :match-groups="gameStatsByMatch"
                     />
                 </template>
 
@@ -394,6 +385,7 @@ import SkeletonRow from "../components/SkeletonRow.vue";
 import Rotations360Section from "../components/stats/Rotations360Section.vue";
 import SkillTablesSection from "../components/stats/SkillTablesSection.vue";
 import DirectionsSection from "../components/stats/DirectionsSection.vue";
+import PlayerDetailSection from "../components/stats/PlayerDetailSection.vue";
 import { useTeamStats } from "../composables/useTeamStats";
 import {
     SERVE_ERR_IDS,
@@ -412,7 +404,6 @@ import {
     mergeCredits,
     mergeGradeBuckets,
     pct,
-    playerRadarFilters,
     radarAxes,
     receptionTotals,
     sideOutStats,
@@ -579,7 +570,17 @@ const creditsByCode = computed(() => {
     }
     return map;
 });
-const derivedKills = computed(() => mergeCredits([...creditsByCode.value.values()]).kills);
+// Objeto de créditos fusionado completo (kills/aces/creditedBy): expuesto tal
+// cual a <PlayerDetailSection> (tab "Por jugadora"), que necesita las tres
+// piezas para atribuir puntos derivados a la jugadora seleccionada.
+const derivedCredits = computed(() => mergeCredits([...creditsByCode.value.values()]));
+const derivedKills = computed(() => derivedCredits.value.kills);
+const derivedAces = computed(() => derivedCredits.value.aces);
+// Secuencia ORDENADA de stats de juego por partido (una entrada por partido,
+// sin fusionar) — la necesita <PlayerDetailSection> para el bloque "ataque
+// según la nota de recepción" (el puntero de última recepción no puede
+// recorrer varios partidos concatenados, ver `attackByReceptionGradeForMatch`).
+const gameStatsByMatch = computed(() => loadedMatches.value.map((m) => (m.stats as StatDoc[]).filter(isGameStat)));
 
 // --- KPIs ---
 const kpiSideOut = computed(() => sideOutStats(pointEnders.value));
@@ -665,31 +666,10 @@ const radarTeamChart = computed(() => ({
     chartOptions: radarChartOptions("#6E93FF"),
 }));
 
-const rosterPlayers = computed(() => {
-    const names = new Map<string, string>();
-    for (const s of gameStats.value) {
-        if (isRival(s)) continue;
-        const id = String(s.player?.id ?? "");
-        if (id && !names.has(id)) names.set(id, s.player?.name || id);
-    }
-    return [...names.entries()]
-        .map(([id, name]) => ({ id, name }))
-        .sort((a, b) => a.name.localeCompare(b.name));
-});
-const selectedPlayerId = ref<string | null>(null);
-const currentPlayerId = computed(() => selectedPlayerId.value ?? rosterPlayers.value[0]?.id ?? "");
-const radarPlayer = computed(() =>
-    currentPlayerId.value ? radarAxes(gameStats.value, playerRadarFilters(currentPlayerId.value)) : { attack: 0, serve: 0, block: 0, dig: 0, receive: 0 }
-);
-const radarPlayerChart = computed(() => ({
-    series: [
-        {
-            name: rosterPlayers.value.find((p) => p.id === currentPlayerId.value)?.name ?? "",
-            data: RADAR_AXIS_ORDER.map((k) => radarPlayer.value[k]),
-        },
-    ],
-    chartOptions: radarChartOptions("#CBFB45"),
-}));
+// Selector global de jugadora del tab "Por jugadora" (PlayerDetailSection):
+// vive aquí, no dentro del componente, para sobrevivir al cambio de
+// sub-pestaña de "Estadísticas" (se montan con `v-if`, ver `statsTab`).
+const selectedPlayerId = ref<string>("");
 
 // --- D/E/F: rotaciones 360, ataque por fase/nota/técnica y colocadora →
 // atacante viven en <Rotations360Section> (src/components/stats/). Solo se

@@ -1,9 +1,10 @@
 // Fórmulas y constantes de estadísticas compartidas entre el visor de un
-// partido (GeneralStats.vue, components/stats/PlayersSection.vue) y las estadísticas agregadas
-// de equipo (composables/useTeamStats.ts, TeamMatches.vue). Todo lo que hay
-// aquí opera sobre el shape crudo de un doc de `live_matches/{code}/stats`
-// (ver contrato en ../../CLAUDE.md y VoleyStatsApp/CLAUDE.md) — no dupliques
-// estas constantes/fórmulas en un componente nuevo, impórtalas de aquí.
+// partido (GeneralStats.vue, components/stats/PlayerDetailSection.vue) y las
+// estadísticas agregadas de equipo (composables/useTeamStats.ts, TeamMatches.vue).
+// Todo lo que hay aquí opera sobre el shape crudo de un doc de
+// `live_matches/{code}/stats` (ver contrato en ../../CLAUDE.md y
+// VoleyStatsApp/CLAUDE.md) — no dupliques estas constantes/fórmulas en un
+// componente nuevo, impórtalas de aquí.
 
 export type StatDoc = any;
 
@@ -19,9 +20,7 @@ export const SERVE_ERR_IDS = ["15", "32"];
 export const RECEPTION_IDS = ["1", "2", "3", "4", "22"];
 // Nota de recepción: id de acción -> nota 0-3 (3 = perfecta).
 export const RECEPTION_GRADES: Record<string, number> = { "4": 3, "3": 2, "2": 1, "1": 0, "22": 0 };
-// Nota de saque 0-3 (misma fórmula que la app iPad). OJO: `PlayersSection.vue`
-// tiene los pesos de 39/41 permutados (bug conocido, no se corrige aquí para
-// no cambiar una cifra ya publicada) — código nuevo debe usar estos pesos.
+// Nota de saque 0-3 (misma fórmula que la app iPad).
 export const SERVE_WEIGHTS: Record<string, number> = { "39": 0.5, "40": 1, "41": 2, "8": 3 };
 // Pesos del eje "recepción" del radar de equipo/jugadora (0-3, mismo patrón
 // que SERVE_WEIGHTS): ids fuera de este mapa (incl. "22", error) pesan 0.
@@ -482,7 +481,15 @@ export type GradeBucket = AttackTotals;
 // acciones admin — mezclar partidos rompería el reinicio del puntero entre
 // sets con el mismo número (p.ej. el set 3 de un partido y el set 3 del
 // siguiente). Usa `mergeGradeBuckets` para combinar varios partidos.
-export function attackByReceptionGradeForMatch(orderedGameStats: StatDoc[], derivedKills: Set<StatDoc>): Map<number, GradeBucket> {
+// `attackerFilter` acota qué SWINGS de ataque cuentan (p.ej. una sola
+// jugadora en `PlayerDetailSection.vue`) sin tocar el puntero de "última
+// recepción", que debe seguir avanzando con la recepción de CUALQUIER
+// compañera — de ahí que el filtro solo se aplique a la rama de ataque.
+export function attackByReceptionGradeForMatch(
+    orderedGameStats: StatDoc[],
+    derivedKills: Set<StatDoc>,
+    attackerFilter: (s: StatDoc) => boolean = () => true
+): Map<number, GradeBucket> {
     const buckets = new Map<number, GradeBucket>();
     let lastGrade: number | null = null;
     let lastSetN: number | null = null;
@@ -495,7 +502,7 @@ export function attackByReceptionGradeForMatch(orderedGameStats: StatDoc[], deri
         const id = aid(s);
         if (!isRival(s) && id in RECEPTION_GRADES) {
             lastGrade = RECEPTION_GRADES[id];
-        } else if (!isRival(s) && ATTACK_IDS.includes(id) && lastGrade !== null) {
+        } else if (!isRival(s) && ATTACK_IDS.includes(id) && lastGrade !== null && attackerFilter(s)) {
             const b = buckets.get(lastGrade) ?? { attempts: 0, kills: 0, errors: 0, blocked: 0 };
             b.attempts++;
             if (isKill(s, derivedKills)) b.kills++;
