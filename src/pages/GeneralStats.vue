@@ -320,7 +320,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, reactive, ref, watch } from "vue";
+import { computed, onUnmounted, reactive, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 import { useI18n } from "vue-i18n";
 import { useDocument } from "vuefire";
@@ -336,7 +336,7 @@ import Rotations360Section from "../components/stats/Rotations360Section.vue";
 import PlayerDetailSection from "../components/stats/PlayerDetailSection.vue";
 import SkillTablesSection from "../components/stats/SkillTablesSection.vue";
 import DirectionsSection from "../components/stats/DirectionsSection.vue";
-import { collection, doc, onSnapshot, orderBy, query } from "firebase/firestore";
+import { collection, doc, getDocs, getDocsFromCache, onSnapshot, orderBy, query } from "firebase/firestore";
 import { db } from "../firebase";
 import {
     ADMIN_IDS,
@@ -347,6 +347,7 @@ import {
     attackByReceptionGradeForMatch,
     currentSetsWon,
     deriveCredits,
+    isMatchCacheable,
     isMatchFinished,
     isRival,
     isUnforced,
@@ -401,13 +402,55 @@ const AREA_LABELS = computed(() => AREA_LABEL_KEYS.map((key) => t(`stats.areas.$
 const match = useDocument(doc(db, "live_matches", props?.id ?? "x"));
 const baseStats = reactive({ data: [] as any[], loaded: false });
 
-onSnapshot(
-    query(collection(db, "live_matches", props?.id ?? "x", "stats"), orderBy("order")),
-    (q) => {
-        baseStats.data = q.docs.map((d) => d.data());
-        baseStats.loaded = true;
-    }
+// El doc del partido (`useDocument`) es async, así que el modo de carga de
+// `stats` se decide UNA sola vez, en cuanto se resuelve (`match.value` deja
+// de ser `undefined`; puede quedar en `null` si no existe):
+//  - Partido realmente en directo (`live === true` y todavía NO cacheable,
+//    ver `isMatchCacheable` — más tolerante que `isMatchFinished`):
+//    `onSnapshot` permanente, igual que antes. Si el partido termina con la
+//    página abierta, esta sesión NO migra a one-shot — sigue con el mismo
+//    listener (solo una visita nueva, tras recargar, entraría en modo
+//    one-shot). Evita desmontar/remontar la suscripción a mitad de sesión.
+//  - Cualquier otro caso (cacheable/terminado, doc no encontrado, estados
+//    antiguos sin `live`): one-shot cache-first — intenta `getDocsFromCache`
+//    (IndexedDB local, sin red); si lanza o viene vacía, cae a `getDocs` de
+//    servidor. Sin listener permanente: esta página no vuelve a tocar
+//    Firestore para ese partido tras la carga inicial.
+let statsUnsub: (() => void) | null = null;
+const stopStatsModeWatch = watch(
+    () => match.value,
+    (m) => {
+        if (m === undefined) return; // useDocument sigue resolviendo.
+        stopStatsModeWatch();
+        const statsQuery = query(collection(db, "live_matches", props?.id ?? "x", "stats"), orderBy("order"));
+        const isLiveActive = m?.live === true && !isMatchCacheable(m);
+        if (isLiveActive) {
+            statsUnsub = onSnapshot(statsQuery, (q) => {
+                baseStats.data = q.docs.map((d) => d.data());
+                baseStats.loaded = true;
+            });
+            return;
+        }
+        (async () => {
+            try {
+                const cacheSnap = await getDocsFromCache(statsQuery);
+                if (!cacheSnap.empty) {
+                    baseStats.data = cacheSnap.docs.map((d) => d.data());
+                    baseStats.loaded = true;
+                    return;
+                }
+            } catch {
+                // Sin caché local (IndexedDB) para esta consulta todavía: cae a servidor.
+            }
+            const serverSnap = await getDocs(statsQuery);
+            baseStats.data = serverSnap.docs.map((d) => d.data());
+            baseStats.loaded = true;
+        })();
+    },
+    { immediate: true }
 );
+
+onUnmounted(() => statsUnsub?.());
 
 const notFound = computed(() => match.value === null && baseStats.loaded && baseStats.data.length === 0);
 const nSets = computed(() => match.value?.n_sets ?? 5);

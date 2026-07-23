@@ -1,5 +1,16 @@
 import { computed, markRaw, onUnmounted, reactive, ref, shallowRef, watchEffect } from "vue";
-import { collection, doc, getDoc, getDocs, onSnapshot, orderBy, query, type Unsubscribe } from "firebase/firestore";
+import {
+    collection,
+    doc,
+    getDoc,
+    getDocs,
+    getDocsFromCache,
+    onSnapshot,
+    orderBy,
+    query,
+    type Query,
+    type Unsubscribe,
+} from "firebase/firestore";
 import { useDocument } from "vuefire";
 import { db } from "../firebase";
 import { isMatchCacheable, isMatchFinished, type StatDoc } from "../utils/volleyStats";
@@ -36,12 +47,39 @@ import { isMatchCacheable, isMatchFinished, type StatDoc } from "../utils/volley
 // `season` (id). Hoy ningún doc trae estos campos — sin ellos, todo
 // funciona igual que antes (sin selector, todos los partidos visibles).
 
-const CACHE_SCHEMA_VERSION = 2; // v2: añade `fingerprint` (sets_scoreboard/current_set) a la entrada cacheada.
+// v2: añade `fingerprint` (sets_scoreboard/current_set) a la entrada
+// cacheada. v3: adelgaza los stats cacheados a una proyección "slim" (ver
+// `trimStat`) — el objeto `rotation` (~55% del peso de cada stat, con las 6
+// posiciones de cancha como `Player.toJSON()` completos) y otros campos que
+// la web nunca lee (`player_in`, `rotationTurns`, `date`, `order`) dejaban de
+// caber en la cuota de 5 MB de localStorage a partir de ~5-7 partidos
+// cacheados (fallo silencioso de `writeCache`, ver más abajo).
+const CACHE_SCHEMA_VERSION = 3;
+const CACHE_KEY_PREFIX = "vsl-team-match-v";
 const CONCURRENCY = 4;
 
 function cacheKey(code: string): string {
-    return `vsl-team-match-v${CACHE_SCHEMA_VERSION}:${code}`;
+    return `${CACHE_KEY_PREFIX}${CACHE_SCHEMA_VERSION}:${code}`;
 }
+
+// Borra las entradas de localStorage de versiones de esquema ANTERIORES (las
+// del formato "gordo" pre-slim, o de una futura migración): libera cuota en
+// vez de dejarlas muertas ocupando espacio para siempre. Se ejecuta una vez
+// por carga del módulo (side effect a nivel de módulo, ver abajo).
+function pruneOldCacheVersions(): void {
+    try {
+        const currentPrefix = cacheKey("");
+        const stale: string[] = [];
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key && key.startsWith(CACHE_KEY_PREFIX) && !key.startsWith(currentPrefix)) stale.push(key);
+        }
+        for (const key of stale) localStorage.removeItem(key);
+    } catch {
+        // localStorage no disponible: nada que limpiar.
+    }
+}
+pruneOldCacheVersions();
 
 interface CachedMatch {
     match: StatDoc;
@@ -96,6 +134,34 @@ function trimMatch(match: StatDoc): StatDoc {
         sets_scoreboard: match.sets_scoreboard ?? [],
         live: match.live,
         date: match.date ?? null,
+    };
+}
+
+// Proyección slim de un doc de stat para la caché localStorage: SOLO los
+// campos que consume esta capa (verificado con grep sobre volleyStats.ts,
+// teamTables.ts y los componentes de team stats — Rotations360Section,
+// PlayerDetailSection, DirectionsSection, SkillTablesSection). Se descartan,
+// entre otros: `rotation` (objeto pesado de `Rotation.toJSON()` con las 6
+// posiciones de cancha, cada una un `Player.toJSON()` completo — nunca leído
+// por la web), `player_in`, `rotationTurns`, `date` (del stat, no del
+// partido) y `order` (el array ya llega ordenado por la query `orderBy`,
+// ningún consumidor relee ese campo tras la carga). `action.name` tampoco se
+// incluye: solo se usa como fallback de texto en GeneralStats.vue, que no
+// pasa por esta caché (hace su propio `onSnapshot`/one-shot directo).
+function trimStat(s: StatDoc): StatDoc {
+    return {
+        to: s?.to,
+        score_us: s?.score_us,
+        score_them: s?.score_them,
+        stage: s?.stage,
+        set: { number: s?.set?.number },
+        action: { id: s?.action?.id, area: s?.action?.area, type: s?.action?.type },
+        player: s?.player ? { id: s.player.id, name: s.player.name } : s?.player ?? null,
+        server: s?.server ? { id: s.server.id, name: s.server.name } : s?.server ?? null,
+        setter: s?.setter ? { id: s.setter.id, name: s.setter.name } : s?.setter ?? null,
+        detail: s?.detail,
+        direction: s?.direction,
+        rotationCount: s?.rotationCount,
     };
 }
 
@@ -340,16 +406,46 @@ export function useTeamStats(teamId: string) {
         statsRequested.value = true;
     }
 
+    interface CacheProbeResult {
+        applied: boolean;
+        // Había una entrada en localStorage para este partido pero con una
+        // huella distinta (el marcador cambió: re-sincronización/corrección
+        // desde el móvil) — señal de que la caché offline de Firestore
+        // (IndexedDB) también podría estar desactualizada, ver
+        // `fetchStatsCacheFirst`.
+        knownStale: boolean;
+    }
+
     // Intenta resolver un partido desde la caché localStorage (síncrono, sin
-    // red) comparando la huella del marcador. Devuelve `true` si lo resolvió.
-    function tryApplyCache(entry: TeamMatchData): boolean {
-        if (!entry.cacheable || !entry.match) return false;
+    // red) comparando la huella del marcador.
+    function tryApplyCache(entry: TeamMatchData): CacheProbeResult {
+        if (!entry.cacheable || !entry.match) return { applied: false, knownStale: false };
         const fp = scoreboardFingerprint(entry.match);
         const cached = readCache(entry.code);
-        if (!cached || cached.fingerprint !== fp) return false;
+        if (!cached) return { applied: false, knownStale: false };
+        if (cached.fingerprint !== fp) return { applied: false, knownStale: true };
         entry.stats = rawStats(cached.stats);
         entry.statsLoaded = true;
-        return true;
+        return { applied: true, knownStale: false };
+    }
+
+    // Fase "stats" cache-first para partidos cacheables: intenta resolver la
+    // subcolección desde la caché local de Firestore (IndexedDB,
+    // `getDocsFromCache` — sin red) antes de pedirla al servidor. Si la
+    // consulta lanza (sin caché local para ella) o viene vacía, cae a
+    // `getDocs` normal (server-first). No se usa si ya sabemos que la huella
+    // cambió (`knownStale`): en ese caso la caché local podría reflejar el
+    // estado ANTERIOR a la corrección, así que se va directo a servidor.
+    async function fetchStatsCacheFirst(code: string): Promise<StatDoc[]> {
+        const q: Query = query(collection(db, "live_matches", code, "stats"), orderBy("order"));
+        try {
+            const cacheSnap = await getDocsFromCache(q);
+            if (!cacheSnap.empty) return rawStats(cacheSnap.docs.map((d) => d.data()));
+        } catch {
+            // Sin caché local (IndexedDB) para esta consulta todavía: cae a servidor.
+        }
+        const serverSnap = await getDocs(q);
+        return rawStats(serverSnap.docs.map((d) => d.data()));
     }
 
     watchEffect(async () => {
@@ -364,10 +460,16 @@ export function useTeamStats(teamId: string) {
         if (!candidates.length) return;
 
         const stillPending: TeamMatchData[] = [];
+        const staleFingerprint = new Set<string>();
         let cacheHits = 0;
         for (const m of candidates) {
-            if (tryApplyCache(m)) cacheHits++;
-            else stillPending.push(m);
+            const probe = tryApplyCache(m);
+            if (probe.applied) {
+                cacheHits++;
+            } else {
+                stillPending.push(m);
+                if (probe.knownStale) staleFingerprint.add(m.code);
+            }
         }
         if (cacheHits) commitMatches(); // que se vean ya los resueltos por caché, sin esperar red.
         if (!stillPending.length) return;
@@ -385,14 +487,28 @@ export function useTeamStats(teamId: string) {
             stillPending,
             CONCURRENCY,
             async (m) => {
-                const statsSnap = await getDocs(query(collection(db, "live_matches", m.code, "stats"), orderBy("order")));
-                const stats = rawStats(statsSnap.docs.map((d) => d.data()));
+                // Cache-first (IndexedDB local, sin red) solo para partidos
+                // cacheables cuya huella NO se sabe cambiada respecto a lo
+                // conocido (localStorage) — si cambió, o si el partido no es
+                // cacheable (en directo/incierto), va directo a servidor.
+                const stats =
+                    m.cacheable && !staleFingerprint.has(m.code)
+                        ? await fetchStatsCacheFirst(m.code)
+                        : rawStats(
+                              (
+                                  await getDocs(query(collection(db, "live_matches", m.code, "stats"), orderBy("order")))
+                              ).docs.map((d) => d.data())
+                          );
                 m.stats = stats;
                 m.statsLoaded = true;
                 statsInFlight.delete(m.code);
 
                 if (m.cacheable && m.match) {
-                    writeCache(m.code, { match: m.match, stats, fingerprint: scoreboardFingerprint(m.match) });
+                    writeCache(m.code, {
+                        match: m.match,
+                        stats: stats.map(trimStat),
+                        fingerprint: scoreboardFingerprint(m.match),
+                    });
                 } else if (m.live && !statsLiveUnsubs.has(m.code)) {
                     // Partido realmente en directo: mantener sus stats al día.
                     const unsub = onSnapshot(
