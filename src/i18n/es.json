@@ -117,6 +117,12 @@
       "a6": "Descargar la app y anotar tus partidos es gratis, incluidas las estadísticas en directo de cada partido. El plan premium añade el histórico del equipo y las estadísticas de temporada con filtros, la exportación en PDF, la copia de seguridad en la nube y la posibilidad de completar a posteriori estadísticas que no anotaste en vivo. Ver los directos desde la web es siempre gratis."
     }
   },
+  "overlay": {
+    "timeout": "Tiempo muerto",
+    "substitution": "Cambio",
+    "setStatsTitle": "Estadísticas del set",
+    "statsPoints": "Puntos"
+  },
   "teamCode": {
     "title": "Estadísticas en vivo",
     "subtitle": "Introduce el código del partido o pega el enlace del equipo para acceder al marcador y las estadísticas en directo. Ambos los comparte quien registra el partido desde la app.",

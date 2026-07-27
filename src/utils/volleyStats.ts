@@ -120,6 +120,52 @@ export const isKill = (s: StatDoc, derivedKills: Set<StatDoc>): boolean =>
 export const isAce = (s: StatDoc, derivedAces: Set<StatDoc>): boolean =>
     (aid(s) === "8" && s.to === 1) || derivedAces.has(s);
 
+export interface PointsOriginRow {
+    us: number;
+    them: number;
+}
+
+// Origen de los puntos por equipo: ataque/bloqueo/saque directo/errores del
+// rival. `pointEnders` son los stats de cierre de punto (`to !== 0`) del
+// ámbito (set o partido) ya filtrados de acciones admin; `derived` es el
+// motor de créditos (`deriveCredits`) del MISMO ámbito, para reatribuir los
+// puntos derivados (captura en cancha) a la jugadora/equipo real. La columna
+// `us`/`them` es SIEMPRE quién ganó el punto (no quién ejecutó la acción):
+// `errors.us` = puntos ganados por errores del rival, `errors.them` = puntos
+// del rival por errores propios. Usado por GeneralStats.vue ("Origen de los
+// puntos") y Overlay.vue (bloque de estadísticas del set).
+export interface PointsOrigin {
+    attack: PointsOriginRow;
+    block: PointsOriginRow;
+    ace: PointsOriginRow;
+    errors: PointsOriginRow;
+}
+
+export function pointsOrigin(pointEnders: StatDoc[], derived: DerivedCredits): PointsOrigin {
+    const rows: PointsOrigin = {
+        attack: { us: 0, them: 0 },
+        block: { us: 0, them: 0 },
+        ace: { us: 0, them: 0 },
+        errors: { us: 0, them: 0 },
+    };
+    const order: (keyof PointsOrigin)[] = ["attack", "block", "ace", "errors"];
+    for (const s of pointEnders) {
+        const rival = isRival(s);
+        const id = aid(s);
+        if (rival && s.to === 1) {
+            const credit = derived.creditedBy.get(s);
+            if (credit) {
+                rows[derived.aces.has(credit) ? "ace" : "attack"].us++;
+                continue;
+            }
+        }
+        const bucketKey = order[KILL_IDS.includes(id) ? 0 : id === "13" ? 1 : id === "8" ? 2 : 3];
+        if (s.to === 1) rows[rival ? "errors" : bucketKey].us++;
+        else if (s.to === 2) rows[!rival ? "errors" : bucketKey].them++;
+    }
+    return rows;
+}
+
 // Errores no forzados: puntos del rival regalados sin oposición (error de
 // saque, ataque fallado sin bloqueo, colocación o free). Ver GeneralStats.vue
 // para el contexto de por qué esto sustituye al antiguo "regalados" bruto.

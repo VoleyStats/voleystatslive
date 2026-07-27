@@ -1,9 +1,13 @@
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted } from "vue"
+import { computed, onMounted, onUnmounted, ref } from "vue"
 import { useRoute } from "vue-router"
-import { doc } from "firebase/firestore"
+import { useI18n } from "vue-i18n"
+import { collection, doc, onSnapshot, orderBy, query } from "firebase/firestore"
 import { useDocument } from "vuefire"
 import { db } from "../firebase"
+import { ADMIN_IDS, aid, deriveCredits, pointsOrigin } from "../utils/volleyStats"
+
+const { t } = useI18n()
 
 // Everything the scoreboard needs already lives on the match doc: the app
 // rewrites `sets_scoreboard` (per-set scores, current set included) on every
@@ -140,16 +144,125 @@ const playedSets = computed(() =>
     scoreboard.value.filter((s) => s.number <= currentSet.value).sort((a, b) => a.number - b.number)
 )
 
+// --- Stats subcollection: momentary banners (timeout/substitution) + the
+// "set stats" block of the expanded panel. One listener, same query shape as
+// GeneralStats.vue. Skipped entirely in demo mode (no Firestore needed).
+const allStats = ref<any[]>([])
+
+interface BannerItem {
+    id: number
+    kind: "timeout" | "sub"
+    team?: "us" | "them"
+    playerIn?: string
+    playerOut?: string
+}
+const bannerQueue = ref<BannerItem[]>([])
+const activeBanner = ref<BannerItem | null>(null)
+let bannerSeq = 0
+let bannerTimer: ReturnType<typeof setTimeout> | null = null
+const BANNER_MS = 8000
+
+function clearBannerTimer() {
+    if (bannerTimer) {
+        clearTimeout(bannerTimer)
+        bannerTimer = null
+    }
+}
+function advanceBanner() {
+    clearBannerTimer()
+    const next = bannerQueue.value.shift()
+    activeBanner.value = next ?? null
+    if (next) bannerTimer = setTimeout(advanceBanner, BANNER_MS)
+}
+function enqueueBanner(item: Omit<BannerItem, "id">) {
+    bannerQueue.value.push({ id: ++bannerSeq, ...item })
+    if (!activeBanner.value) advanceBanner()
+}
+function formatPlayer(p: any): string {
+    if (!p) return ""
+    const name = p.name ?? ""
+    const num = Number(p.number)
+    return num ? `${num} ${name}`.trim() : name
+}
+// Timeout ("0"): `to` carries WHO called it here (1 = us, 2 = them) instead
+// of its usual "who scored" meaning — `player` is always the rival sentinel
+// on this stat, so it can't be used to tell the teams apart.
+// Substitution ("99"): `player` (outgoing) is always our own roster — the app
+// doesn't track rival substitutions — so no team badge is needed there.
+function handleLiveStat(s: any) {
+    const id = aid(s)
+    if (id === "0") {
+        enqueueBanner({ kind: "timeout", team: s?.to === 1 ? "us" : s?.to === 2 ? "them" : undefined })
+        return
+    }
+    if (id === "99") {
+        enqueueBanner({ kind: "sub", playerIn: formatPlayer(s?.player_in), playerOut: formatPlayer(s?.player) })
+        return
+    }
+    if (id === "98") return
+    // Any real point closing while a banner is up: clear it early rather
+    // than let it linger over the next rally.
+    if (s?.to !== 0 && activeBanner.value) advanceBanner()
+}
+
+const bannerChipColor = computed(() => {
+    const b = activeBanner.value
+    if (!b) return "#93a4bd"
+    if (b.kind === "sub") return usColor.value
+    return b.team === "us" ? usColor.value : b.team === "them" ? themColor : "#93a4bd"
+})
+
+let statsUnsub: (() => void) | null = null
+
+// --- Set stats block (expanded panel): totals for the set that JUST ended.
+// `currentSet` still points at that set until the app starts the next one.
+const finishedSetGameStats = computed(() =>
+    allStats.value.filter((s) => Number(s?.set?.number) === currentSet.value && !ADMIN_IDS.includes(aid(s)))
+)
+const finishedSetPointEnders = computed(() => finishedSetGameStats.value.filter((s) => s.to !== 0))
+const setStatRows = computed(() => {
+    const o = pointsOrigin(finishedSetPointEnders.value, deriveCredits(finishedSetGameStats.value))
+    return [
+        { key: "points", label: t("overlay.statsPoints"), us: cur.value.score_us, them: cur.value.score_them },
+        { key: "attack", label: t("stats.originAttack"), us: o.attack.us, them: o.attack.them },
+        { key: "block", label: t("stats.originBlock"), us: o.block.us, them: o.block.them },
+        { key: "ace", label: t("stats.originAce"), us: o.ace.us, them: o.ace.them },
+        { key: "errors", label: t("stats.originErrors"), us: o.errors.us, them: o.errors.them },
+    ]
+})
+function barPct(v: number, total: number): number {
+    return total > 0 ? Math.round((v / total) * 100) : 0
+}
+
 // Force a transparent canvas so OBS captures the page with alpha.
 onMounted(() => {
     document.documentElement.style.background = "transparent"
     document.body.style.background = "transparent"
     document.documentElement.style.colorScheme = "normal"
+
+    if (code && !demo) {
+        let firstSnapshot = true
+        const statsQuery = query(collection(db, "live_matches", code, "stats"), orderBy("order"))
+        statsUnsub = onSnapshot(statsQuery, (snap) => {
+            allStats.value = snap.docs.map((d) => d.data())
+            // The first snapshot replays the whole match history — never
+            // treat those as "live" events, only real additions afterwards.
+            if (firstSnapshot) {
+                firstSnapshot = false
+                return
+            }
+            for (const change of snap.docChanges()) {
+                if (change.type === "added") handleLiveStat(change.doc.data())
+            }
+        })
+    }
 })
 onUnmounted(() => {
     document.documentElement.style.background = ""
     document.body.style.background = ""
     document.documentElement.style.colorScheme = ""
+    statsUnsub?.()
+    clearBannerTimer()
 })
 </script>
 
@@ -157,19 +270,43 @@ onUnmounted(() => {
     <div class="overlay-root" v-if="ready">
         <Transition name="sb" mode="out-in">
             <!-- COMPACT — during a set -->
-            <div v-if="phase === 'playing'" key="playing" class="compact" :style="compactStyle">
-                <div class="compact-head">SET {{ currentSet }}</div>
-                <div class="team-row">
-                    <span class="chip" :style="{ background: usColor }"></span>
-                    <span class="tname">{{ usName }}</span>
-                    <span class="sets">{{ effUs }}</span>
-                    <span class="pts">{{ cur.score_us }}</span>
-                </div>
-                <div class="team-row">
-                    <span class="chip" :style="{ background: themColor }"></span>
-                    <span class="tname">{{ themName }}</span>
-                    <span class="sets">{{ effThem }}</span>
-                    <span class="pts">{{ cur.score_them }}</span>
+            <div v-if="phase === 'playing'" key="playing" class="compact-wrap" :style="compactStyle">
+                <Transition name="banner">
+                    <div
+                        v-if="activeBanner"
+                        :key="activeBanner.id"
+                        class="banner"
+                        :class="pos.startsWith('top') ? 'banner-below' : 'banner-above'"
+                    >
+                        <div class="banner-head">
+                            <span class="banner-chip" :style="{ background: bannerChipColor }"></span>
+                            <span class="banner-title">
+                                {{ activeBanner.kind === "timeout" ? t("overlay.timeout") : t("overlay.substitution") }}
+                            </span>
+                            <span v-if="activeBanner.kind === 'timeout' && activeBanner.team" class="banner-team">
+                                {{ activeBanner.team === "us" ? usName : themName }}
+                            </span>
+                        </div>
+                        <div v-if="activeBanner.kind === 'sub'" class="banner-sub-rows">
+                            <span class="banner-sub-row"><span class="arrow arrow-in">↑</span>{{ activeBanner.playerIn }}</span>
+                            <span class="banner-sub-row"><span class="arrow arrow-out">↓</span>{{ activeBanner.playerOut }}</span>
+                        </div>
+                    </div>
+                </Transition>
+                <div class="compact">
+                    <div class="compact-head">SET {{ currentSet }}</div>
+                    <div class="team-row">
+                        <span class="chip" :style="{ background: usColor }"></span>
+                        <span class="tname">{{ usName }}</span>
+                        <span class="sets">{{ effUs }}</span>
+                        <span class="pts">{{ cur.score_us }}</span>
+                    </div>
+                    <div class="team-row">
+                        <span class="chip" :style="{ background: themColor }"></span>
+                        <span class="tname">{{ themName }}</span>
+                        <span class="sets">{{ effThem }}</span>
+                        <span class="pts">{{ cur.score_them }}</span>
+                    </div>
                 </div>
             </div>
 
@@ -193,6 +330,33 @@ onUnmounted(() => {
                         <span class="sval" :class="{ win: s.score_us > s.score_them }">{{ s.score_us }}</span>
                         <span class="sval" :class="{ win: s.score_them > s.score_us }">{{ s.score_them }}</span>
                     </div>
+
+                    <!-- Estadísticas del set recién terminado -->
+                    <template v-if="setStatRows.some((r) => r.us + r.them > 0)">
+                        <div class="divider"></div>
+                        <div class="stats-title">{{ t("overlay.setStatsTitle") }}</div>
+                        <div class="stat-row" v-for="row in setStatRows" :key="row.key">
+                            <div class="stat-label">{{ row.label }}</div>
+                            <div class="stat-line">
+                                <span class="stat-num">{{ row.us }}</span>
+                                <div class="stat-track">
+                                    <div class="stat-half us">
+                                        <div
+                                            class="stat-fill"
+                                            :style="{ width: barPct(row.us, row.us + row.them) + '%', background: usColor }"
+                                        ></div>
+                                    </div>
+                                    <div class="stat-half them">
+                                        <div
+                                            class="stat-fill"
+                                            :style="{ width: barPct(row.them, row.us + row.them) + '%', background: themColor }"
+                                        ></div>
+                                    </div>
+                                </div>
+                                <span class="stat-num">{{ row.them }}</span>
+                            </div>
+                        </div>
+                    </template>
                 </div>
             </div>
         </Transition>
@@ -211,8 +375,11 @@ onUnmounted(() => {
 }
 
 /* ---------- COMPACT ---------- */
-.compact {
+.compact-wrap {
     position: absolute;
+}
+.compact {
+    position: relative;
     min-width: 340px;
     padding: 10px 16px 14px;
     background: rgba(9, 12, 20, 0.82);
@@ -220,6 +387,81 @@ onUnmounted(() => {
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 12px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+}
+
+/* ---------- BANNER (timeout / substitution) ---------- */
+.banner {
+    position: absolute;
+    left: 0;
+    right: 0;
+    min-width: 340px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 10px 16px;
+    background: rgba(9, 12, 20, 0.92);
+    backdrop-filter: blur(6px);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+}
+.banner-above {
+    bottom: 100%;
+    margin-bottom: 10px;
+}
+.banner-below {
+    top: 100%;
+    margin-top: 10px;
+}
+.banner-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.banner-chip {
+    width: 14px;
+    height: 14px;
+    border-radius: 4px;
+    flex-shrink: 0;
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.25) inset;
+}
+.banner-title {
+    font-size: 16px;
+    font-weight: 800;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: #fff;
+}
+.banner-team {
+    font-size: 16px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #93a4bd;
+}
+.banner-sub-rows {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    padding-left: 24px;
+}
+.banner-sub-row {
+    font-size: 18px;
+    font-weight: 700;
+    color: #e5ecf7;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.arrow {
+    font-weight: 900;
+    font-size: 18px;
+    line-height: 1;
+}
+.arrow-in {
+    color: #4ade80;
+}
+.arrow-out {
+    color: #f87171;
 }
 .compact-head {
     font-size: 13px;
@@ -352,17 +594,92 @@ onUnmounted(() => {
     color: #fff;
 }
 
+/* ---------- SET STATS (expanded panel) ---------- */
+.stats-title {
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    text-align: left;
+    color: #93a4bd;
+    margin: 0 0 12px;
+}
+.stat-row {
+    text-align: left;
+    margin: 0 0 12px;
+}
+.stat-row:last-child {
+    margin-bottom: 0;
+}
+.stat-label {
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: #93a4bd;
+    margin-bottom: 5px;
+}
+.stat-line {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.stat-num {
+    font-size: 20px;
+    font-weight: 800;
+    min-width: 28px;
+    text-align: center;
+    color: #fff;
+}
+.stat-track {
+    flex: 1;
+    display: flex;
+    height: 10px;
+    border-radius: 6px;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.08);
+}
+.stat-half {
+    flex: 1;
+    display: flex;
+}
+.stat-half.us {
+    justify-content: flex-end;
+}
+.stat-half.them {
+    justify-content: flex-start;
+}
+.stat-fill {
+    height: 100%;
+}
+
 /* ---------- transition between the two states ---------- */
 .sb-enter-active,
 .sb-leave-active {
     transition: opacity 0.45s ease, transform 0.45s ease;
 }
-.compact.sb-enter-from,
-.compact.sb-leave-to {
+.compact-wrap.sb-enter-from,
+.compact-wrap.sb-leave-to {
     opacity: 0;
 }
 .expanded.sb-enter-from,
 .expanded.sb-leave-to {
     opacity: 0;
+}
+
+/* ---------- banner enter/leave ---------- */
+.banner-enter-active,
+.banner-leave-active {
+    transition: opacity 0.35s ease, transform 0.35s ease;
+}
+.banner-above.banner-enter-from,
+.banner-above.banner-leave-to {
+    opacity: 0;
+    transform: translateY(8px);
+}
+.banner-below.banner-enter-from,
+.banner-below.banner-leave-to {
+    opacity: 0;
+    transform: translateY(-8px);
 }
 </style>

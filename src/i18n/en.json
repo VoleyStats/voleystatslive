@@ -117,6 +117,12 @@
       "a6": "Downloading the app and logging your matches is free, live match stats included. The premium plan adds the team history and season stats with filters, PDF export, cloud backup and the ability to fill in stats you missed live. Watching the live feeds on the web is always free."
     }
   },
+  "overlay": {
+    "timeout": "Timeout",
+    "substitution": "Substitution",
+    "setStatsTitle": "Set stats",
+    "statsPoints": "Points"
+  },
   "teamCode": {
     "title": "Live stats",
     "subtitle": "Enter the match code or paste the team link to access the live score and statistics. Both are shared by whoever logs the match from the app.",

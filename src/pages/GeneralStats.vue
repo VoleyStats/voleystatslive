@@ -342,7 +342,6 @@ import {
     ADMIN_IDS,
     AREA_LABEL_KEYS,
     ATTACK_IDS,
-    KILL_IDS,
     aid,
     attackByReceptionGradeForMatch,
     currentSetsWon,
@@ -351,6 +350,7 @@ import {
     isMatchFinished,
     isRival,
     isUnforced,
+    pointsOrigin,
     rivalServing,
 } from "../utils/volleyStats";
 
@@ -574,36 +574,15 @@ const timeline = computed(() =>
 );
 
 // ------------------------------------------------------------------ origen de puntos
+// Fórmula compartida con Overlay.vue — ver `pointsOrigin` en volleyStats.ts.
 const sourceRows = computed(() => {
-    const credits = derived.value;
-    const rows = [
-        { label: t("stats.originAttack"), us: 0, them: 0 },
-        { label: t("stats.originBlock"), us: 0, them: 0 },
-        { label: t("stats.originAce"), us: 0, them: 0 },
-        { label: t("stats.originErrors"), us: 0, them: 0 },
+    const o = pointsOrigin(pointEnders.value, derived.value);
+    return [
+        { label: t("stats.originAttack"), us: o.attack.us, them: o.attack.them },
+        { label: t("stats.originBlock"), us: o.block.us, them: o.block.them },
+        { label: t("stats.originAce"), us: o.ace.us, them: o.ace.them },
+        { label: t("stats.originErrors"), us: o.errors.us, them: o.errors.them },
     ];
-    for (const s of pointEnders.value) {
-        const rival = isRival(s);
-        const id = aid(s);
-        // Punto derivado (captura en cancha): el sentinel rival de error de
-        // recepción/defensa en realidad lo cerró nuestro saque o ataque
-        // anterior — se reatribuye al bucket real en vez de "Errores".
-        if (rival && s.to === 1) {
-            const credit = credits.creditedBy.get(s);
-            if (credit) {
-                rows[credits.aces.has(credit) ? 2 : 0].us++;
-                continue;
-            }
-        }
-        const bucket = KILL_IDS.includes(id) ? 0 : id === "13" ? 1 : id === "8" ? 2 : 3;
-        if (s.to === 1) {
-            // Punto nuestro: si lo cerró el rival, es error suyo.
-            rows[rival ? 3 : bucket].us++;
-        } else if (s.to === 2) {
-            rows[!rival ? 3 : bucket].them++;
-        }
-    }
-    return rows;
 });
 
 // ------------------------------------------------------------------ jugadoras
