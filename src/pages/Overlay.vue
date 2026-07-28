@@ -30,9 +30,9 @@ interface LiveMatch {
 }
 
 // Remote placement config, published (optionally) on `teams/{team.id}.overlay`
-// by the apps: `pos`/`scale`/`banners` mirror the URL params below and act as
-// hot-reloadable defaults — see the priority cascade (URL > remote > default)
-// further down.
+// by the apps: `pos`/`scale`/`banners` mirror the URL params below and, once
+// published, take priority over them — see the priority cascade (session >
+// remote > URL > default) further down.
 interface RemoteOverlay {
     pos?: string
     scale?: number
@@ -88,13 +88,19 @@ const demoData = computed<LiveMatch | null>(() => {
 const match = computed<LiveMatch | null | undefined>(() => demoData.value ?? liveMatch.value)
 
 // --- OBS placement: `pos`/`scale`/`banners` follow a priority cascade —
-// explicit URL query param > remote `teams/{team.id}.overlay` config (see
-// `remoteOverlay` below, hot-reloaded so a streamer can nudge things from the
-// app mid-broadcast) > hardcoded default. The `*Override` refs hold ONLY the
-// explicit choice (from the URL at load time, or from the setup panel once
-// the streamer touches a control) — `null` means "no override, let the
-// remote/default show through". The plain `pos`/`scale`/`bannersMode`
-// computeds below resolve the cascade and are what the template/styles read.
+// session override from the `?setup` panel (only while the streamer is
+// actively touching controls on that page) > remote `teams/{team.id}.overlay`
+// config (see `remoteOverlay` below, hot-reloaded so a streamer can nudge
+// things from the app mid-broadcast) > explicit URL query param > hardcoded
+// default. Putting remote ahead of the URL param is deliberate: OBS/Prism
+// Browser Sources are typically set up once with `?pos=...&scale=...` baked
+// in and never touched again, so if the URL always won, publishing a remote
+// config from the app would silently do nothing for anyone with an
+// already-configured overlay. The `*UrlParam` values are parsed once from the
+// query at load time and never change; the `*Session` refs start at `null`
+// and are populated ONLY by the setup panel's controls. The plain
+// `pos`/`scale`/`bannersMode` computeds below resolve the cascade and are
+// what the template/styles read.
 const posOptions = ["bottom-left", "bottom-right", "top-left", "top-right"] as const
 type Pos = (typeof posOptions)[number]
 function parsePos(v: unknown): Pos | null {
@@ -114,27 +120,38 @@ function parseScale(v: unknown): number | null {
 // for a tighter crop). "side" stays the default for URLs with no `banners`.
 type BannersMode = "side" | "stack" | "top" | "bottom" | "left" | "right"
 const BANNERS_MODES: readonly BannersMode[] = ["side", "stack", "top", "bottom", "left", "right"]
-function parseBannersMode(v: unknown): BannersMode {
+function parseBannersMode(v: unknown): BannersMode | null {
     const s = String(v ?? "")
-    return (BANNERS_MODES as readonly string[]).includes(s) ? (s as BannersMode) : "side"
+    return (BANNERS_MODES as readonly string[]).includes(s) ? (s as BannersMode) : null
 }
 
-const posOverride = ref<Pos | null>(parsePos(route.query.pos))
-const scaleOverride = ref<number | null>(parseScale(route.query.scale))
-const bannersOverride = ref<BannersMode | null>(route.query.banners !== undefined ? parseBannersMode(route.query.banners) : null)
+// Parsed once from the URL at load time — immutable for the life of the page
+// (unlike the session overrides below, these never change once resolved).
+const posUrlParam = parsePos(route.query.pos)
+const scaleUrlParam = parseScale(route.query.scale)
+const bannersUrlParam = parseBannersMode(route.query.banners)
 
-const pos = computed<Pos>(() => posOverride.value ?? parsePos(remoteOverlay.value?.pos) ?? "bottom-left")
-const scale = computed<number>(() => scaleOverride.value ?? parseScale(remoteOverlay.value?.scale) ?? 1)
+// Populated ONLY by the `?setup` panel's controls (see the `@click`/`v-model`
+// handlers below) — stays `null` for the whole session otherwise, including
+// for OBS/Prism sources opened straight from a saved URL.
+const posSession = ref<Pos | null>(null)
+const scaleSession = ref<number | null>(null)
+const bannersSession = ref<BannersMode | null>(null)
+
+const pos = computed<Pos>(() => posSession.value ?? parsePos(remoteOverlay.value?.pos) ?? posUrlParam ?? "bottom-left")
+const scale = computed<number>(() => scaleSession.value ?? parseScale(remoteOverlay.value?.scale) ?? scaleUrlParam ?? 1)
 // Writable proxy for the setup panel's range input (`v-model.number`) — it
-// just funnels edits into the override ref; reads still go through the
+// just funnels edits into the session override; reads still go through the
 // resolved cascade above.
 const scaleInput = computed<number>({
     get: () => scale.value,
     set: (v) => {
-        scaleOverride.value = v
+        scaleSession.value = v
     },
 })
-const bannersMode = computed<BannersMode>(() => bannersOverride.value ?? parseBannersMode(remoteOverlay.value?.banners))
+const bannersMode = computed<BannersMode>(
+    () => bannersSession.value ?? parseBannersMode(remoteOverlay.value?.banners) ?? bannersUrlParam ?? "side"
+)
 // Resolves the mode above into one of the 4 concrete edges the CSS actually
 // draws. Auto modes derive the edge from `pos` (the bar's screen corner):
 // "side" flares toward the horizontal center, "stack" toward the vertical
@@ -488,15 +505,15 @@ function armSetupHint() {
 // --- Setup panel: final OBS URL (current pos/scale/banners, never `setup`
 // or `demo` — those two are preview-only) + clipboard copy.
 // Only bakes in an explicit `pos`/`scale`/`banners` param when the streamer
-// actually touched that control (the `*Override` refs) — leaving a control
-// untouched means the copied URL keeps deferring to the remote config, so
-// changes made from the app keep applying live even after this URL is
-// pasted into OBS.
+// actually touched that control in THIS session (the `*Session` refs) —
+// leaving a control untouched means the copied URL has no opinion on it, so
+// the remote config (and, failing that, the default) keeps applying live
+// even after this URL is pasted into OBS.
 const finalOverlayUrl = computed(() => {
     const q: Record<string, string> = {}
-    if (posOverride.value) q.pos = posOverride.value
-    if (scaleOverride.value != null) q.scale = String(scaleOverride.value)
-    if (bannersOverride.value) q.banners = bannersOverride.value
+    if (posSession.value) q.pos = posSession.value
+    if (scaleSession.value != null) q.scale = String(scaleSession.value)
+    if (bannersSession.value) q.banners = bannersSession.value
     const resolved = router.resolve({ name: "overlay", params: { code }, query: q })
     return `${window.location.origin}${resolved.href}`
 })
@@ -673,7 +690,7 @@ onUnmounted(() => {
                         type="button"
                         class="rounded-lg border px-3 py-2 text-xs font-semibold transition-colors"
                         :class="pos === p ? 'border-brand-400 bg-brand-500/20 text-white' : 'border-white/10 bg-white/5 text-slate-300 hover:bg-white/10'"
-                        @click="posOverride = p"
+                        @click="posSession = p"
                     >
                         {{ t(`overlay.pos.${p}`) }}
                     </button>
@@ -696,7 +713,7 @@ onUnmounted(() => {
                         :title="t('overlay.bannersTop')"
                         class="flex h-9 items-center justify-center rounded-lg border text-base font-semibold leading-none transition-colors"
                         :class="bannersMode === 'top' ? 'border-brand-400 bg-brand-500/20 text-white' : 'border-white/10 bg-white/5 text-slate-300 hover:bg-white/10'"
-                        @click="bannersOverride = 'top'"
+                        @click="bannersSession = 'top'"
                     >
                         ↑
                     </button>
@@ -707,7 +724,7 @@ onUnmounted(() => {
                         :title="t('overlay.bannersLeft')"
                         class="flex h-9 items-center justify-center rounded-lg border text-base font-semibold leading-none transition-colors"
                         :class="bannersMode === 'left' ? 'border-brand-400 bg-brand-500/20 text-white' : 'border-white/10 bg-white/5 text-slate-300 hover:bg-white/10'"
-                        @click="bannersOverride = 'left'"
+                        @click="bannersSession = 'left'"
                     >
                         ←
                     </button>
@@ -716,7 +733,7 @@ onUnmounted(() => {
                         :title="t('overlay.bannersAuto')"
                         class="flex h-9 items-center justify-center rounded-lg border text-[10px] font-semibold uppercase tracking-wide transition-colors"
                         :class="bannersMode === 'side' ? 'border-brand-400 bg-brand-500/20 text-white' : 'border-white/10 bg-white/5 text-slate-300 hover:bg-white/10'"
-                        @click="bannersOverride = 'side'"
+                        @click="bannersSession = 'side'"
                     >
                         {{ t("overlay.bannersAuto") }}
                     </button>
@@ -725,7 +742,7 @@ onUnmounted(() => {
                         :title="t('overlay.bannersRight')"
                         class="flex h-9 items-center justify-center rounded-lg border text-base font-semibold leading-none transition-colors"
                         :class="bannersMode === 'right' ? 'border-brand-400 bg-brand-500/20 text-white' : 'border-white/10 bg-white/5 text-slate-300 hover:bg-white/10'"
-                        @click="bannersOverride = 'right'"
+                        @click="bannersSession = 'right'"
                     >
                         →
                     </button>
@@ -736,7 +753,7 @@ onUnmounted(() => {
                         :title="t('overlay.bannersBottom')"
                         class="flex h-9 items-center justify-center rounded-lg border text-base font-semibold leading-none transition-colors"
                         :class="bannersMode === 'bottom' ? 'border-brand-400 bg-brand-500/20 text-white' : 'border-white/10 bg-white/5 text-slate-300 hover:bg-white/10'"
-                        @click="bannersOverride = 'bottom'"
+                        @click="bannersSession = 'bottom'"
                     >
                         ↓
                     </button>

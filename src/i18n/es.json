@@ -124,7 +124,7 @@
     "configure": "Configurar",
     "setupTitle": "Configurar overlay",
     "setupSubtitle": "Ajusta la posición y el tamaño, y copia el enlace para OBS.",
-    "setupRemoteNote": "Estos ajustes también pueden controlarse desde la app.",
+    "setupRemoteNote": "La app manda sobre esta URL en cuanto publica un ajuste; los controles de aquí solo mandan mientras tienes esta página abierta.",
     "setupPos": "Posición",
     "pos": {
       "bottom-left": "Abajo izq.",
@@ -133,7 +133,7 @@
       "top-right": "Arriba dcha."
     },
     "setupScale": "Escala",
-    "setupBanners": "Avisos (tiempo muerto / cambio)",
+    "setupBanners": "Rótulos",
     "bannersAuto": "Auto",
     "bannersTop": "Arriba",
     "bannersBottom": "Abajo",
