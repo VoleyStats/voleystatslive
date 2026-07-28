@@ -336,20 +336,10 @@ const bannerChipColor = computed(() => {
 // border; horizontal layout (left/right edge) shows the accent as a top
 // inset line instead (the left/right edge is the seam glued to the compact
 // bar, so it can't carry a 4px accent border there).
-const bannerAccentStyle = computed(() =>
-    bannerAxis.value === "vertical"
-        ? { borderLeftColor: bannerChipColor.value }
-        : { boxShadow: `inset 0 3px 0 0 ${bannerChipColor.value}, 0 10px 30px rgba(0, 0, 0, 0.45)` }
-)
+const bannerAccentStyle = computed(() => ({ borderLeftColor: bannerChipColor.value }))
 const bannerPosClass = computed(() => {
     if (bannerAxis.value === "vertical") return bannerDir.value === "top" ? "banner-above" : "banner-below"
     return bannerDir.value === "right" ? "banner-extend-right" : "banner-extend-left"
-})
-// Flattens the compact bar's corner that touches the side banner so the two
-// panels read as a single joined shape.
-const compactJoinClass = computed(() => {
-    if (!activeBanner.value || bannerAxis.value !== "horizontal") return ""
-    return bannerDir.value === "right" ? "compact-flat-right" : "compact-flat-left"
 })
 
 // Tiempos muertos gastados EN ESTE SET por el equipo que acaba de pedirlo
@@ -570,18 +560,8 @@ onUnmounted(() => {
                 <!-- COMPACT — during a set -->
                 <div v-if="phase === 'playing'" key="playing" class="compact-wrap" :style="compactStyle">
                     <Transition :name="bannerAxis === 'vertical' ? 'banner' : 'banner-side'">
-                        <div
-                            v-if="activeBanner"
-                            :key="activeBanner.id"
-                            class="banner"
-                            :class="[bannerAxis === 'vertical' ? 'banner-stack' : 'banner-side', bannerPosClass]"
-                            :style="bannerAccentStyle"
-                        >
-                            <div
-                                v-if="activeBanner.kind === 'timeout'"
-                                class="banner-head"
-                                :class="{ 'head-side': bannerAxis === 'horizontal' }"
-                            >
+                        <div v-if="activeBanner" :key="activeBanner.id" class="banner" :class="bannerPosClass" :style="bannerAccentStyle">
+                            <div v-if="activeBanner.kind === 'timeout'" class="banner-head">
                                 <span class="banner-title">{{ t("overlay.timeout") }}</span>
                                 <span v-if="activeBanner.team" class="banner-team">
                                     {{ activeBanner.team === "us" ? usName : themName }}
@@ -611,25 +591,25 @@ onUnmounted(() => {
                             </div>
                         </div>
                     </Transition>
-                    <div class="compact" :class="compactJoinClass">
+                    <div class="compact">
                         <div class="compact-head">SET {{ currentSet }}</div>
                         <div class="team-row">
-                            <span class="chip-wrap">
-                                <span class="chip" :style="{ background: usColor }"></span>
-                                <span v-if="servingTeam === 'us'" class="serve-badge" :style="{ background: usColor }"></span>
-                            </span>
+                            <span class="chip" :style="{ background: usColor }"></span>
                             <span class="tname">{{ usName }}</span>
                             <span class="sets">{{ effUs }}</span>
-                            <span class="pts">{{ cur.score_us }}</span>
+                            <span class="pts-wrap">
+                                <span v-if="servingTeam === 'us'" class="serve-dot"></span>
+                                <span class="pts">{{ cur.score_us }}</span>
+                            </span>
                         </div>
                         <div class="team-row">
-                            <span class="chip-wrap">
-                                <span class="chip" :style="{ background: themColor }"></span>
-                                <span v-if="servingTeam === 'them'" class="serve-badge" :style="{ background: themColor }"></span>
-                            </span>
+                            <span class="chip" :style="{ background: themColor }"></span>
                             <span class="tname">{{ themName }}</span>
                             <span class="sets">{{ effThem }}</span>
-                            <span class="pts">{{ cur.score_them }}</span>
+                            <span class="pts-wrap">
+                                <span v-if="servingTeam === 'them'" class="serve-dot"></span>
+                                <span class="pts">{{ cur.score_them }}</span>
+                            </span>
                         </div>
                     </div>
                 </div>
@@ -868,22 +848,17 @@ onUnmounted(() => {
     border-radius: 12px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
 }
-/* flattens the corner touching the side banner so the two panels look joined */
-.compact-flat-right {
-    border-top-right-radius: 0;
-    border-bottom-right-radius: 0;
-}
-.compact-flat-left {
-    border-top-left-radius: 0;
-    border-bottom-left-radius: 0;
-}
 
 /* ---------- BANNER (timeout / substitution) ---------- */
+/* Single layout for every direction: header row (title/team, wraps if
+   needed) + stacked rows below. Only the anchor position below (and the
+   enter/leave animation, further down) changes per `bannerDir`. */
 .banner {
     position: absolute;
     display: flex;
     flex-direction: column;
     gap: 8px;
+    min-width: 340px;
     padding: 10px 16px 10px 14px;
     background: rgba(var(--c-ink-950-rgb), 0.94);
     backdrop-filter: blur(6px);
@@ -893,66 +868,38 @@ onUnmounted(() => {
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
 }
 
-/* stack layout (?banners=stack): banner appears above/below the bar */
-.banner-stack {
+/* Anchor position relative to the compact bar — the only thing that
+   differs between banner directions. */
+.banner-above {
     left: 0;
     right: 0;
-    min-width: 340px;
-}
-.banner-above {
     bottom: 100%;
     margin-bottom: 10px;
 }
 .banner-below {
+    left: 0;
+    right: 0;
     top: 100%;
     margin-top: 10px;
 }
-
-/* side layout (default): banner flares out horizontally from the inner
-   edge of the compact bar, same height, joined into a single visual piece. */
-.banner-side {
-    top: 0;
-    height: 100%;
-    /* Own min-width + padding (wider/roomier than the base .banner padding)
-       so the content has real breathing room once it emerges from the seam
-       — 240px was tight enough that "TIEMPO MUERTO" + team name, or a long
-       player name in a substitution, wrapped into a cramped, illegible mess
-       right at the bar's edge. */
-    min-width: 300px;
-    max-width: 460px;
-    padding: 12px 20px;
-    justify-content: center;
-    border-left: 1px solid rgba(255, 255, 255, 0.12);
-    box-sizing: border-box;
-}
 .banner-extend-right {
+    top: 0;
     left: 100%;
-    margin-left: -1px;
-    border-top-left-radius: 0;
-    border-bottom-left-radius: 0;
+    margin-left: 10px;
 }
 .banner-extend-left {
+    top: 0;
     right: 100%;
-    margin-right: -1px;
-    border-top-right-radius: 0;
-    border-bottom-right-radius: 0;
+    margin-right: 10px;
 }
 .banner-head {
     display: flex;
     align-items: center;
-    /* Wraps rather than compressing when the side banner's narrower width
-       can't fit title + team + dots on one line — the team/dots move down
-       as a whole line instead of squeezing every word. */
+    /* Wraps rather than compresses when title + team + timeout dots don't
+       fit on one line at the banner's width. */
     flex-wrap: wrap;
     gap: 10px;
     row-gap: 4px;
-}
-/* On the side layout the "auto" right-alignment of the dots reads oddly once
-   the row wraps (dots stranded far from the team name); group them together
-   instead. The stack layout has plenty of width and never wraps, so it keeps
-   the default right-aligned dots (see .to-dots below). */
-.banner-head.head-side .to-dots {
-    margin-left: 0;
 }
 .banner-sub {
     display: flex;
@@ -1033,27 +980,13 @@ onUnmounted(() => {
     column-gap: 14px;
     padding: 3px 0;
 }
-.chip-wrap {
-    position: relative;
-    width: 14px;
-    height: 14px;
-}
+/* Team color identifier — always visible regardless of who's serving (see
+   .serve-dot below for that indicator, anchored to the points instead). */
 .chip {
     width: 14px;
     height: 14px;
     border-radius: 4px;
-    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.25) inset;
-}
-/* Serving-team indicator: a small filled dot badging the corner of the
-   team's color chip, derived live from the stats stream (see `servingTeam`). */
-.serve-badge {
-    position: absolute;
-    top: -4px;
-    right: -4px;
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    box-shadow: 0 0 0 2px rgba(var(--c-ink-900-rgb), 0.95), 0 0 6px rgba(255, 255, 255, 0.55);
+    box-shadow: 0 0 0 1.5px rgba(255, 255, 255, 0.35) inset, 0 1px 3px rgba(0, 0, 0, 0.45);
 }
 .tname {
     font-family: var(--font-display);
@@ -1074,6 +1007,11 @@ onUnmounted(() => {
     min-width: 24px;
     text-align: center;
 }
+.pts-wrap {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+}
 .pts {
     font-family: var(--font-display);
     font-size: 40px;
@@ -1081,6 +1019,19 @@ onUnmounted(() => {
     min-width: 56px;
     text-align: center;
     line-height: 1;
+}
+/* Serving-team indicator: a volt dot anchored beside the serving team's
+   point number, derived live from the stats stream (see `servingTeam`). */
+.serve-dot {
+    position: absolute;
+    left: -14px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--c-volt-400);
+    box-shadow: 0 0 0 2px rgba(var(--c-ink-900-rgb), 0.95), 0 0 6px rgba(203, 251, 69, 0.65);
 }
 
 /* ---------- EXPANDED ---------- */
