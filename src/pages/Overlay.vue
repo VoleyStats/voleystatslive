@@ -1024,7 +1024,7 @@ onUnmounted(() => {
    point number, derived live from the stats stream (see `servingTeam`). */
 .serve-dot {
     position: absolute;
-    left: -14px;
+    right: -14px;
     top: 50%;
     transform: translateY(-50%);
     width: 9px;
