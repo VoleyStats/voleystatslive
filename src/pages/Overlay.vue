@@ -60,9 +60,17 @@ const demoData = computed<LiveMatch | null>(() => {
 })
 const match = computed<LiveMatch | null | undefined>(() => demoData.value ?? liveMatch.value)
 
-// --- OBS placement, configurable via URL (?pos=, ?scale=) ---
+// --- OBS placement, configurable via URL (?pos=, ?scale=, ?banners=) ---
 const pos = String(route.query.pos ?? "bottom-left")
 const scale = Number(route.query.scale) || 1
+// Banner layout for timeout/substitution notices. Default "side": the banner
+// flares out horizontally from the inner edge of the compact bar, sharing its
+// height/border so it reads as one piece (VNL-style "TIME OUT" chip). Pass
+// `?banners=stack` to keep the legacy above/below layout instead.
+const bannersMode = String(route.query.banners ?? "") === "stack" ? "stack" : "side"
+// Bars pinned to the left of the screen flare the banner rightward (toward
+// center); bars pinned to the right flare it leftward.
+const sideExtend = pos.includes("left") ? "right" : "left"
 
 const compactStyle = computed(() => {
     const m = "3vmin"
@@ -216,6 +224,24 @@ const bannerChipColor = computed(() => {
     if (b.kind === "sub") return usColor.value
     return b.team === "us" ? usColor.value : b.team === "them" ? themColor : "#93a4bd"
 })
+// Stack mode keeps the original team-color left border; side mode shows the
+// accent as a top inset line instead (the left/right edge is the seam glued
+// to the compact bar, so it can't carry a 4px accent border there).
+const bannerAccentStyle = computed(() =>
+    bannersMode === "stack"
+        ? { borderLeftColor: bannerChipColor.value }
+        : { boxShadow: `inset 0 3px 0 0 ${bannerChipColor.value}, 0 10px 30px rgba(0, 0, 0, 0.45)` }
+)
+const bannerPosClass = computed(() => {
+    if (bannersMode === "stack") return pos.startsWith("top") ? "banner-below" : "banner-above"
+    return sideExtend === "right" ? "banner-extend-right" : "banner-extend-left"
+})
+// Flattens the compact bar's corner that touches the side banner so the two
+// panels read as a single joined shape.
+const compactJoinClass = computed(() => {
+    if (!activeBanner.value || bannersMode !== "side") return ""
+    return sideExtend === "right" ? "compact-flat-right" : "compact-flat-left"
+})
 
 // Tiempos muertos gastados EN ESTE SET por el equipo que acaba de pedirlo
 // (incluido el que acaba de llegar): cuenta stats `action.id=="0"` del mismo
@@ -289,13 +315,13 @@ onUnmounted(() => {
         <Transition name="sb" mode="out-in">
             <!-- COMPACT — during a set -->
             <div v-if="phase === 'playing'" key="playing" class="compact-wrap" :style="compactStyle">
-                <Transition name="banner">
+                <Transition :name="bannersMode === 'stack' ? 'banner' : 'banner-side'">
                     <div
                         v-if="activeBanner"
                         :key="activeBanner.id"
                         class="banner"
-                        :class="pos.startsWith('top') ? 'banner-below' : 'banner-above'"
-                        :style="{ borderLeftColor: bannerChipColor }"
+                        :class="[bannersMode === 'stack' ? 'banner-stack' : 'banner-side', bannerPosClass]"
+                        :style="bannerAccentStyle"
                     >
                         <div v-if="activeBanner.kind === 'timeout'" class="banner-head">
                             <span class="banner-title">{{ t("overlay.timeout") }}</span>
@@ -312,13 +338,13 @@ onUnmounted(() => {
                                 ></span>
                             </span>
                         </div>
-                        <div v-else class="banner-sub-rows">
+                        <div v-else class="banner-sub-rows" :class="{ 'sub-inline': bannersMode !== 'stack' }">
                             <span class="banner-sub-row"><span class="arrow arrow-in">↑</span>{{ activeBanner.playerIn }}</span>
                             <span class="banner-sub-row"><span class="arrow arrow-out">↓</span>{{ activeBanner.playerOut }}</span>
                         </div>
                     </div>
                 </Transition>
-                <div class="compact">
+                <div class="compact" :class="compactJoinClass">
                     <div class="compact-head">SET {{ currentSet }}</div>
                     <div class="team-row">
                         <span class="chip" :style="{ background: usColor }"></span>
@@ -413,13 +439,19 @@ onUnmounted(() => {
     border-radius: 12px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
 }
+/* flattens the corner touching the side banner so the two panels look joined */
+.compact-flat-right {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+.compact-flat-left {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+}
 
 /* ---------- BANNER (timeout / substitution) ---------- */
 .banner {
     position: absolute;
-    left: 0;
-    right: 0;
-    min-width: 340px;
     display: flex;
     flex-direction: column;
     gap: 8px;
@@ -431,6 +463,13 @@ onUnmounted(() => {
     border-radius: 12px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
 }
+
+/* stack layout (?banners=stack): banner appears above/below the bar */
+.banner-stack {
+    left: 0;
+    right: 0;
+    min-width: 340px;
+}
 .banner-above {
     bottom: 100%;
     margin-bottom: 10px;
@@ -438,6 +477,36 @@ onUnmounted(() => {
 .banner-below {
     top: 100%;
     margin-top: 10px;
+}
+
+/* side layout (default): banner flares out horizontally from the inner
+   edge of the compact bar, same height, joined into a single visual piece. */
+.banner-side {
+    top: 0;
+    height: 100%;
+    min-width: 240px;
+    max-width: 460px;
+    justify-content: center;
+    border-left: 1px solid rgba(255, 255, 255, 0.12);
+    box-sizing: border-box;
+}
+.banner-extend-right {
+    left: 100%;
+    margin-left: -1px;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+}
+.banner-extend-left {
+    right: 100%;
+    margin-right: -1px;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+.banner-sub-rows.sub-inline {
+    flex-direction: row;
+    align-items: center;
+    gap: 18px;
+    padding-left: 0;
 }
 .banner-head {
     display: flex;
@@ -717,5 +786,21 @@ onUnmounted(() => {
 .banner-below.banner-leave-to {
     opacity: 0;
     transform: translateY(-8px);
+}
+
+/* ---------- side banner: slide out from behind the bar ---------- */
+.banner-side-enter-active,
+.banner-side-leave-active {
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+}
+.banner-extend-right.banner-side-enter-from,
+.banner-extend-right.banner-side-leave-to {
+    transform: translateX(-100%);
+    opacity: 0;
+}
+.banner-extend-left.banner-side-enter-from,
+.banner-extend-left.banner-side-leave-to {
+    transform: translateX(100%);
+    opacity: 0;
 }
 </style>
