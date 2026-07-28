@@ -124,6 +124,7 @@
     "configure": "Configure",
     "setupTitle": "Configure overlay",
     "setupSubtitle": "Adjust position and size, then copy the link for OBS.",
+    "setupRemoteNote": "These settings can also be controlled from the app.",
     "setupPos": "Position",
     "pos": {
       "bottom-left": "Bottom left",

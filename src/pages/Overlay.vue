@@ -19,7 +19,7 @@ interface SetScore {
     score_them: number
 }
 interface LiveMatch {
-    team?: { name?: string; color?: string }
+    team?: { id?: string; name?: string; color?: string }
     opponent?: string
     n_sets?: number
     sets_us?: number
@@ -27,6 +27,16 @@ interface LiveMatch {
     current_set?: number
     set_closed?: boolean
     sets_scoreboard?: SetScore[]
+}
+
+// Remote placement config, published (optionally) on `teams/{team.id}.overlay`
+// by the apps: `pos`/`scale`/`banners` mirror the URL params below and act as
+// hot-reloadable defaults — see the priority cascade (URL > remote > default)
+// further down.
+interface RemoteOverlay {
+    pos?: string
+    scale?: number
+    banners?: string
 }
 
 const route = useRoute()
@@ -77,12 +87,24 @@ const demoData = computed<LiveMatch | null>(() => {
 })
 const match = computed<LiveMatch | null | undefined>(() => demoData.value ?? liveMatch.value)
 
-// --- OBS placement, configurable via URL (?pos=, ?scale=, ?banners=) or, in
-// setup mode, via the panel controls below (both read/write the same refs so
-// the preview updates live as the streamer tweaks them). ---
+// --- OBS placement: `pos`/`scale`/`banners` follow a priority cascade —
+// explicit URL query param > remote `teams/{team.id}.overlay` config (see
+// `remoteOverlay` below, hot-reloaded so a streamer can nudge things from the
+// app mid-broadcast) > hardcoded default. The `*Override` refs hold ONLY the
+// explicit choice (from the URL at load time, or from the setup panel once
+// the streamer touches a control) — `null` means "no override, let the
+// remote/default show through". The plain `pos`/`scale`/`bannersMode`
+// computeds below resolve the cascade and are what the template/styles read.
 const posOptions = ["bottom-left", "bottom-right", "top-left", "top-right"] as const
-const pos = ref<string>(String(route.query.pos ?? "bottom-left"))
-const scale = ref<number>(Number(route.query.scale) || 1)
+type Pos = (typeof posOptions)[number]
+function parsePos(v: unknown): Pos | null {
+    const s = String(v ?? "")
+    return (posOptions as readonly string[]).includes(s) ? (s as Pos) : null
+}
+function parseScale(v: unknown): number | null {
+    const n = Number(v)
+    return Number.isFinite(n) && n >= 0.5 && n <= 2 ? n : null
+}
 // Banner layout for timeout/substitution notices, relative to the compact
 // bar: "side"/"stack" are the historical auto modes (side picks left/right,
 // stack picks above/below, both based on which screen corner the bar sits
@@ -96,7 +118,23 @@ function parseBannersMode(v: unknown): BannersMode {
     const s = String(v ?? "")
     return (BANNERS_MODES as readonly string[]).includes(s) ? (s as BannersMode) : "side"
 }
-const bannersMode = ref<BannersMode>(parseBannersMode(route.query.banners))
+
+const posOverride = ref<Pos | null>(parsePos(route.query.pos))
+const scaleOverride = ref<number | null>(parseScale(route.query.scale))
+const bannersOverride = ref<BannersMode | null>(route.query.banners !== undefined ? parseBannersMode(route.query.banners) : null)
+
+const pos = computed<Pos>(() => posOverride.value ?? parsePos(remoteOverlay.value?.pos) ?? "bottom-left")
+const scale = computed<number>(() => scaleOverride.value ?? parseScale(remoteOverlay.value?.scale) ?? 1)
+// Writable proxy for the setup panel's range input (`v-model.number`) — it
+// just funnels edits into the override ref; reads still go through the
+// resolved cascade above.
+const scaleInput = computed<number>({
+    get: () => scale.value,
+    set: (v) => {
+        scaleOverride.value = v
+    },
+})
+const bannersMode = computed<BannersMode>(() => bannersOverride.value ?? parseBannersMode(remoteOverlay.value?.banners))
 // Resolves the mode above into one of the 4 concrete edges the CSS actually
 // draws. Auto modes derive the edge from `pos` (the bar's screen corner):
 // "side" flares toward the horizontal center, "stack" toward the vertical
@@ -327,6 +365,36 @@ const servingTeam = computed<"us" | "them" | null>(() => {
     return null
 })
 
+// --- Remote overlay config: `teams/{team.id}.overlay`, hot-reloaded so a
+// streamer can reposition/rescale the scoreboard from the app while watching
+// the live output, without touching OBS. Subscribes once the match doc
+// resolves `team.id`; re-subscribes if the id changes; skipped entirely in
+// demo mode (no real team doc) — see the `id` computation below.
+const remoteOverlay = ref<RemoteOverlay | null>(null)
+let teamUnsub: (() => void) | null = null
+let subscribedTeamId: string | null = null
+
+function stopTeamSubscription() {
+    teamUnsub?.()
+    teamUnsub = null
+    subscribedTeamId = null
+    remoteOverlay.value = null
+}
+
+watch(
+    () => (demo.value ? null : match.value?.team?.id ?? null),
+    (id) => {
+        if (id === subscribedTeamId) return
+        stopTeamSubscription()
+        if (!id) return
+        subscribedTeamId = id
+        teamUnsub = onSnapshot(doc(db, "teams", id), (snap) => {
+            remoteOverlay.value = (snap.data() as { overlay?: RemoteOverlay } | undefined)?.overlay ?? null
+        })
+    },
+    { immediate: true }
+)
+
 let statsUnsub: (() => void) | null = null
 
 function startStatsSubscription() {
@@ -419,11 +487,16 @@ function armSetupHint() {
 
 // --- Setup panel: final OBS URL (current pos/scale/banners, never `setup`
 // or `demo` — those two are preview-only) + clipboard copy.
+// Only bakes in an explicit `pos`/`scale`/`banners` param when the streamer
+// actually touched that control (the `*Override` refs) — leaving a control
+// untouched means the copied URL keeps deferring to the remote config, so
+// changes made from the app keep applying live even after this URL is
+// pasted into OBS.
 const finalOverlayUrl = computed(() => {
     const q: Record<string, string> = {}
-    if (pos.value !== "bottom-left") q.pos = pos.value
-    if (scale.value !== 1) q.scale = String(scale.value)
-    if (bannersMode.value !== "side") q.banners = bannersMode.value
+    if (posOverride.value) q.pos = posOverride.value
+    if (scaleOverride.value != null) q.scale = String(scaleOverride.value)
+    if (bannersOverride.value) q.banners = bannersOverride.value
     const resolved = router.resolve({ name: "overlay", params: { code }, query: q })
     return `${window.location.origin}${resolved.href}`
 })
@@ -465,6 +538,7 @@ onUnmounted(() => {
     document.body.style.background = ""
     document.documentElement.style.colorScheme = ""
     stopStatsSubscription()
+    stopTeamSubscription()
     window.removeEventListener("mousemove", armSetupHint)
     if (hintTimer) clearTimeout(hintTimer)
 })
@@ -588,6 +662,7 @@ onUnmounted(() => {
         >
             <h2 class="font-display text-lg font-bold tracking-tight text-white">{{ t("overlay.setupTitle") }}</h2>
             <p class="mt-1 text-xs text-slate-400">{{ t("overlay.setupSubtitle") }}</p>
+            <p class="mt-1 text-[11px] text-slate-500">{{ t("overlay.setupRemoteNote") }}</p>
 
             <div class="mt-5">
                 <p class="eyebrow !py-1 !text-[10px]">{{ t("overlay.setupPos") }}</p>
@@ -598,7 +673,7 @@ onUnmounted(() => {
                         type="button"
                         class="rounded-lg border px-3 py-2 text-xs font-semibold transition-colors"
                         :class="pos === p ? 'border-brand-400 bg-brand-500/20 text-white' : 'border-white/10 bg-white/5 text-slate-300 hover:bg-white/10'"
-                        @click="pos = p"
+                        @click="posOverride = p"
                     >
                         {{ t(`overlay.pos.${p}`) }}
                     </button>
@@ -607,7 +682,7 @@ onUnmounted(() => {
 
             <div class="mt-5">
                 <label class="eyebrow !py-1 !text-[10px]" for="setup-scale">{{ t("overlay.setupScale") }} · {{ scale.toFixed(2) }}×</label>
-                <input id="setup-scale" v-model.number="scale" type="range" min="0.5" max="2" step="0.05" class="mt-2 w-full accent-volt-400" />
+                <input id="setup-scale" v-model.number="scaleInput" type="range" min="0.5" max="2" step="0.05" class="mt-2 w-full accent-volt-400" />
             </div>
 
             <div class="mt-5">
@@ -621,7 +696,7 @@ onUnmounted(() => {
                         :title="t('overlay.bannersTop')"
                         class="flex h-9 items-center justify-center rounded-lg border text-base font-semibold leading-none transition-colors"
                         :class="bannersMode === 'top' ? 'border-brand-400 bg-brand-500/20 text-white' : 'border-white/10 bg-white/5 text-slate-300 hover:bg-white/10'"
-                        @click="bannersMode = 'top'"
+                        @click="bannersOverride = 'top'"
                     >
                         ↑
                     </button>
@@ -632,7 +707,7 @@ onUnmounted(() => {
                         :title="t('overlay.bannersLeft')"
                         class="flex h-9 items-center justify-center rounded-lg border text-base font-semibold leading-none transition-colors"
                         :class="bannersMode === 'left' ? 'border-brand-400 bg-brand-500/20 text-white' : 'border-white/10 bg-white/5 text-slate-300 hover:bg-white/10'"
-                        @click="bannersMode = 'left'"
+                        @click="bannersOverride = 'left'"
                     >
                         ←
                     </button>
@@ -641,7 +716,7 @@ onUnmounted(() => {
                         :title="t('overlay.bannersAuto')"
                         class="flex h-9 items-center justify-center rounded-lg border text-[10px] font-semibold uppercase tracking-wide transition-colors"
                         :class="bannersMode === 'side' ? 'border-brand-400 bg-brand-500/20 text-white' : 'border-white/10 bg-white/5 text-slate-300 hover:bg-white/10'"
-                        @click="bannersMode = 'side'"
+                        @click="bannersOverride = 'side'"
                     >
                         {{ t("overlay.bannersAuto") }}
                     </button>
@@ -650,7 +725,7 @@ onUnmounted(() => {
                         :title="t('overlay.bannersRight')"
                         class="flex h-9 items-center justify-center rounded-lg border text-base font-semibold leading-none transition-colors"
                         :class="bannersMode === 'right' ? 'border-brand-400 bg-brand-500/20 text-white' : 'border-white/10 bg-white/5 text-slate-300 hover:bg-white/10'"
-                        @click="bannersMode = 'right'"
+                        @click="bannersOverride = 'right'"
                     >
                         →
                     </button>
@@ -661,7 +736,7 @@ onUnmounted(() => {
                         :title="t('overlay.bannersBottom')"
                         class="flex h-9 items-center justify-center rounded-lg border text-base font-semibold leading-none transition-colors"
                         :class="bannersMode === 'bottom' ? 'border-brand-400 bg-brand-500/20 text-white' : 'border-white/10 bg-white/5 text-slate-300 hover:bg-white/10'"
-                        @click="bannersMode = 'bottom'"
+                        @click="bannersOverride = 'bottom'"
                     >
                         ↓
                     </button>
