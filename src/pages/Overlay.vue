@@ -577,7 +577,11 @@ onUnmounted(() => {
                             :class="[bannerAxis === 'vertical' ? 'banner-stack' : 'banner-side', bannerPosClass]"
                             :style="bannerAccentStyle"
                         >
-                            <div v-if="activeBanner.kind === 'timeout'" class="banner-head">
+                            <div
+                                v-if="activeBanner.kind === 'timeout'"
+                                class="banner-head"
+                                :class="{ 'head-side': bannerAxis === 'horizontal' }"
+                            >
                                 <span class="banner-title">{{ t("overlay.timeout") }}</span>
                                 <span v-if="activeBanner.team" class="banner-team">
                                     {{ activeBanner.team === "us" ? usName : themName }}
@@ -592,9 +596,18 @@ onUnmounted(() => {
                                     ></span>
                                 </span>
                             </div>
-                            <div v-else class="banner-sub-rows" :class="{ 'sub-inline': bannerAxis === 'horizontal' }">
-                                <span class="banner-sub-row"><span class="arrow arrow-in">↑</span>{{ activeBanner.playerIn }}</span>
-                                <span class="banner-sub-row"><span class="arrow arrow-out">↓</span>{{ activeBanner.playerOut }}</span>
+                            <div v-else class="banner-sub">
+                                <!-- Substitutions are always our own roster (see handleLiveStat) — spell
+                                     out the team explicitly (chip + name) so it reads the same way the
+                                     timeout banner names its requester. -->
+                                <div class="banner-team-row">
+                                    <span class="chip" :style="{ background: usColor }"></span>
+                                    <span class="banner-team">{{ usName }}</span>
+                                </div>
+                                <div class="banner-sub-rows">
+                                    <span class="banner-sub-row"><span class="arrow arrow-in">↑</span>{{ activeBanner.playerIn }}</span>
+                                    <span class="banner-sub-row"><span class="arrow arrow-out">↓</span>{{ activeBanner.playerOut }}</span>
+                                </div>
                             </div>
                         </div>
                     </Transition>
@@ -900,8 +913,14 @@ onUnmounted(() => {
 .banner-side {
     top: 0;
     height: 100%;
-    min-width: 240px;
+    /* Own min-width + padding (wider/roomier than the base .banner padding)
+       so the content has real breathing room once it emerges from the seam
+       — 240px was tight enough that "TIEMPO MUERTO" + team name, or a long
+       player name in a substitution, wrapped into a cramped, illegible mess
+       right at the bar's edge. */
+    min-width: 300px;
     max-width: 460px;
+    padding: 12px 20px;
     justify-content: center;
     border-left: 1px solid rgba(255, 255, 255, 0.12);
     box-sizing: border-box;
@@ -918,16 +937,32 @@ onUnmounted(() => {
     border-top-right-radius: 0;
     border-bottom-right-radius: 0;
 }
-.banner-sub-rows.sub-inline {
-    flex-direction: row;
-    align-items: center;
-    gap: 18px;
-    padding-left: 0;
-}
 .banner-head {
     display: flex;
     align-items: center;
+    /* Wraps rather than compressing when the side banner's narrower width
+       can't fit title + team + dots on one line — the team/dots move down
+       as a whole line instead of squeezing every word. */
+    flex-wrap: wrap;
     gap: 10px;
+    row-gap: 4px;
+}
+/* On the side layout the "auto" right-alignment of the dots reads oddly once
+   the row wraps (dots stranded far from the team name); group them together
+   instead. The stack layout has plenty of width and never wraps, so it keeps
+   the default right-aligned dots (see .to-dots below). */
+.banner-head.head-side .to-dots {
+    margin-left: 0;
+}
+.banner-sub {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.banner-team-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 .banner-title {
     font-size: 16px;
