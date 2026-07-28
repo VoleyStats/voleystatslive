@@ -119,7 +119,6 @@
   },
   "overlay": {
     "timeout": "Tiempo muerto",
-    "substitution": "Cambio",
     "setStatsTitle": "Estadísticas del set",
     "statsPoints": "Puntos"
   },

@@ -119,7 +119,6 @@
   },
   "overlay": {
     "timeout": "Timeout",
-    "substitution": "Substitution",
     "setStatsTitle": "Set stats",
     "statsPoints": "Points"
   },

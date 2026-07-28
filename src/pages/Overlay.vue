@@ -155,6 +155,7 @@ interface BannerItem {
     team?: "us" | "them"
     playerIn?: string
     playerOut?: string
+    setNumber?: number
 }
 const bannerQueue = ref<BannerItem[]>([])
 const activeBanner = ref<BannerItem | null>(null)
@@ -192,7 +193,11 @@ function formatPlayer(p: any): string {
 function handleLiveStat(s: any) {
     const id = aid(s)
     if (id === "0") {
-        enqueueBanner({ kind: "timeout", team: s?.to === 1 ? "us" : s?.to === 2 ? "them" : undefined })
+        enqueueBanner({
+            kind: "timeout",
+            team: s?.to === 1 ? "us" : s?.to === 2 ? "them" : undefined,
+            setNumber: Number(s?.set?.number),
+        })
         return
     }
     if (id === "99") {
@@ -210,6 +215,19 @@ const bannerChipColor = computed(() => {
     if (!b) return "#93a4bd"
     if (b.kind === "sub") return usColor.value
     return b.team === "us" ? usColor.value : b.team === "them" ? themColor : "#93a4bd"
+})
+
+// Tiempos muertos gastados EN ESTE SET por el equipo que acaba de pedirlo
+// (incluido el que acaba de llegar): cuenta stats `action.id=="0"` del mismo
+// `to` (equipo) y mismo `set.number`. `null` cuando no es computable (datos
+// viejos sin `to`) — el contador se omite en ese caso.
+const timeoutCount = computed<number | null>(() => {
+    const b = activeBanner.value
+    if (!b || b.kind !== "timeout" || !b.team || !Number.isFinite(b.setNumber)) return null
+    const toValue = b.team === "us" ? 1 : 2
+    return allStats.value.filter(
+        (s) => aid(s) === "0" && Number(s?.to) === toValue && Number(s?.set?.number) === b.setNumber
+    ).length
 })
 
 let statsUnsub: (() => void) | null = null
@@ -277,17 +295,24 @@ onUnmounted(() => {
                         :key="activeBanner.id"
                         class="banner"
                         :class="pos.startsWith('top') ? 'banner-below' : 'banner-above'"
+                        :style="{ borderLeftColor: bannerChipColor }"
                     >
-                        <div class="banner-head">
-                            <span class="banner-chip" :style="{ background: bannerChipColor }"></span>
-                            <span class="banner-title">
-                                {{ activeBanner.kind === "timeout" ? t("overlay.timeout") : t("overlay.substitution") }}
-                            </span>
-                            <span v-if="activeBanner.kind === 'timeout' && activeBanner.team" class="banner-team">
+                        <div v-if="activeBanner.kind === 'timeout'" class="banner-head">
+                            <span class="banner-title">{{ t("overlay.timeout") }}</span>
+                            <span v-if="activeBanner.team" class="banner-team">
                                 {{ activeBanner.team === "us" ? usName : themName }}
                             </span>
+                            <span v-if="timeoutCount !== null" class="to-dots">
+                                <span
+                                    v-for="n in 2"
+                                    :key="n"
+                                    class="to-dot"
+                                    :class="{ filled: n <= timeoutCount }"
+                                    :style="n <= timeoutCount ? { background: bannerChipColor, borderColor: bannerChipColor } : {}"
+                                ></span>
+                            </span>
                         </div>
-                        <div v-if="activeBanner.kind === 'sub'" class="banner-sub-rows">
+                        <div v-else class="banner-sub-rows">
                             <span class="banner-sub-row"><span class="arrow arrow-in">↑</span>{{ activeBanner.playerIn }}</span>
                             <span class="banner-sub-row"><span class="arrow arrow-out">↓</span>{{ activeBanner.playerOut }}</span>
                         </div>
@@ -382,9 +407,9 @@ onUnmounted(() => {
     position: relative;
     min-width: 340px;
     padding: 10px 16px 14px;
-    background: rgba(9, 12, 20, 0.82);
+    background: rgba(11, 15, 26, 0.88);
     backdrop-filter: blur(6px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(61, 107, 255, 0.24);
     border-radius: 12px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
 }
@@ -398,10 +423,11 @@ onUnmounted(() => {
     display: flex;
     flex-direction: column;
     gap: 8px;
-    padding: 10px 16px;
-    background: rgba(9, 12, 20, 0.92);
+    padding: 10px 16px 10px 14px;
+    background: rgba(7, 10, 18, 0.94);
     backdrop-filter: blur(6px);
-    border: 1px solid rgba(255, 255, 255, 0.14);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-left: 4px solid rgba(255, 255, 255, 0.3);
     border-radius: 12px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
 }
@@ -418,25 +444,35 @@ onUnmounted(() => {
     align-items: center;
     gap: 10px;
 }
-.banner-chip {
-    width: 14px;
-    height: 14px;
-    border-radius: 4px;
-    flex-shrink: 0;
-    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.25) inset;
-}
 .banner-title {
     font-size: 16px;
-    font-weight: 800;
+    font-weight: 700;
     letter-spacing: 0.16em;
     text-transform: uppercase;
-    color: #fff;
+    color: #c7d8ff;
 }
 .banner-team {
     font-size: 16px;
     font-weight: 700;
     text-transform: uppercase;
     color: #93a4bd;
+}
+.to-dots {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-left: auto;
+}
+.to-dot {
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    border: 2px solid rgba(51, 66, 106, 0.9);
+    background: transparent;
+    box-sizing: border-box;
+}
+.to-dot.filled {
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.25) inset;
 }
 .banner-sub-rows {
     display: flex;
@@ -527,9 +563,9 @@ onUnmounted(() => {
 .panel {
     min-width: 560px;
     padding: 34px 48px;
-    background: rgba(9, 12, 20, 0.9);
+    background: rgba(15, 21, 36, 0.92);
     backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(61, 107, 255, 0.2);
     border-radius: 20px;
     box-shadow: 0 24px 70px rgba(0, 0, 0, 0.55);
 }
@@ -563,11 +599,11 @@ onUnmounted(() => {
     text-align: center;
 }
 .winner .bsets {
-    color: #4ade80;
+    color: #cbfb45;
 }
 .divider {
     height: 1px;
-    background: rgba(255, 255, 255, 0.14);
+    background: rgba(61, 107, 255, 0.2);
     margin: 20px 0 16px;
 }
 .set-line {
@@ -637,7 +673,7 @@ onUnmounted(() => {
     height: 10px;
     border-radius: 6px;
     overflow: hidden;
-    background: rgba(255, 255, 255, 0.08);
+    background: rgba(51, 66, 106, 0.4);
 }
 .stat-half {
     flex: 1;
