@@ -83,14 +83,42 @@ const match = computed<LiveMatch | null | undefined>(() => demoData.value ?? liv
 const posOptions = ["bottom-left", "bottom-right", "top-left", "top-right"] as const
 const pos = ref<string>(String(route.query.pos ?? "bottom-left"))
 const scale = ref<number>(Number(route.query.scale) || 1)
-// Banner layout for timeout/substitution notices. Default "side": the banner
-// flares out horizontally from the inner edge of the compact bar, sharing its
-// height/border so it reads as one piece (VNL-style "TIME OUT" chip). Pass
-// `?banners=stack` to keep the legacy above/below layout instead.
-const bannersMode = ref<"side" | "stack">(String(route.query.banners ?? "") === "stack" ? "stack" : "side")
-// Bars pinned to the left of the screen flare the banner rightward (toward
-// center); bars pinned to the right flare it leftward.
-const sideExtend = computed(() => (pos.value.includes("left") ? "right" : "left"))
+// Banner layout for timeout/substitution notices, relative to the compact
+// bar: "side"/"stack" are the historical auto modes (side picks left/right,
+// stack picks above/below, both based on which screen corner the bar sits
+// in); "top"/"bottom"/"left"/"right" pin the banner to that explicit edge of
+// the bar regardless of corner, letting the streamer override the auto
+// choice (e.g. push it toward screen center, or deliberately off-screen-ish
+// for a tighter crop). "side" stays the default for URLs with no `banners`.
+type BannersMode = "side" | "stack" | "top" | "bottom" | "left" | "right"
+const BANNERS_MODES: readonly BannersMode[] = ["side", "stack", "top", "bottom", "left", "right"]
+function parseBannersMode(v: unknown): BannersMode {
+    const s = String(v ?? "")
+    return (BANNERS_MODES as readonly string[]).includes(s) ? (s as BannersMode) : "side"
+}
+const bannersMode = ref<BannersMode>(parseBannersMode(route.query.banners))
+// Resolves the mode above into one of the 4 concrete edges the CSS actually
+// draws. Auto modes derive the edge from `pos` (the bar's screen corner):
+// "side" flares toward the horizontal center, "stack" toward the vertical
+// center — same rule as before, just factored out so explicit modes can
+// short-circuit it.
+const bannerDir = computed<"top" | "bottom" | "left" | "right">(() => {
+    switch (bannersMode.value) {
+        case "top":
+        case "bottom":
+        case "left":
+        case "right":
+            return bannersMode.value
+        case "stack":
+            return pos.value.startsWith("top") ? "bottom" : "top"
+        case "side":
+        default:
+            return pos.value.includes("left") ? "right" : "left"
+    }
+})
+const bannerAxis = computed<"vertical" | "horizontal">(() =>
+    bannerDir.value === "top" || bannerDir.value === "bottom" ? "vertical" : "horizontal"
+)
 
 const compactStyle = computed(() => {
     const m = "3vmin"
@@ -249,23 +277,24 @@ const bannerChipColor = computed(() => {
     if (b.kind === "sub") return usColor.value
     return b.team === "us" ? usColor.value : b.team === "them" ? themColor : "#93a4bd"
 })
-// Stack mode keeps the original team-color left border; side mode shows the
-// accent as a top inset line instead (the left/right edge is the seam glued
-// to the compact bar, so it can't carry a 4px accent border there).
+// Vertical layout (top/bottom edge) keeps the original team-color left
+// border; horizontal layout (left/right edge) shows the accent as a top
+// inset line instead (the left/right edge is the seam glued to the compact
+// bar, so it can't carry a 4px accent border there).
 const bannerAccentStyle = computed(() =>
-    bannersMode.value === "stack"
+    bannerAxis.value === "vertical"
         ? { borderLeftColor: bannerChipColor.value }
         : { boxShadow: `inset 0 3px 0 0 ${bannerChipColor.value}, 0 10px 30px rgba(0, 0, 0, 0.45)` }
 )
 const bannerPosClass = computed(() => {
-    if (bannersMode.value === "stack") return pos.value.startsWith("top") ? "banner-below" : "banner-above"
-    return sideExtend.value === "right" ? "banner-extend-right" : "banner-extend-left"
+    if (bannerAxis.value === "vertical") return bannerDir.value === "top" ? "banner-above" : "banner-below"
+    return bannerDir.value === "right" ? "banner-extend-right" : "banner-extend-left"
 })
 // Flattens the compact bar's corner that touches the side banner so the two
 // panels read as a single joined shape.
 const compactJoinClass = computed(() => {
-    if (!activeBanner.value || bannersMode.value !== "side") return ""
-    return sideExtend.value === "right" ? "compact-flat-right" : "compact-flat-left"
+    if (!activeBanner.value || bannerAxis.value !== "horizontal") return ""
+    return bannerDir.value === "right" ? "compact-flat-right" : "compact-flat-left"
 })
 
 // Tiempos muertos gastados EN ESTE SET por el equipo que acaba de pedirlo
@@ -394,7 +423,7 @@ const finalOverlayUrl = computed(() => {
     const q: Record<string, string> = {}
     if (pos.value !== "bottom-left") q.pos = pos.value
     if (scale.value !== 1) q.scale = String(scale.value)
-    if (bannersMode.value === "stack") q.banners = "stack"
+    if (bannersMode.value !== "side") q.banners = bannersMode.value
     const resolved = router.resolve({ name: "overlay", params: { code }, query: q })
     return `${window.location.origin}${resolved.href}`
 })
@@ -449,12 +478,12 @@ onUnmounted(() => {
             <Transition name="sb" mode="out-in">
                 <!-- COMPACT — during a set -->
                 <div v-if="phase === 'playing'" key="playing" class="compact-wrap" :style="compactStyle">
-                    <Transition :name="bannersMode === 'stack' ? 'banner' : 'banner-side'">
+                    <Transition :name="bannerAxis === 'vertical' ? 'banner' : 'banner-side'">
                         <div
                             v-if="activeBanner"
                             :key="activeBanner.id"
                             class="banner"
-                            :class="[bannersMode === 'stack' ? 'banner-stack' : 'banner-side', bannerPosClass]"
+                            :class="[bannerAxis === 'vertical' ? 'banner-stack' : 'banner-side', bannerPosClass]"
                             :style="bannerAccentStyle"
                         >
                             <div v-if="activeBanner.kind === 'timeout'" class="banner-head">
@@ -472,7 +501,7 @@ onUnmounted(() => {
                                     ></span>
                                 </span>
                             </div>
-                            <div v-else class="banner-sub-rows" :class="{ 'sub-inline': bannersMode !== 'stack' }">
+                            <div v-else class="banner-sub-rows" :class="{ 'sub-inline': bannerAxis === 'horizontal' }">
                                 <span class="banner-sub-row"><span class="arrow arrow-in">↑</span>{{ activeBanner.playerIn }}</span>
                                 <span class="banner-sub-row"><span class="arrow arrow-out">↓</span>{{ activeBanner.playerOut }}</span>
                             </div>
@@ -583,23 +612,60 @@ onUnmounted(() => {
 
             <div class="mt-5">
                 <p class="eyebrow !py-1 !text-[10px]">{{ t("overlay.setupBanners") }}</p>
-                <div class="mt-2 grid grid-cols-2 gap-2">
+                <!-- D-pad layout: direction is relative to the compact bar, so
+                     arrows read naturally regardless of which corner it's pinned to. -->
+                <div class="mt-2 grid grid-cols-3 gap-2">
+                    <span></span>
                     <button
                         type="button"
-                        class="rounded-lg border px-3 py-2 text-xs font-semibold transition-colors"
+                        :title="t('overlay.bannersTop')"
+                        class="flex h-9 items-center justify-center rounded-lg border text-base font-semibold leading-none transition-colors"
+                        :class="bannersMode === 'top' ? 'border-brand-400 bg-brand-500/20 text-white' : 'border-white/10 bg-white/5 text-slate-300 hover:bg-white/10'"
+                        @click="bannersMode = 'top'"
+                    >
+                        ↑
+                    </button>
+                    <span></span>
+
+                    <button
+                        type="button"
+                        :title="t('overlay.bannersLeft')"
+                        class="flex h-9 items-center justify-center rounded-lg border text-base font-semibold leading-none transition-colors"
+                        :class="bannersMode === 'left' ? 'border-brand-400 bg-brand-500/20 text-white' : 'border-white/10 bg-white/5 text-slate-300 hover:bg-white/10'"
+                        @click="bannersMode = 'left'"
+                    >
+                        ←
+                    </button>
+                    <button
+                        type="button"
+                        :title="t('overlay.bannersAuto')"
+                        class="flex h-9 items-center justify-center rounded-lg border text-[10px] font-semibold uppercase tracking-wide transition-colors"
                         :class="bannersMode === 'side' ? 'border-brand-400 bg-brand-500/20 text-white' : 'border-white/10 bg-white/5 text-slate-300 hover:bg-white/10'"
                         @click="bannersMode = 'side'"
                     >
-                        {{ t("overlay.bannersSide") }}
+                        {{ t("overlay.bannersAuto") }}
                     </button>
                     <button
                         type="button"
-                        class="rounded-lg border px-3 py-2 text-xs font-semibold transition-colors"
-                        :class="bannersMode === 'stack' ? 'border-brand-400 bg-brand-500/20 text-white' : 'border-white/10 bg-white/5 text-slate-300 hover:bg-white/10'"
-                        @click="bannersMode = 'stack'"
+                        :title="t('overlay.bannersRight')"
+                        class="flex h-9 items-center justify-center rounded-lg border text-base font-semibold leading-none transition-colors"
+                        :class="bannersMode === 'right' ? 'border-brand-400 bg-brand-500/20 text-white' : 'border-white/10 bg-white/5 text-slate-300 hover:bg-white/10'"
+                        @click="bannersMode = 'right'"
                     >
-                        {{ t("overlay.bannersStack") }}
+                        →
                     </button>
+
+                    <span></span>
+                    <button
+                        type="button"
+                        :title="t('overlay.bannersBottom')"
+                        class="flex h-9 items-center justify-center rounded-lg border text-base font-semibold leading-none transition-colors"
+                        :class="bannersMode === 'bottom' ? 'border-brand-400 bg-brand-500/20 text-white' : 'border-white/10 bg-white/5 text-slate-300 hover:bg-white/10'"
+                        @click="bannersMode = 'bottom'"
+                    >
+                        ↓
+                    </button>
+                    <span></span>
                 </div>
             </div>
 
