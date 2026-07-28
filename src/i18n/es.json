@@ -120,7 +120,26 @@
   "overlay": {
     "timeout": "Tiempo muerto",
     "setStatsTitle": "Estadísticas del set",
-    "statsPoints": "Puntos"
+    "topScorer": "Máxima anotadora",
+    "configure": "Configurar",
+    "setupTitle": "Configurar overlay",
+    "setupSubtitle": "Ajusta la posición y el tamaño, y copia el enlace para OBS.",
+    "setupPos": "Posición",
+    "pos": {
+      "bottom-left": "Abajo izq.",
+      "bottom-right": "Abajo dcha.",
+      "top-left": "Arriba izq.",
+      "top-right": "Arriba dcha."
+    },
+    "setupScale": "Escala",
+    "setupBanners": "Avisos (tiempo muerto / cambio)",
+    "bannersSide": "Lateral",
+    "bannersStack": "Apilado",
+    "setupDemo": "Datos de ejemplo",
+    "setupNoLiveData": "No hay datos en directo para este código. Activa \"Datos de ejemplo\" para previsualizar.",
+    "setupUrlLabel": "Enlace para OBS",
+    "copyUrl": "Copiar URL",
+    "copied": "¡Copiado!"
   },
   "teamCode": {
     "title": "Estadísticas en vivo",

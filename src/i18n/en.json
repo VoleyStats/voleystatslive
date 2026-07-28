@@ -120,7 +120,26 @@
   "overlay": {
     "timeout": "Timeout",
     "setStatsTitle": "Set stats",
-    "statsPoints": "Points"
+    "topScorer": "Top scorer",
+    "configure": "Configure",
+    "setupTitle": "Configure overlay",
+    "setupSubtitle": "Adjust position and size, then copy the link for OBS.",
+    "setupPos": "Position",
+    "pos": {
+      "bottom-left": "Bottom left",
+      "bottom-right": "Bottom right",
+      "top-left": "Top left",
+      "top-right": "Top right"
+    },
+    "setupScale": "Scale",
+    "setupBanners": "Banners (timeout / substitution)",
+    "bannersSide": "Side",
+    "bannersStack": "Stacked",
+    "setupDemo": "Demo data",
+    "setupNoLiveData": "No live data for this code. Turn on \"Demo data\" to preview.",
+    "setupUrlLabel": "OBS link",
+    "copyUrl": "Copy URL",
+    "copied": "Copied!"
   },
   "teamCode": {
     "title": "Live stats",
