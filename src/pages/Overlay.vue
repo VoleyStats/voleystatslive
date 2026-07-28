@@ -1011,6 +1011,8 @@ onUnmounted(() => {
     position: relative;
     display: inline-flex;
     align-items: center;
+    /* Reserved slot for .serve-dot so it never crowds the bar's border. */
+    padding-right: 15px;
 }
 .pts {
     font-family: var(--font-display);
@@ -1024,8 +1026,9 @@ onUnmounted(() => {
    point number, derived live from the stats stream (see `servingTeam`). */
 .serve-dot {
     position: absolute;
-    right: -14px;
-    top: 50%;
+    right: 0;
+    /* -1px: optical center of the digits sits slightly above the line-box center. */
+    top: calc(50% - 1px);
     transform: translateY(-50%);
     width: 9px;
     height: 9px;
