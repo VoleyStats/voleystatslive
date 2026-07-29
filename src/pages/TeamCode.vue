@@ -56,8 +56,9 @@ const codeTeam = ref("");
 const goToStats = () => {
   let value = codeTeam.value.trim();
   if (!value) return;
-  // Acepta el código suelto o la URL completa pegada desde la app.
-  const fromUrl = value.match(/voleystats-live\.vercel\.app\/(?:stats\/|team\/|overlay\/)?([A-Za-z0-9-]+)/);
+  // Acepta el código suelto o la URL completa pegada desde la app
+  // (cualquier host: el dominio ha cambiado ya una vez y volverá a hacerlo).
+  const fromUrl = value.match(/^https?:\/\/[^/]+\/(?:stats\/|team\/|overlay\/)?([A-Za-z0-9-]+)/);
   if (fromUrl) value = fromUrl[1];
   // Los enlaces de equipo llevan un UUID (36 caracteres con guiones); los de
   // partido son IDs de Firestore (20 alfanuméricos).
