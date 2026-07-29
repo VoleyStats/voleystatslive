@@ -1,134 +1,88 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+Guía para Claude Code al trabajar en este repo.
 
-z## Commands
+## Qué es
 
-```bash
-npm run dev      # Vite dev server
-npm run build    # vue-tsc typecheck THEN vite build — typecheck failures block the build
-npm run preview  # serve the production build locally
-```
+`voleystatslive` es el **visor web público** del ecosistema Voley Stats (apps iOS/Android). No tiene backend propio: **lee** en tiempo real (o desde caché) el mismo proyecto Firebase/Firestore en el que las apps escriben, y lo renderiza. Coupling único con `../VoleyStatsApp/` y `../VoleyStats-Android/`: Firestore. El contrato de campos es autoritativo en `../VoleyStatsApp/CLAUDE.md` ("Companion web app" / "Live sets scoreboard") — este repo solo lee, nunca escribe.
 
-There is no test runner and no linter. `vue-tsc` (run as part of `build`) is the only static check. `tsconfig.json` is strict with `noUnusedLocals`/`noUnusedParameters`, so unused variables/imports fail the build — but note the stats components lean heavily on `// @ts-ignore` and `any[]` to bypass this on the Firestore data. Commit prefixes like `test:` in the history refer to manual verification, not an automated suite.
+Stack: **Vue 3** (`<script setup>`, TS) + **vue-router** (history mode) + **vuefire**/Firebase (solo Firestore) + **Tailwind** (dark-only) + **ApexCharts** (`vue3-apexcharts`) + **vue-i18n**. Build con **Vite** (rolldown). Deploy en Vercel como SPA (`vercel.json` reescribe todo a `index.html`).
 
-## Setup
-
-Firebase credentials come from `VITE_*` env vars. Copy `.env.example` to `.env` and fill in the Firebase project config before running. Without a valid `.env`, Firestore calls fail at runtime.
-
-## Architecture
-
-Single-page Vue 3 app (`<script setup>` SFCs, TypeScript) that displays **live volleyball match statistics** read in real time from Firestore. There is no backend in this repo — a separate app (not in this codebase) writes match data; this app is read-only.
-
-**i18n:** UI copy is bilingual es/en via vue-i18n (`src/i18n/` — `es.json` is the source of truth, `en.json` the translation; composition API, `legacy: false`, `globalInjection: true`). Default locale: `navigator.language` (es if it starts with "es", en otherwise), user choice persisted in `localStorage["vsl-locale"]` and switchable from the ES/EN toggle in the Layout header. Insight/summary texts use `$t`/`t()` interpolation with params — never string concatenation. The static SEO meta + JSON-LD in `index.html` stay in Spanish on purpose; `Overlay.vue` (OBS) is not translated. When adding UI text, add the key to BOTH json files.
-
-**Stack:** Vue 3 + vue-router (history mode, non-home routes lazy-loaded) + vuefire/Firebase (Firestore only) + Tailwind + ApexCharts (`vue3-apexcharts`, imported locally in `GeneralStats.vue` — NOT registered globally). Deployed on Vercel; `vercel.json` rewrites all paths to `index.html` for client-side routing.
-
-**Code-splitting:** `main.ts` deliberately imports neither Firebase nor ApexCharts, so the initial chunk (Home/SEO) stays small. `src/firebase.ts` (`initializeApp` + `db`) is only imported by the lazy stats pages; vuefire composables (`useDocument`) find the default app via `getApp()` — no `VueFire` app plugin needed. `vite.config.ts` pins vendor chunks via rolldown `codeSplitting.groups` (`firebase`, `apexcharts`, plus `apexcharts-ssr` for the SSR copy that `vue3-apexcharts` dynamic-imports but the browser never fetches). Don't re-add Firebase/ApexCharts imports to `main.ts` or eagerly-loaded modules.
-
-**Composition:** `App.vue` → `layouts/Layout.vue` (nav + bottom toolbar + footer) → `<RouterView>` slot. The bottom toolbar is hidden on the `home` and `code` routes.
-
-### Firestore data model
-
-- Collection `live_matches` — each document is one match, keyed by an ID that **is the "team code"** users type on `/team-code`. That navigates to `/stats/<id>`. Match docs carry `n_sets` (used to render the set selector).
-- Subcollection `live_matches/<id>/stats` — each document is a single recorded action/rally outcome. Components subscribe with `onSnapshot(query(..., orderBy("order")))` for live updates, and read the match doc with VueFire's `useDocument`.
-
-> The helper functions `getMatch`/`getStats` in `src/firebase.ts` are unused legacy — components call `onSnapshot` directly. `src/firebase.ts` exports the live `db`, the `matches` collection, and Firebase init.
-
-### Stat document shape (reverse-engineered — there are no type definitions for it)
-
-Each stat doc is consumed with fields including: `order` (sort key), `set.number`, `stage` (`0` = serve stage), `score_us`/`score_them`, `server`, `player` (`{ name, ... }`), and `action` (`{ id, type, area }`).
-
-- `to`: rally outcome — `0` = rally still in progress, `1` = point for our team, `2` = point for opponent / our error. `to !== 0` means the rally finished.
-- `action.area`: index into this fixed label array (see `GeneralStats.vue`): `["Recepción", "Bloqueo", "Defensa", "Colocación", "Saque", "Ataque", "Falta"]` (0–6).
-- `action.id`: specific action code. Reception grades used in `AreaStats.vue`: `2` = "-", `3` = "+", `4` = "++", `22` = error; ids `1,2,3,4,22` are the reception actions. `action.type === "error"` flags errors.
-
-All aggregation (score, streaks, per-player/per-area breakdowns, serve efficiency) is derived **client-side** with a `watch(stats, ...)` handler and `Map.groupBy`. When editing stats logic, expect to trace these derivations rather than a schema.
-
-### Routes (`src/router.ts`)
-
-- `/` → `Home.vue` (marketing landing page)
-- `/team-code` → `TeamCode.vue` (enter match/team code)
-- `/stats/:id` → parent with no component; children render directly:
-  - `''` → `StatsView.vue` → `GeneralStats.vue` (score, streaks, error & point-log charts)
-  - `areas` → `AreaStats.vue` (per-player reception breakdown)
-  - `team` → `EmptyState.vue` (placeholder — not yet built)
-
-The bottom toolbar links to `areaStats` ("Stats") and `teamStats` ("Team"), not to the base `stats` route.
-
-### Known duplication
-
-`GeneralStats.vue` and `AreaStats.vue` each independently reimplement the same set-selector UI and the same `onSnapshot` + `baseStats`/`stats` + `watch(set)` filtering boilerplate. A change to how stats are fetched or filtered by set usually needs to be made in both.
-
-### Design system & theming
-
-The app commits to a single dark visual world (sports-analytics product) — there is no light theme. Design tokens live in `tailwind.config.js`: brand palette `ink` (near-black grounds), `brand` (electric blue, primary), `volt` (lime, energy/CTA accent); fonts `font-display` (Space Grotesk) and `font-sans` (Inter), loaded via `<link>` in `index.html`. Reusable component classes (`.btn-primary`, `.btn-ghost`, `.card`, `.eyebrow`, `.text-gradient`, `.container-x`, `.reveal`) are defined in `src/style.css` under `@layer components` — prefer these over re-deriving utility soup. `src/components/Logo.vue` is the inline-SVG brand mark (replaces the old 490 KB PNG on the critical path).
-
-**Scroll reveals** use a progressive-enhancement pattern (see `Home.vue` + `style.css`): content is visible by default; an inline script in `index.html` adds a `js` class to `<html>`, and only then does `.reveal` start hidden and animate in via `IntersectionObserver`. This keeps content crawlable for non-JS bots. Respect `prefers-reduced-motion` (already handled in `style.css`).
-
-### SEO & GEO
-
-`index.html` carries full static meta (title, description, canonical, Open Graph, Twitter) plus three JSON-LD blocks: `SoftwareApplication`, `Organization`, and `FAQPage`. **The `FAQPage` JSON-LD must be kept in sync with the `faqs` array in `src/pages/Home.vue`.** `public/` holds `robots.txt` (explicitly allows AI crawlers — GPTBot, ClaudeBot, PerplexityBot, etc. — for GEO), `sitemap.xml`, `llms.txt` (product summary for generative engines), `site.webmanifest`, `favicon.svg`, and `og-image.svg`.
-
-> All absolute URLs use the placeholder domain `https://voleystatslive.com` — replace with the real production domain (in `index.html` canonical/OG/Twitter/JSON-LD, `robots.txt`, and `sitemap.xml`) before launch. There is no prerendering/SSG yet: Google renders the JS, and JSON-LD + `llms.txt` + a `<noscript>` summary cover non-JS/AI crawlers. Firebase and ApexCharts are code-split out of the initial bundle (see "Code-splitting" above).
-## Overview
-
-**voleystatslive** is the **public web viewer** for the Voley Stats iOS app. It has no backend of its own: it reads volleyball match data in realtime from the **same Firebase/Firestore project the iOS app writes to** and renders it. It is a companion to the app repo (`../VoleyStatsApp/`), coupled to it only through Firestore (see "Data source" below).
-
-Stack: **Vue 3** (`<script setup>` SFCs) + **TypeScript** + **Vite** + **Tailwind** (dark mode via `selector`) + **ApexCharts** (`vue3-apexcharts`) + **vuefire** (Firebase bindings) + **GSAP** (landing animations) + **bootstrap-icons**. Deployed on **Vercel** as an SPA. README is stale Vite boilerplate — ignore it.
-
-## Commands
+## Comandos
 
 ```bash
 npm install
 npm run dev       # Vite dev server
-npm run build     # vue-tsc type-check THEN vite build — type errors fail the build
-npm run preview   # serve the production build
+npm run build     # vue-tsc (type-check estricto) + vite build — un error de tipos bloquea el build
+npm run preview   # sirve el build de producción
 ```
 
-Requires a `.env` (copy `.env.example`) with Firebase `VITE_*` keys pointing at the **same Firebase project as the iOS app**. Without it, `firebase.ts` initializes with `undefined` config and all reads fail. `.env` is gitignored.
+Requiere `.env` (copiar `.env.example`) con las claves `VITE_*` de Firebase, apuntando al mismo proyecto que usan las apps. Sin `.env` válido, `firebase.ts` inicializa con config `undefined` y toda lectura falla en runtime. No hay test runner ni linter; `vue-tsc` (parte de `build`) es el único check estático. `tsconfig` es estricto (`noUnusedLocals`/`noUnusedParameters`) — mantén el código limpio en vez de añadir `@ts-ignore` (actualmente no hay ninguno en el repo).
 
-## Architecture
+## Code-splitting
 
-- **Entry:** `main.ts` mounts `App.vue` and registers only the router (no Firebase, no ApexCharts — see "Code-splitting"). `App.vue` wraps `<RouterView>` in `layouts/Layout.vue` — so **every route currently renders inside Layout** (nav + gradient background + bottom toolbar + footer).
-- **Router** (`router.ts`, `createWebHistory`):
-  - `/` → `Home.vue` (marketing landing, GSAP fade-ins).
-  - `/team-code` → `TeamCode.vue` (input where the user types the match `code`, then routes to `/stats/{code}`).
-  - `/stats/:id` → `StatsView.vue` (renders `GeneralStats.vue`), child `/stats/:id/areas` → `AreaStats.vue`, child `/stats/:id/team` → `EmptyState` (placeholder, not built).
-  - `:id` is the Firestore `live_matches` document id, i.e. the app's `match.code`.
-- **Firebase data layer** (`src/firebase.ts`): initializes the app, exports `db` (Firestore), the `matches` collection ref, and `getMatch(id)`/`getStats(id)` helpers. In practice the pages mostly call Firestore directly rather than these helpers.
-- **Realtime pattern** (the core of every stats page): subscribe to the stats subcollection ordered by `order`, and to the match doc:
-  ```ts
-  onSnapshot(query(collection(db, "live_matches", id, "stats"), orderBy("order")), q => {
-    baseStats.data = q.docs.map(d => d.data())
-  })
-  const match = useDocument(doc(db, "live_matches", id))
-  ```
-  All displayed numbers (score, streaks, per-area errors, serve efficiency) are **derived client-side** from the raw stat stream via `watch` + `Map.groupBy` — there is no aggregation on the server. `GeneralStats.vue` is the reference for how each metric is computed.
+`main.ts` **no** importa Firebase ni ApexCharts — el chunk inicial (Home/SEO) se queda ligero. `src/firebase.ts` (init + `db`) solo lo importan las páginas lazy que leen Firestore; los composables de vuefire (`useDocument`) encuentran la app por defecto vía `getApp()`, así que no hace falta instalar el plugin `VueFire` en `main.ts`. `vite.config.ts` fija los chunks de vendor pesados vía `rolldownOptions.output.codeSplitting.groups` (`firebase`, `apexcharts`, y `apexcharts-ssr` para la copia SSR que `vue3-apexcharts` importa dinámicamente pero el navegador nunca descarga). No reintroduzcas esos imports en `main.ts` u otros módulos eager.
 
-## Data source (the contract with the iOS app — read-only here)
+## Rutas (`src/router.ts`, `createWebHistory`)
 
-This app only ever **reads** Firestore; the iOS app is the sole writer. The document shapes are produced by the app's `toJSON()` methods and are a hard API — a field rename on the app side silently breaks this viewer. The authoritative, field-by-field contract is documented in **`../VoleyStatsApp/CLAUDE.md`** ("Companion web app" and "Live sets scoreboard"). Summary of what this repo consumes:
+- `/` → `Home.vue` (landing de marketing).
+- `/overlay/:code` → `Overlay.vue`, `meta: { bare: true }` — marcador para OBS (Browser Source), fondo transparente, **sin** el chrome de `Layout` (ver `App.vue`: si `route.meta.bare`, renderiza el `RouterView` directo, sin envolver en `Layout`). Query params: `?setup` (panel flotante de configuración con vista previa en vivo, no pensado para OBS), `?demo=1|between` (datos simulados sin partido real, útil para maquetar/posicionar sin tocar Firestore), `?pos=`, `?scale=`, `?banners=` (posición/tamaño/modo de banners del marcador). Estos tres últimos siguen una cascada de prioridad: override de sesión del panel `?setup` > config remota `teams/{team.id}.overlay` (documento hot-reloaded, para que el streamer reposicione desde la app sin tocar la URL) > el propio query param de la URL > default.
+- `/team-code` → `TeamCode.vue` (input de código de partido/equipo).
+- `/privacy`, `/terms`, `/contact` → páginas legales (`Privacy.vue`/`Terms.vue` sobre `LegalPage.vue`, `Contact.vue`).
+- `/stats/:id` (`parentStats`) → hijo `''` = `StatsView.vue` (envoltorio fino de `GeneralStats.vue`, la página de stats de UN partido). Seis pestañas internas (`TABS` en `GeneralStats.vue`): **General**, **Rotaciones**, **Por jugadora**, **Tablas**, **Direcciones**, **Punto a punto**. Mientras el partido está en directo (`match.live === true` y no cacheable) solo se muestran General y Punto a punto (`LIVE_VISIBLE_KEYS`); el resto (informe post-set: rotaciones, tablas por destreza, direcciones, detalle por jugadora) se desbloquea cuando el partido termina. Rutas antiguas `/stats/:id/players` y `/stats/:id/areas` redirigen a `stats` con `?tab=players` (compatibilidad de enlaces).
+- `/team/:id` → `TeamMatches.vue` — página pública de un equipo (`teams/{id}`). Dos pestañas de alto nivel: **Partidos** (lista de partidos compartidos, con selector de temporada si el equipo publica `current_season`) y **Estadísticas** (agregado multi-partido), con 7 sub-pestañas propias (`STATS_TABS`): general, rotaciones, absolutas, histórico, direcciones, por jugadora, tablas.
+- `/:code([A-Za-z0-9]{15,})` → enlace corto (`voleystats.vercel.app/<código>`); redirige a `stats`. El patrón (15+ alfanuméricos) evita capturar otras rutas — los códigos son IDs de Firestore.
 
-- **`live_matches/{code}/stats/{id}`** (subcollection, one per captured stat): `order`, `to` (0 rally / 1 point-us / 2 point-them), `score_us`, `score_them`, `stage`, `server` (null-checked), `player.name`, `action.id`/`action.area`/`action.type`, `set.{id,number}`.
-- **`live_matches/{code}`** (match doc): `opponent`, `team` (name/color), `n_sets`, plus the live scoreboard fields `sets_us`, `sets_them`, `current_set`, `sets_scoreboard[]`.
+`Layout.vue` envuelve todas las rutas salvo las `bare`: nav superior con botón "atrás" (oculto en `home`/`code`) y CTA "Ver en vivo" (oculto en `code`/`stats`/`players`/`team`/`overlay`, donde no aporta), más footer con enlaces legales. No hay barra inferior de navegación (toolbar) actualmente.
 
-When something in the UI shows wrong/missing data, first check whether the app is actually writing that field (the app may be an older build) before debugging the Vue side.
+## Patrón de datos
 
-## Conventions & gotchas
+Dos modos de lectura según el estado del partido, decididos **una sola vez** al resolver el doc de `live_matches/{id}` (ver `GeneralStats.vue` y el composable `useTeamStats.ts` para el caso multi-partido de `/team/:id`):
 
-- **Dark mode:** Tailwind `darkMode: "selector"`; the theme is the `dark` class on `<html id="voleyApp">` (hardcoded `class="dark"` in `index.html`). `ToggleTheme.vue` flips that class but is commented out in `Layout.vue` — the app is effectively dark-only right now.
-- **Strict TS, loose code:** `tsconfig` has `strict`, `noUnusedLocals`, `noUnusedParameters`, yet the code leans on ~11 `@ts-ignore`s and `Map.groupBy` (newer than the ES2020 lib target). Since `build` runs `vue-tsc` first, new type errors will block deploys — keep new code clean rather than adding more `@ts-ignore`.
-- **SPA routing:** `vercel.json` rewrites everything to `index.html`; deep links like `/stats/xyz` work in production because of this. Keep it when adding routes.
-- **Layout wraps all routes:** any route that should NOT show the nav/footer/toolbar/background (e.g. a broadcast overlay) must bypass or conditionally disable Layout — see below.
+- **En directo** (`match.live === true` y `!isMatchCacheable(match)`): `onSnapshot` permanente sobre `query(collection(db,"live_matches",id,"stats"), orderBy("order"))` + `useDocument(doc(db,"live_matches",id))`. Si el partido termina con la página abierta, esa sesión sigue con el mismo listener (no migra a mitad de sesión); solo una visita nueva tras recargar entraría en modo one-shot.
+- **Terminado / cacheable** (`isMatchFinished`/`isMatchCacheable` en `src/utils/volleyStats.ts`): one-shot **cache-first** — intenta `getDocsFromCache` (IndexedDB local, sin red); si lanza o viene vacía, cae a `getDocs` contra el servidor. Sin listener: la página no vuelve a tocar Firestore para ese partido.
 
-## Current initiative: OBS scoreboard overlay (`/overlay/:code`)
+Toda la agregación (marcador, rachas, eficiencias, kills/aces derivados, rotaciones, direcciones...) es **client-side**, vía `watch` + `Map.groupBy` sobre el stream crudo de `stats` — no hay agregación en servidor. `GeneralStats.vue` es la referencia de cómo se deriva cada métrica.
 
-We are adding a **broadcast scoreboard** to be composited into a YouTube live stream via OBS (a "Browser Source" pointing at this route). The iOS-side data (Fase 0/1) is already done and publishing the fields listed above. What this repo needs:
+**Dos capas de caché, con propósitos distintos:**
+1. `initializeFirestore` + `persistentLocalCache({ tabManager: persistentMultipleTabManager() })` en `src/firebase.ts` — caché IndexedDB nativa de Firestore (multi-pestaña), usada por `getDoc`/`getDocs`/`getDocsFromCache`/`onSnapshot` para todo. Si `initializeFirestore` falla síncronamente (Safari privado, cuota agotada...) cae a `getFirestore` (caché en memoria).
+2. `localStorage` en `useTeamStats.ts` (para `/team/:id`, que agrega muchos partidos): esquema versionado (`CACHE_SCHEMA_VERSION = 3`, clave `vsl-team-match-v3:{code}`), con entradas que incluyen un **fingerprint** (`sets_scoreboard`/`current_set`) para invalidar si el partido cambió, y una proyección **"slim"** de los stats cacheados (solo los campos necesarios) para caber en la cuota de ~5 MB de `localStorage` con varios partidos. Versiones de esquema anteriores se purgan automáticamente al arrancar.
 
-- A new route `/overlay/:code` rendering **only** the scoreboard: team names/score, sets won (`sets_us`–`sets_them`), current set points (from the last stat in the stream), optional per-set breakdown (`sets_scoreboard`).
-- **Transparent background and no Layout chrome** — OBS composites this over video, so nav/footer/gradient must not render. Either make `App.vue`/`Layout.vue` skip the wrapper for the overlay route (Layout already gates the toolbar by route name, extend that pattern), or give the overlay its own bare layout.
-- Large, high-contrast typography with outline/shadow for legibility over arbitrary video.
-- Reuse the exact same Firestore subscriptions as `GeneralStats.vue` (match doc + stats subcollection); no new data plumbing needed.
-- Consider URL query params (`?scale=`, `?pos=`, theme) so the streamer can place/size it in OBS without code changes.
-- This is Enfoque A only. Embedding the YouTube player on our own site (Enfoque B, with a latency offset to sync scoreboard to the delayed video) is **deferred** — do not build it now.
+## Dónde vive la lógica compartida
+
+- `src/utils/volleyStats.ts` — el núcleo: constantes de `action.id` por área (`KILL_IDS`, `ATTACK_IDS`, `SERVE_IDS`, `RECEPTION_IDS`...), `AREA_LABEL_KEYS` (10 áreas, 0–9), derivación de kills/aces reales (`deriveCredits`/`mergeCredits`, re-atribuyendo errores rivales de recepción/defensa como punto nuestro), eficiencias, side-out/break, `isMatchFinished`/`isMatchCacheable`, radar, rotaciones, ataque por técnica/dirección. Punto de entrada obligado para tocar cualquier métrica.
+- `src/utils/teamTables.ts` — tablas agregadas multi-partido para `/team/:id`.
+- `src/composables/useTeamStats.ts` — composable que orquesta la lista de partidos de un equipo: caché `localStorage` (ver arriba), resolución cache-first/one-shot/`onSnapshot` por partido, y merge de stats entre partidos.
+- `src/components/stats/*.vue` (`SkillTablesSection`, `DirectionsSection`, `Rotations360Section`, `PlayerDetailSection`) — secciones de pestañas reutilizadas entre `GeneralStats.vue` (un partido) y `TeamMatches.vue` (agregado de equipo).
+
+## i18n
+
+vue-i18n Composition API (`legacy: false`, `globalInjection: true`), fuente de verdad `src/i18n/es.json`, traducción `en.json`. Locale por defecto: `localStorage["vsl-locale"]` si existe, si no `navigator.language` (es si empieza por "es", en en caso contrario); persistido al cambiar desde el toggle ES/EN del `Layout`. **Al añadir texto de UI, añade la clave a AMBOS JSON.** `Overlay.vue` (marcador OBS) se deja **sin traducir a propósito** — el streamer controla el idioma vía OBS/stream, no por navegador. El SEO estático + JSON-LD de `index.html` también se queda en español fijo (no vue-i18n, es HTML estático).
+
+## Contrato de datos (solo lectura)
+
+Este repo nunca escribe Firestore; las apps (iOS/Android) son las únicas escritoras. Los shapes vienen de `toJSON()`/`updateLiveScoreboard` en las apps y son un API duro — un rename ahí rompe esto en silencio (no en compilación). Contrato autoritativo, campo a campo: `../VoleyStatsApp/CLAUDE.md`.
+
+Resumen de lo que se consume:
+- `live_matches/{code}` — `opponent`, `team.{id,name,color}`, `n_sets`, `live`, `current_season`, y el marcador de sets (`sets_us`, `sets_them`, `current_set`, `sets_scoreboard[]`).
+- `live_matches/{code}/stats/{id}` — `order`, `to` (0 rally en curso / 1 punto nuestro / 2 punto rival), `score_us`/`score_them`, `stage`, `server`, `set.{id,number}`, `player.{id,name}`, `action.{id,area,type}`, más campos ya documentados en el contrato (`rotation`, `direction`, `setter`, `detail`, `player_in`, `rotationCount`/`Turns`, `set_closed`).
+- `teams/{team.id}` — nombre/color/temporada del equipo, y opcionalmente `teams/{id}.overlay` (config remota de posición del marcador, ver rutas).
+- **Nota de privacidad:** `player.birthday` **nunca** llega en los JSON de jugadora — se elimina intencionadamente de toda escritura a Firestore (`LivePrivacy.stripBirthday` en iOS, espejo en Android). No es un bug ni un campo a reclamar.
+
+Si algo sale mal o vacío en la UI, comprueba primero si la app está escribiendo ese campo (puede ser una build antigua) antes de depurar el lado Vue.
+
+## SEO / GEO
+
+`index.html` lleva meta estática completa (title, description, canonical, Open Graph, Twitter) sobre el dominio real `https://voleystats.vercel.app/`, más tres bloques JSON-LD: `SoftwareApplication`, `Organization`+`WebSite`, `FAQPage`. **El JSON-LD de `FAQPage` debe mantenerse sincronizado a mano con el array `faqs` de `src/pages/Home.vue`.** `public/` incluye `robots.txt` (permite explícitamente crawlers de IA — GPTBot, ClaudeBot, PerplexityBot... — para GEO), `sitemap.xml`, `llms.txt` (resumen de producto para motores generativos), `site.webmanifest`, iconos y `og-image.png`. No hay prerendering/SSG: Google renderiza el JS; el JSON-LD + `llms.txt` cubren crawlers no-JS/IA.
+
+**Scroll reveals** (`Home.vue` + `style.css`): progressive enhancement — contenido visible por defecto; un script inline en `index.html` añade la clase `js` a `<html>`, y solo entonces `.reveal` arranca oculto y anima con `IntersectionObserver`. Mantiene el contenido crawleable para bots sin JS. Respeta `prefers-reduced-motion`.
+
+## Diseño
+
+Dark-only (no hay light theme real; `ToggleTheme` no está enganchado). Tokens en `tailwind.config.js`: `ink` (fondos), `brand` (azul, primario), `volt` (lima, acento/CTA); fuentes `font-display` (Space Grotesk) y `font-sans` (Inter). Clases reutilizables en `src/style.css` bajo `@layer components` (`.btn-primary`, `.btn-ghost`, `.card`, `.eyebrow`, `.text-gradient`, `.container-x`, `.reveal`) — prefiérelas a recomponer utilidades sueltas. `src/components/Logo.vue` es la marca en SVG inline.
+
+## Deuda conocida
+
+- No hay tests automatizados ni linter; la única verificación es `vue-tsc` vía `npm run build`.
+- `GeneralStats.vue` y `TeamMatches.vue` comparten bastante estructura de pestañas/selector de set pero no un componente común — al tocar cómo se filtra/pintan las pestañas, revisa ambos.
+- Sin prerendering: el LCP inicial depende de que los bots ejecuten JS (mitigado con JSON-LD/`llms.txt`, ver SEO/GEO).
