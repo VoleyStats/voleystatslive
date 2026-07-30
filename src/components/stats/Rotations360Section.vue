@@ -24,7 +24,7 @@
                 <span class="font-semibold text-slate-400 px-1 pt-2 border-t border-white/10">{{ $t('team.rotationsAverages') }}</span>
                 <span class="text-center pt-2 border-t border-white/10 text-slate-300">{{ pct(kpiSideOut.won, kpiSideOut.total) }}</span>
                 <span class="text-center pt-2 border-t border-white/10 text-slate-300">{{ pct(kpiBreak.won, kpiBreak.total) }}</span>
-                <span class="text-center pt-2 border-t border-white/10 text-slate-300">{{ rotationAverages.rec.toFixed(1) }}</span>
+                <span class="text-center pt-2 border-t border-white/10 text-slate-300">{{ receptionMarkPercent(rotationAverages.rec) }}</span>
                 <span class="text-center pt-2 border-t border-white/10 text-slate-300">{{ Math.round(rotationAverages.kill * 100) }}%</span>
                 <span class="text-center pt-2 border-t border-white/10 text-slate-300">{{ Math.round(rotationAverages.err * 100) }}%</span>
                 <span class="text-center pt-2 border-t border-white/10 text-slate-300">{{ rotationAverages.rallies }}</span>
@@ -101,6 +101,7 @@ import {
     breakStats,
     isPointEnder,
     pct,
+    receptionMarkPercent,
     receptionTotals,
     rotationBreakdown,
     setterConnections,
@@ -178,7 +179,7 @@ const rotationCells = computed(() => {
             n: r.n,
             so: { text: r.soTotal ? pct(r.soWon, r.soTotal) : "—", style: heatStyle(soRate, avg.so, 0.15, false, r.soTotal > 0) },
             br: { text: r.brTotal ? pct(r.brWon, r.brTotal) : "—", style: heatStyle(brRate, avg.br, 0.15, false, r.brTotal > 0) },
-            rec: { text: r.recTotal ? recRate.toFixed(1) : "—", style: heatStyle(recRate, avg.rec, 0.6, false, r.recTotal > 0) },
+            rec: { text: r.recTotal ? receptionMarkPercent(recRate) : "—", style: heatStyle(recRate, avg.rec, 0.6, false, r.recTotal > 0) },
             kill: { text: r.atkTotal ? pct(r.atkKills, r.atkTotal) : "—", style: heatStyle(killRate, avg.kill, 0.15, false, r.atkTotal > 0) },
             err: {
                 text: r.rallies ? `${r.ourErrors} · ${Math.round(errRate * 100)}%` : "—",

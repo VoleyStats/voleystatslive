@@ -260,6 +260,20 @@ export function receptionMark(r: ReceptionTotals): string {
     return r.total > 0 ? (r.sum / r.total).toFixed(1) : "0.0";
 }
 
+// Misma nota 0-3 (`receptionMark`/`r.sum / r.total`) expresada como
+// porcentaje — paridad de presentación con las apps. El cálculo interno (la
+// media 0-3) no cambia, esto es solo una capa de formato sobre ese número.
+export function receptionMarkPercent(avg: number): string {
+    return Math.round((avg / 3) * 100) + "%";
+}
+
+// % de recepciones "perfectas" (nota 3, id "4") sobre el total de intentos
+// de recepción (ids 1/2/3/4/22). `null` si no hay recepciones — el llamador
+// decide el fallback ("—").
+export function perfectReceptionPercent(r: ReceptionTotals): number | null {
+    return r.total > 0 ? Math.round((r.perfect / r.total) * 100) : null;
+}
+
 export interface UnforcedShare {
     count: number;
     total: number;

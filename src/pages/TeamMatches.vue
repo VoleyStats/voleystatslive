@@ -405,6 +405,7 @@ import {
     mergeGradeBuckets,
     pct,
     radarAxes,
+    receptionMarkPercent,
     receptionTotals,
     sideOutStats,
     unforcedShare,
@@ -587,7 +588,7 @@ const kpiSideOut = computed(() => sideOutStats(pointEnders.value));
 const kpiBreak = computed(() => breakStats(pointEnders.value));
 const kpiReception = computed(() => receptionTotals(gameStats.value));
 const kpiReceptionMark = computed(() =>
-    kpiReception.value.total > 0 ? (kpiReception.value.sum / kpiReception.value.total).toFixed(1) : "—"
+    kpiReception.value.total > 0 ? receptionMarkPercent(kpiReception.value.sum / kpiReception.value.total) : "—"
 );
 // Retrofit fase 2a: la eficiencia FIVB pasa a contar kills con `isKill`
 // (incluye los derivados de la captura en cancha, ver A).

@@ -41,6 +41,9 @@
                         <th v-if="currentSkillTable.markLabelKey" class="text-center font-normal pb-2 px-1 w-14">
                             {{ $t(currentSkillTable.markLabelKey) }}
                         </th>
+                        <th v-if="currentSkillTable.mark2LabelKey" class="text-center font-normal pb-2 px-1 w-14">
+                            {{ $t(currentSkillTable.mark2LabelKey) }}
+                        </th>
                     </tr>
                 </thead>
                 <tbody>
@@ -52,6 +55,9 @@
                         <td v-if="currentSkillTable.markLabelKey" class="text-center py-1.5 px-1 font-semibold text-brand-300">
                             {{ row.mark }}
                         </td>
+                        <td v-if="currentSkillTable.mark2LabelKey" class="text-center py-1.5 px-1 font-semibold text-volt-400">
+                            {{ row.mark2 }}
+                        </td>
                     </tr>
                     <tr class="border-t border-white/10 font-semibold text-slate-200">
                         <td class="py-1.5 pr-2">{{ $t('team.rowTotal') }}</td>
@@ -60,6 +66,9 @@
                         </td>
                         <td v-if="currentSkillTable.markLabelKey" class="text-center py-1.5 px-1 text-brand-300">
                             {{ currentSkillTable.total.mark }}
+                        </td>
+                        <td v-if="currentSkillTable.mark2LabelKey" class="text-center py-1.5 px-1 text-volt-400">
+                            {{ currentSkillTable.total.mark2 }}
                         </td>
                     </tr>
                 </tbody>

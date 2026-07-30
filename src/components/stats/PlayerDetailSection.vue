@@ -99,6 +99,9 @@
         <article v-if="kpiReception.total" class="card w-full p-4">
             <p class="text-sm font-semibold mb-3">{{ $t('stats.areas.reception') }}</p>
             <VueApexCharts type="donut" height="220" :options="receptionDistChart.chartOptions" :series="receptionDistChart.series" />
+            <p class="text-xs text-slate-400 text-center mt-2">
+                {{ $t('stats.perfectReceptionPct') }}: <span class="font-semibold text-slate-200">{{ kpiPerfectReceptionPct !== null ? kpiPerfectReceptionPct + '%' : '—' }}</span>
+            </p>
         </article>
 
         <!-- ============ OTRAS ÁREAS ============ -->
@@ -201,9 +204,10 @@ import {
     isUnforced,
     mergeGradeBuckets,
     pct,
+    perfectReceptionPercent,
     playerRadarFilters,
     radarAxes,
-    receptionMark,
+    receptionMarkPercent,
     receptionTotals,
     type AttackTotals,
     type StatDoc,
@@ -287,7 +291,10 @@ const kpiAttack = computed(() =>
 const kpiAttackEff = computed(() => attackEfficiency(kpiAttack.value));
 const kpiAttackKillPct = computed(() => pct(kpiAttack.value.kills, kpiAttack.value.attempts));
 const kpiReception = computed(() => receptionTotals(playerStats.value));
-const kpiReceptionMark = computed(() => receptionMark(kpiReception.value));
+const kpiReceptionMark = computed(() =>
+    receptionMarkPercent(kpiReception.value.total ? kpiReception.value.sum / kpiReception.value.total : 0)
+);
+const kpiPerfectReceptionPct = computed(() => perfectReceptionPercent(kpiReception.value));
 const kpiServeTotal = computed(() => playerServeStats.value.length);
 const kpiServeMark = computed(() => {
     if (!kpiServeTotal.value) return "0.0";
