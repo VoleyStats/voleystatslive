@@ -96,6 +96,7 @@
             <li><RouterLink :to="{ name: 'privacy' }" class="hover:text-white">{{ $t('layout.footer.privacy') }}</RouterLink></li>
             <li><RouterLink :to="{ name: 'terms' }" class="hover:text-white">{{ $t('layout.footer.terms') }}</RouterLink></li>
             <li><RouterLink :to="{ name: 'contact' }" class="hover:text-white">{{ $t('layout.footer.contact') }}</RouterLink></li>
+            <li><RouterLink :to="{ name: 'deleteAccount' }" class="hover:text-white">{{ $t('layout.footer.deleteAccount') }}</RouterLink></li>
           </ul>
         </div>
       </div>

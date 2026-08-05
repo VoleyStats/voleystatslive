@@ -53,7 +53,7 @@ import { useI18n } from "vue-i18n";
  * secciones (encabezado, párrafos y/o lista) leídas de i18n con tm().
  * `baseKey` apunta al bloque raíz de mensajes (p. ej. "privacy" o "terms").
  */
-const props = defineProps<{ baseKey: "privacy" | "terms" }>();
+const props = defineProps<{ baseKey: "privacy" | "terms" | "deleteAccount" }>();
 
 const { t, tm, rt, te, locale } = useI18n();
 

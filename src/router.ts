@@ -32,6 +32,11 @@ const routes = [
     component: () => import('./pages/Terms.vue'),
   },
   {
+    path: '/delete-account',
+    name: 'deleteAccount',
+    component: () => import('./pages/DeleteAccount.vue'),
+  },
+  {
     path: '/contact',
     name: 'contact',
     component: () => import('./pages/Contact.vue'),
