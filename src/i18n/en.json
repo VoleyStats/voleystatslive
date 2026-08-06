@@ -55,7 +55,7 @@
     "product": {
       "eyebrow": "The product",
       "title": "Take control of the whole match",
-      "text": "Log every action with the quick grid — designed so one person can coach and record at the same time — or straight on the court map, with attack and serve trajectories. You choose the detail: every touch or just the actions that end the rally. And you make your substitutions with data, not gut feeling.",
+      "text": "Log every action with the quick grid — designed so one person can coach and record at the same time — or straight on the court map with Rally Map (available on the Normal plan), with attack and serve trajectories. You choose the detail: every touch or just the actions that end the rally. And you make your substitutions with data, not gut feeling.",
       "point1": "Score, rotation and server update on their own.",
       "point2": "Automatic detection of scoring and error runs.",
       "point3": "Breakdown per player and per court area.",
@@ -73,16 +73,16 @@
       "step1Title": "Log the actions",
       "step1Text": "Record every play from your iPad with the quick grid or on the court map, with substitutions, timeouts and graded reception. Works offline, in any gym.",
       "step2Title": "Follow it live",
-      "step2Text": "Share the match code and anyone can watch the score and stats in real time from the web.",
+      "step2Text": "With the Pro plan or a match pass, share the match code and broadcast the score and stats live. Watching it from the web is always free for whoever gets the code.",
       "step3Title": "Break down the report",
-      "step3Text": "When it's over, you get the full match report: side-out and break, rotations, attack maps and much more. With premium, export it as a PDF to review with the team."
+      "step3Text": "When it's over, you get the full match report: side-out and break, rotations, attack maps (if you captured with Rally Map) and much more. With the Normal plan, export it as a PDF to review with the team."
     },
     "features": {
       "eyebrow": "Features",
       "title": "Everything your coaching staff needs",
       "subtitle": "Tools built for coaches, analysts and players.",
       "f1Title": "Live scoreboard",
-      "f1Text": "Follow the result set by set and how the match unfolds in real time from any device.",
+      "f1Text": "Follow the result set by set and how the match unfolds in real time from any device. Broadcasting the live feed is a Pro plan feature (or a match pass); watching it is always free.",
       "f2Title": "Per-player stats",
       "f2Text": "Evaluate individual performance in every area and find your roster's strengths.",
       "f3Title": "Analysis by phase",
@@ -90,13 +90,23 @@
       "f4Title": "Momentum curve",
       "f4Text": "Visualize point and error runs to understand the key moments of every set.",
       "f5Title": "PDF reports",
-      "f5Text": "With premium, export match and season reports as PDFs to share with your coaching staff and players.",
+      "f5Text": "With the Normal plan, export match and season reports as PDFs to share with your coaching staff and players.",
       "f6Title": "Code-based access",
-      "f6Text": "Share a simple code and the whole team can check the stats online, no complicated sign-ups."
+      "f6Text": "Share a simple code and the whole team can check the stats online, no complicated sign-ups.",
+      "f7Title": "Opponent scouting",
+      "f7Text": "Check the aggregated history against each opponent: their rotations, reception against your servers, their attack lanes and danger zones, with the key points always at hand.",
+      "f8Title": "Match comparator",
+      "f8Text": "Compare two matches side by side: key metrics, side-out by rotation and who scored the points in each one.",
+      "f9Title": "Smart alerts",
+      "f9Text": "Automatic warnings during the match: opponent run, player on a streak, set point, stuck rotation or predictable attack, so you can react in time.",
+      "f10Title": "Between-sets summary",
+      "f10Text": "A panel built for the 3-minute break: phases, rotations, opponent trends and the next set's key points in plain language.",
+      "f11Title": "Player profiles",
+      "f11Text": "With the Normal plan, every player gets a full profile: skill radar, attack, serve-reception and physical evolution, inside the season dashboard."
     },
     "download": {
       "title": "Take your team to the next level",
-      "text": "Download Voley Stats for iPad and log your next match for free, live stats included. Go premium whenever you want the season history, PDF reports and cloud backup.",
+      "text": "Download Voley Stats for iPad and log your next match for free. Go Normal whenever you want the season history, PDF reports and cloud backup, or Pro to share your matches live.",
       "appStore": "App Store",
       "web": "Check it on the web"
     },
@@ -111,11 +121,11 @@
       "q3": "Which statistics can I record?",
       "a3": "Everything that happens on the court: every touch or just the rally-ending actions, attack and serve trajectories on the court map, reception graded on 4 levels, serve quality, K1/K2 phase tracking, substitutions and timeouts. The score, rotation and server update on their own.",
       "q4": "Can I download a match report?",
-      "a4": "Yes. When the match ends the app builds a full report: side-out and break, where the points came from, rotations, attack by phase and by pass quality, setter-attacker connections, unforced errors and attack maps. With the premium plan you can export it as a PDF to share with the team.",
+      "a4": "Yes. When the match ends the app builds a full report: side-out and break, where the points came from, rotations, attack by phase and by pass quality, setter-attacker connections, unforced errors and attack maps (if you captured that match with Rally Map). Exporting it as a PDF is available with the Normal plan or with a match pass for that match.",
       "q5": "Do I need an internet connection?",
-      "a5": "Not for logging: the app works fully offline, so you can capture and check stats in any gym. You only need internet to share the live feed on this web, use the OBS overlay, the public team page or the cloud backup.",
+      "a5": "Not for logging: the app works fully offline, so you can capture and check stats in any gym. You only need internet to share the live feed on this web, and for the OBS overlay or the public team page (both Pro plan features), or for cloud backup (Normal plan).",
       "q6": "How much does it cost?",
-      "a6": "Downloading the app and logging your matches is free, live match stats included. The premium plan adds the team history and season stats with filters, PDF export, cloud backup and the ability to fill in stats you missed live. Watching the live feeds on the web is always free."
+      "a6": "Downloading the app and logging your matches — full capture and stats for every match and set — is free. The Normal plan (€19.99/year or €3.99/month) adds Rally Map, the team history and season stats with filters, PDF reports, multi-device sync, cloud backup and team/tournament export. The Pro plan (€34.99/year or €6.99/month) adds sharing matches live, the OBS overlay, the public team page and sharing the team with other coaches. There's also a €2.99 match pass to unlock the live feed, Rally Map and the PDF report for a single match, no subscription needed. Watching the live feeds on the web is always free for whoever gets the code."
     }
   },
   "overlay": {
@@ -407,17 +417,17 @@
   "privacy": {
     "docTitle": "Privacy Policy — Voley Stats",
     "title": "Privacy Policy",
-    "lastUpdated": "Last updated: August 5, 2026",
+    "lastUpdated": "Last updated: August 6, 2026",
     "sections": [
       {
         "paragraphs": [
-          "This policy explains what data the Voley Stats app (iOS and Android) and this website (voleystats.vercel.app) process, and how we protect it."
+          "This policy explains what data the Voley Stats app for iPad and this website (voleystats.vercel.app) process, and how we protect it."
         ]
       },
       {
         "heading": "Data controller",
         "paragraphs": [
-          "Voley Stats is developed by Pau Hermosilla, an individual developer. For any privacy questions, write to phermosilla{'@'}viviendea.com."
+          "Voley Stats is developed by Pau Hermosilla, an individual developer. For any privacy questions, write to voleystats{'@'}gmail.com."
         ]
       },
       {
@@ -446,7 +456,7 @@
       {
         "heading": "Advertising, analytics and third parties",
         "paragraphs": [
-          "Voley Stats shows no ads, uses no third-party analytics, and we never sell or share your data. We use Firebase (Google) and Supabase solely as data processors to provide the live sharing, sync and backup features you enable; your data travels encrypted (HTTPS)."
+          "Voley Stats shows no ads, uses no third-party analytics, and we never sell or share your data. We use Firebase (Google) and Supabase solely as data processors to provide the live sharing, sync and backup features you enable; your data travels encrypted (HTTPS). Payments for subscriptions and in-app purchases are processed by Apple through the App Store: we never see or store your card details. Your subscription status is verified on our server (Supabase), tied to your account, to enable the corresponding features."
         ]
       },
       {
@@ -458,7 +468,7 @@
       {
         "heading": "Your rights",
         "paragraphs": [
-          "You can exercise your rights of access, rectification and erasure over your personal data by writing to phermosilla{'@'}viviendea.com."
+          "You can exercise your rights of access, rectification and erasure over your personal data by writing to voleystats{'@'}gmail.com."
         ]
       },
       {
@@ -472,7 +482,7 @@
   "deleteAccount": {
     "docTitle": "Delete account — Voley Stats",
     "title": "Delete your Voley Stats account",
-    "lastUpdated": "Last updated: August 5, 2026",
+    "lastUpdated": "Last updated: August 6, 2026",
     "sections": [
       {
         "heading": "Option 1: from the app",
@@ -483,7 +493,7 @@
       {
         "heading": "Option 2: without access to the app",
         "paragraphs": [
-          "Send an email to phermosilla{'@'}viviendea.com from the address you registered with, with the subject \"Delete account\". We'll process the request within 30 days and confirm by email once it's done."
+          "Send an email to voleystats{'@'}gmail.com from the address you registered with, with the subject \"Delete account\". We'll process the request within 30 days and confirm by email once it's done."
         ]
       },
       {
@@ -515,7 +525,7 @@
   "terms": {
     "docTitle": "Terms of Use — Voley Stats",
     "title": "Terms of Use",
-    "lastUpdated": "Last updated: July 12, 2026",
+    "lastUpdated": "Last updated: August 6, 2026",
     "note": "This document is an informative template and does not constitute legal advice.",
     "sections": [
       {
@@ -533,7 +543,7 @@
       {
         "heading": "3. The app",
         "paragraphs": [
-          "We grant you a personal, non-exclusive, non-transferable license to use the app. Downloads and purchases — including premium features such as the filtered history, PDF export, cloud backup and completing stats afterwards — are handled through Apple's App Store and governed by its terms. Apple's standard EULA applies to the app."
+          "We grant you a personal, non-exclusive, non-transferable license to use the app. The app offers subscriptions (the Normal and Pro plans) and a one-time match pass purchase, handled through Apple's App Store and governed by its terms. Apple's standard EULA applies to the app."
         ]
       },
       {

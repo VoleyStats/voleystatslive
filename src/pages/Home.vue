@@ -337,6 +337,11 @@ const appFeatures = computed(() => [
   { icon: "bi-activity", title: t("home.features.f4Title"), description: t("home.features.f4Text") },
   { icon: "bi-filetype-pdf", title: t("home.features.f5Title"), description: t("home.features.f5Text") },
   { icon: "bi-key", title: t("home.features.f6Title"), description: t("home.features.f6Text") },
+  { icon: "bi-binoculars", title: t("home.features.f7Title"), description: t("home.features.f7Text") },
+  { icon: "bi-arrow-left-right", title: t("home.features.f8Title"), description: t("home.features.f8Text") },
+  { icon: "bi-bell", title: t("home.features.f9Title"), description: t("home.features.f9Text") },
+  { icon: "bi-hourglass-split", title: t("home.features.f10Title"), description: t("home.features.f10Text") },
+  { icon: "bi-person-vcard", title: t("home.features.f11Title"), description: t("home.features.f11Text") },
 ]);
 
 const faqs = computed(() =>

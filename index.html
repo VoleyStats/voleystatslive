@@ -13,6 +13,7 @@
     />
     <meta name="keywords" content="estadísticas de voleibol, app estadísticas voleibol iPad, scouting voleibol, análisis de partidos de voleibol, estadísticas en directo voleibol, app para entrenadores de voleibol, marcador voleibol en vivo, estadísticas voley" />
     <meta name="author" content="Voley Stats" />
+    <meta name="google-site-verification" content="64DBXpmvUMBBUba4FeEOeNQjGns85ZFY_QgM_tdsntw" />
     <meta name="robots" content="index, follow, max-image-preview:large" />
     <meta name="theme-color" content="#070A12" />
     <link rel="canonical" href="https://voleystats.vercel.app/" />
@@ -26,6 +27,7 @@
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="Voley Stats Live" />
     <meta property="og:locale" content="es_ES" />
+    <meta property="og:locale:alternate" content="en_US" />
     <meta property="og:title" content="Voley Stats — App de estadísticas de voleibol para iPad" />
     <meta
       property="og:description"
@@ -59,29 +61,92 @@
         "name": "Voley Stats",
         "applicationCategory": "SportsApplication",
         "operatingSystem": "iPadOS",
-        "description": "App de estadísticas de voleibol para iPad. Captura cada acción del partido con la rejilla rápida o sobre el mapa de la pista (trayectorias de ataque y saque), con marcador, rotación y sacador automáticos. Funciona completamente sin conexión; internet solo hace falta para el directo en la web, el overlay para OBS, la página pública del equipo y la copia en la nube. Incluye estadísticas en directo, informe post-partido por fases (K1/K2), mapas de ataque, scouting de rivales e informes en PDF.",
+        "description": "App de estadísticas de voleibol para iPad. Captura cada acción del partido con la rejilla rápida o sobre el mapa de la pista con Rally Map (trayectorias de ataque y saque), con marcador, rotación y sacador automáticos. Funciona completamente sin conexión; internet solo hace falta para el directo en la web, el overlay para OBS, la página pública del equipo y la copia en la nube. Descargar y anotar partidos es gratis; el plan Normal añade Rally Map, histórico y estadísticas de temporada e informes en PDF; el plan Pro añade compartir partidos en directo, overlay para OBS y página pública del equipo.",
         "url": "https://voleystats.vercel.app/",
         "installUrl": "https://apps.apple.com/us/app/voley-stats/id6737778450",
         "downloadUrl": "https://apps.apple.com/us/app/voley-stats/id6737778450",
         "sameAs": ["https://apps.apple.com/us/app/voley-stats/id6737778450"],
-        "inLanguage": "es",
-        "offers": {
-          "@type": "Offer",
-          "price": "0",
-          "priceCurrency": "EUR",
-          "description": "Gratis para descargar: la captura y las estadísticas de cada partido en directo son gratuitas. Funciones premium de pago: histórico del equipo y estadísticas de temporada con filtros, exportación en PDF, copia de seguridad en la nube y completar estadísticas a posteriori."
-        },
+        "inLanguage": ["es", "en"],
+        "offers": [
+          {
+            "@type": "Offer",
+            "name": "Gratis",
+            "price": "0",
+            "priceCurrency": "EUR",
+            "description": "Descarga y captura completa de partidos y estadísticas, gratis."
+          },
+          {
+            "@type": "Offer",
+            "name": "Normal (anual)",
+            "price": "19.99",
+            "priceCurrency": "EUR",
+            "priceSpecification": {
+              "@type": "UnitPriceSpecification",
+              "price": "19.99",
+              "priceCurrency": "EUR",
+              "billingDuration": "P1Y"
+            }
+          },
+          {
+            "@type": "Offer",
+            "name": "Normal (mensual)",
+            "price": "3.99",
+            "priceCurrency": "EUR",
+            "priceSpecification": {
+              "@type": "UnitPriceSpecification",
+              "price": "3.99",
+              "priceCurrency": "EUR",
+              "billingDuration": "P1M"
+            }
+          },
+          {
+            "@type": "Offer",
+            "name": "Pro (anual)",
+            "price": "34.99",
+            "priceCurrency": "EUR",
+            "priceSpecification": {
+              "@type": "UnitPriceSpecification",
+              "price": "34.99",
+              "priceCurrency": "EUR",
+              "billingDuration": "P1Y"
+            }
+          },
+          {
+            "@type": "Offer",
+            "name": "Pro (mensual)",
+            "price": "6.99",
+            "priceCurrency": "EUR",
+            "priceSpecification": {
+              "@type": "UnitPriceSpecification",
+              "price": "6.99",
+              "priceCurrency": "EUR",
+              "billingDuration": "P1M"
+            }
+          },
+          {
+            "@type": "Offer",
+            "name": "Match pass (compra única)",
+            "price": "2.99",
+            "priceCurrency": "EUR",
+            "description": "Compra única por partido: desbloquea el directo, Rally Map y el informe en PDF para ese partido."
+          }
+        ],
         "featureList": [
           "Captura rápida en rejilla pensada para entrenar y anotar a la vez",
-          "Captura sobre el mapa de la pista con trayectorias de ataque y saque",
+          "Rally Map: captura sobre el mapa de la pista con trayectorias de ataque y saque (plan Normal)",
           "Marcador, rotación y sacador automáticos",
           "Recepción valorada en 4 niveles y calidad de saque",
           "Seguimiento por fases K1/K2",
           "Funciona sin conexión (base de datos local)",
-          "Estadísticas en directo en la web, gratis y sin registro",
-          "Overlay para OBS y página pública del equipo",
+          "Estadísticas en directo en la web, gratis para cualquiera con el código",
+          "Compartir partidos en directo, overlay para OBS y página pública del equipo (plan Pro)",
           "Informe post-partido: side-out/break, rotaciones, mapas de ataque, conexiones colocadora-atacante",
-          "Scouting de rivales, comparador de partidos e informes en PDF"
+          "Histórico de equipo, estadísticas de temporada e informes en PDF (plan Normal)",
+          "Scouting de rivales: histórico agregado por rival con sus rotaciones, recepción, corredores de ataque y zonas de peligro",
+          "Comparador de partidos cara a cara: métricas clave, side-out por rotación y anotadoras",
+          "Alertas inteligentes durante el partido: rachas, punto de set, rotación atascada, ataque predecible",
+          "Resumen entre sets pensado para los 3 minutos de descanso",
+          "Fichas de jugadora con radar de habilidades, ataque, saque-recepción y evolución física (plan Normal)"
         ]
       }
     </script>
@@ -140,7 +205,7 @@
             "name": "¿Puedo descargar un informe del partido?",
             "acceptedAnswer": {
               "@type": "Answer",
-              "text": "Sí. Al terminar el partido la app genera un informe completo: side-out y break, origen de los puntos, rotaciones, ataque por fase y por calidad de pase, conexiones colocadora-atacante, errores no forzados y mapas de ataque. Con el plan premium puedes exportarlo en PDF para compartirlo con el equipo."
+              "text": "Sí. Al terminar el partido la app genera un informe completo: side-out y break, origen de los puntos, rotaciones, ataque por fase y por calidad de pase, conexiones colocadora-atacante, errores no forzados y mapas de ataque (si capturaste ese partido con Rally Map). Exportarlo en PDF está disponible con el plan Normal o con un match pass para ese partido."
             }
           },
           {
@@ -148,7 +213,7 @@
             "name": "¿Necesito conexión a internet?",
             "acceptedAnswer": {
               "@type": "Answer",
-              "text": "No para anotar: la app funciona completamente sin conexión, con base de datos local, así que puedes capturar y consultar estadísticas en cualquier pabellón. Solo necesitas internet para compartir el directo en esta web, usar el overlay para OBS, la página pública del equipo o la copia de seguridad en la nube."
+              "text": "No para anotar: la app funciona completamente sin conexión, así que puedes capturar y consultar estadísticas en cualquier pabellón. Solo necesitas internet para compartir el directo en esta web, y para el overlay para OBS o la página pública del equipo (ambos del plan Pro), o para la copia de seguridad en la nube (plan Normal)."
             }
           },
           {
@@ -156,7 +221,7 @@
             "name": "¿Cuánto cuesta?",
             "acceptedAnswer": {
               "@type": "Answer",
-              "text": "Descargar la app y anotar tus partidos es gratis, incluidas las estadísticas en directo de cada partido. El plan premium añade el histórico del equipo y las estadísticas de temporada con filtros, la exportación en PDF, la copia de seguridad en la nube y la posibilidad de completar a posteriori estadísticas que no anotaste en vivo. Ver los directos desde la web es siempre gratis."
+              "text": "Descargar la app y anotar tus partidos —captura completa y estadísticas de cada partido y set— es gratis. El plan Normal (19,99 €/año o 3,99 €/mes) añade Rally Map, el histórico del equipo y las estadísticas de temporada con filtros, informes en PDF, sincronización multi-dispositivo, copia de seguridad en la nube y exportación de equipo/torneo. El plan Pro (34,99 €/año o 6,99 €/mes) suma compartir partidos en directo, el overlay para OBS, la página pública del equipo y compartir el equipo con otros entrenadores. También hay un match pass de 2,99 € para desbloquear el directo, el Rally Map y el informe en PDF de un solo partido, sin suscripción. Ver los directos desde la web es siempre gratis para quien recibe el código."
             }
           }
         ]
