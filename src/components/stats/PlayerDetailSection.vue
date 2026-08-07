@@ -41,7 +41,7 @@
                     </p>
                 </div>
                 <div class="rounded-lg bg-white/[0.04] border border-white/10 py-3 text-center">
-                    <p class="text-lg font-display font-bold text-slate-200">{{ kpiReception.total ? kpiReceptionMark : '—' }}</p>
+                    <p class="text-lg font-display font-bold text-slate-200">{{ kpiReceptionMark }}</p>
                     <p class="text-[11px] text-slate-400 mt-1">{{ $t('players.kpiReception') }}</p>
                 </div>
                 <div class="rounded-lg bg-white/[0.04] border border-white/10 py-3 text-center">
@@ -99,9 +99,6 @@
         <article v-if="kpiReception.total" class="card w-full p-4">
             <p class="text-sm font-semibold mb-3">{{ $t('stats.areas.reception') }}</p>
             <VueApexCharts type="donut" height="220" :options="receptionDistChart.chartOptions" :series="receptionDistChart.series" />
-            <p class="text-xs text-slate-400 text-center mt-2">
-                {{ $t('stats.perfectReceptionPct') }}: <span class="font-semibold text-slate-200">{{ kpiPerfectReceptionPct !== null ? kpiPerfectReceptionPct + '%' : '—' }}</span>
-            </p>
         </article>
 
         <!-- ============ OTRAS ÁREAS ============ -->
@@ -200,6 +197,7 @@ import {
     attackEfficiency,
     attackPhaseTotals,
     attackTotals,
+    GRADE_COLORS,
     isRival,
     isUnforced,
     mergeGradeBuckets,
@@ -207,7 +205,7 @@ import {
     perfectReceptionPercent,
     playerRadarFilters,
     radarAxes,
-    receptionMarkPercent,
+    receptionMarkLabel,
     receptionTotals,
     type AttackTotals,
     type StatDoc,
@@ -291,10 +289,14 @@ const kpiAttack = computed(() =>
 const kpiAttackEff = computed(() => attackEfficiency(kpiAttack.value));
 const kpiAttackKillPct = computed(() => pct(kpiAttack.value.kills, kpiAttack.value.attempts));
 const kpiReception = computed(() => receptionTotals(playerStats.value));
+// Etiqueta canónica "NN% (MM%)" (ver `receptionMarkLabel`) — fusiona la nota
+// media y el % de recepciones perfectas en un único KPI (antes eran dos
+// cifras separadas), paridad con la app.
 const kpiReceptionMark = computed(() =>
-    receptionMarkPercent(kpiReception.value.total ? kpiReception.value.sum / kpiReception.value.total : 0)
+    kpiReception.value.total
+        ? receptionMarkLabel(kpiReception.value.sum / kpiReception.value.total, perfectReceptionPercent(kpiReception.value) ?? 0)
+        : "—"
 );
-const kpiPerfectReceptionPct = computed(() => perfectReceptionPercent(kpiReception.value));
 const kpiServeTotal = computed(() => playerServeStats.value.length);
 const kpiServeMark = computed(() => {
     if (!kpiServeTotal.value) return "0.0";
@@ -402,7 +404,6 @@ const attackByGradeBuckets = computed(() => {
     }
     return attackByReceptionGradeForMatch(props.stats, props.derivedKills, filter);
 });
-const GRADE_COLORS: Record<number, string> = { 3: "#CBFB45", 2: "#6E93FF", 1: "#94a3b8", 0: "#F87171" };
 const receptionGradeRows = computed(() =>
     [3, 2, 1, 0]
         .filter((g) => (attackByGradeBuckets.value.get(g)?.attempts ?? 0) > 0)
@@ -427,13 +428,17 @@ const receptionGradeChart = computed(() => ({
 }));
 
 // ------------------------------------------------------------------ saque / recepción
+// El ace (id "8") es un grado extra por encima de la nota 3 (saque
+// perfecto), así que usa el lima de marca en vez de GRADE_COLORS[3] — evita
+// que coincida con GRADE_COLORS[2] (verde claro de "buena") en este mismo
+// donut.
 const serveDistribution = computed(() =>
     [
-        { label: t("stats.actions.a8"), n: playerServeStats.value.filter((s) => aid(s) === "8").length, color: "#4ade80" },
-        { label: t("team.col3"), n: playerServeStats.value.filter((s) => aid(s) === "41").length, color: "#CBFB45" },
-        { label: t("team.col2"), n: playerServeStats.value.filter((s) => aid(s) === "40").length, color: "#6E93FF" },
-        { label: t("team.col1"), n: playerServeStats.value.filter((s) => aid(s) === "39").length, color: "#94a3b8" },
-        { label: t("team.colErrors"), n: playerServeStats.value.filter((s) => SERVE_ERR_IDS.includes(aid(s))).length, color: "#F87171" },
+        { label: t("stats.actions.a8"), n: playerServeStats.value.filter((s) => aid(s) === "8").length, color: "#CBFB45" },
+        { label: t("team.col3"), n: playerServeStats.value.filter((s) => aid(s) === "41").length, color: GRADE_COLORS[3] },
+        { label: t("team.col2"), n: playerServeStats.value.filter((s) => aid(s) === "40").length, color: GRADE_COLORS[2] },
+        { label: t("team.col1"), n: playerServeStats.value.filter((s) => aid(s) === "39").length, color: GRADE_COLORS[1] },
+        { label: t("team.colErrors"), n: playerServeStats.value.filter((s) => SERVE_ERR_IDS.includes(aid(s))).length, color: GRADE_COLORS[0] },
     ].filter((r) => r.n > 0)
 );
 const serveDistChart = computed(() => ({
@@ -450,10 +455,10 @@ const serveDistChart = computed(() => ({
 
 const receptionDistribution = computed(() =>
     [
-        { label: t("stats.recGrade3"), n: kpiReception.value.perfect, color: "#CBFB45" },
-        { label: t("stats.recGrade2"), n: kpiReception.value.good, color: "#6E93FF" },
-        { label: t("stats.recGrade1"), n: kpiReception.value.bad, color: "#94a3b8" },
-        { label: t("stats.recGrade0"), n: kpiReception.value.errors, color: "#F87171" },
+        { label: t("stats.recGrade3"), n: kpiReception.value.perfect, color: GRADE_COLORS[3] },
+        { label: t("stats.recGrade2"), n: kpiReception.value.good, color: GRADE_COLORS[2] },
+        { label: t("stats.recGrade1"), n: kpiReception.value.bad, color: GRADE_COLORS[1] },
+        { label: t("stats.recGrade0"), n: kpiReception.value.errors, color: GRADE_COLORS[0] },
     ].filter((r) => r.n > 0)
 );
 const receptionDistChart = computed(() => ({

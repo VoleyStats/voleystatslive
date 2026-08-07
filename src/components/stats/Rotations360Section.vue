@@ -99,6 +99,7 @@ import {
     attackPhaseTotals,
     attackTotals,
     breakStats,
+    GRADE_COLORS,
     isPointEnder,
     pct,
     receptionMarkPercent,
@@ -205,7 +206,6 @@ const attackPhases = computed(() => {
     return [mk(t("stats.attackK1"), k1), mk(t("stats.attackK2"), k2)];
 });
 
-const GRADE_COLORS: Record<number, string> = { 3: "#CBFB45", 2: "#6E93FF", 1: "#94a3b8", 0: "#F87171" };
 const receptionGradeRows = computed(() =>
     [3, 2, 1, 0]
         .filter((g) => (props.receptionGradeBuckets.get(g)?.attempts ?? 0) > 0)

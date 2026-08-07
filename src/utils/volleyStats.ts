@@ -22,6 +22,20 @@ export const RECEPTION_IDS = ["1", "2", "3", "4", "22"];
 export const RECEPTION_GRADES: Record<string, number> = { "4": 3, "3": 2, "2": 1, "1": 0, "22": 0 };
 // Nota de saque 0-3 (misma fórmula que la app iPad).
 export const SERVE_WEIGHTS: Record<string, number> = { "39": 0.5, "40": 1, "41": 2, "8": 3 };
+// Paleta única de "nota" 0-3 (recepción: RECEPTION_GRADES; saque: los ids
+// 41/40/39 se etiquetan en UI como grado 3/2/1, ver `team.col3/col2/col1` en
+// PlayerDetailSection.vue). 3=perfecta, 2=buena, 1=mala, 0=error. Semántica
+// pedida por el owner: verde oscuro/verde claro/amarillo/rojo — el verde
+// oscuro y el rojo de referencia (#166534/#DC2626) se aclaran un punto en la
+// escala Tailwind (mismo hue) para quedar legibles como texto/serie de
+// gráfica sobre los fondos `ink` (dark-only); el amarillo y el verde claro
+// de referencia ya tenían contraste suficiente y se usan tal cual.
+export const GRADE_COLORS: Record<number, string> = {
+    3: "#16A34A", // verde oscuro (perfecta) — green-600, ref. #166534 (green-800)
+    2: "#4ADE80", // verde claro (buena) — green-400, igual que la referencia
+    1: "#EAB308", // amarillo (mala) — yellow-500, igual que la referencia
+    0: "#EF4444", // rojo (error) — red-500, ref. #DC2626 (red-600)
+};
 // Pesos del eje "recepción" del radar de equipo/jugadora (0-3, mismo patrón
 // que SERVE_WEIGHTS): ids fuera de este mapa (incl. "22", error) pesan 0.
 export const RADAR_RECEIVE_WEIGHTS: Record<string, number> = { "1": 0.5, "2": 1, "3": 2, "4": 3 };
@@ -272,6 +286,18 @@ export function receptionMarkPercent(avg: number): string {
 // decide el fallback ("—").
 export function perfectReceptionPercent(r: ReceptionTotals): number | null {
     return r.total > 0 ? Math.round((r.perfect / r.total) * 100) : null;
+}
+
+// Etiqueta canónica de nota de recepción "NN% (MM%)" — NN = nota 0-3
+// expresada como % (`receptionMarkPercent`), MM = % de recepciones
+// perfectas (`perfectReceptionPercent`); el paréntesis se aclara en la
+// cabecera de columna/KPI ("perfectas"/"perfect"), sin símbolo dentro del
+// string. Paridad con `StatsCalculator.receptionMarkLabel` (app iOS):
+// unifica en un solo string lo que antes eran dos cifras separadas.
+// Excepción documentada (igual que en las apps): gauges/celdas muy
+// estrechas pueden mostrar solo `receptionMarkPercent`.
+export function receptionMarkLabel(avg: number, perfectPercent: number): string {
+    return `${receptionMarkPercent(avg)} (${perfectPercent}%)`;
 }
 
 export interface UnforcedShare {

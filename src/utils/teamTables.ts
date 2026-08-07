@@ -8,7 +8,7 @@
 // (sin acciones admin "0"/"98"/"99") salvo donde se indique explícitamente
 // lo contrario (saque: última columna sobre el array crudo, sin filtrar).
 
-import { ATTACK_ERR_IDS, ATTACK_IDS, KILL_IDS, aid, isRival, receptionMarkPercent, type StatDoc } from "./volleyStats";
+import { ATTACK_ERR_IDS, ATTACK_IDS, KILL_IDS, aid, isRival, receptionMarkLabel, type StatDoc } from "./volleyStats";
 
 export interface SkillColumn {
     key: string;
@@ -20,10 +20,6 @@ export interface SkillRow {
     name: string;
     values: Record<string, number>;
     mark?: string;
-    // Segunda columna de "nota"/derivado opcional (hoy solo la usa
-    // `receiveSkillTable` para el % de recepciones perfectas) — mismo patrón
-    // que `mark`, ver `mark2LabelKey`.
-    mark2?: string;
 }
 
 export interface SkillTable {
@@ -32,8 +28,6 @@ export interface SkillTable {
     total: SkillRow;
     // Clave i18n de la etiqueta de la columna "mark" (nota), si la tabla la tiene.
     markLabelKey?: string;
-    // Clave i18n de la etiqueta de la columna "mark2", si la tabla la tiene.
-    mark2LabelKey?: string;
 }
 
 // ids de acción por destreza, tal como los agrupa la app (actionsByType).
@@ -149,10 +143,12 @@ export function serveSkillTable(gameStats: StatDoc[], allStatsRaw: StatDoc[]): S
 
 // ------------------------------------------------------------------------
 // Recepción: columnas [total, 3(id4), 2(id3), 1(id2+id1), errores(id22)].
-// mark = (n1*0.5 + n2*1 + n3*2 + n4*3)/total (0-3), expresado como % (paridad
-// de presentación con las apps, ver `receptionMarkPercent`) — pesos sobre los
-// ids crudos 1/2/3/4, NO sobre la columna "1" ya fusionada. mark2 = % de
-// recepciones perfectas (nota 3, id "4") sobre el total.
+// mark = etiqueta canónica "NN% (MM%)" (`receptionMarkLabel`): NN = media
+// (n1*0.5 + n2*1 + n3*2 + n4*3)/total (0-3) expresada como %, pesos sobre los
+// ids crudos 1/2/3/4, NO sobre la columna "1" ya fusionada; MM = % de
+// recepciones perfectas (nota 3, id "4") sobre el total — antes era una
+// columna `mark2` separada, ahora fusionada en el mismo string (paridad con
+// `StatsCalculator.receptionMarkLabel` de la app).
 // ------------------------------------------------------------------------
 export function receiveSkillTable(gameStats: StatDoc[]): SkillTable {
     const columns: SkillColumn[] = [
@@ -178,13 +174,13 @@ export function receiveSkillTable(gameStats: StatDoc[]): SkillTable {
         else if (a === "22") e.errors++;
         entries.set(id, e);
     }
-    const mark2Of = (v: { total: number; n4: number }) => (v.total ? Math.round((v.n4 / v.total) * 100) + "%" : "—");
+    const perfectPctOf = (v: { total: number; n4: number }) => (v.total ? Math.round((v.n4 / v.total) * 100) : 0);
+    const markOf = (v: { total: number; n1: number; n2: number; n3: number; n4: number }) =>
+        v.total ? receptionMarkLabel((v.n1 * 0.5 + v.n2 * 1 + v.n3 * 2 + v.n4 * 3) / v.total, perfectPctOf(v)) : "—";
     const rows: SkillRow[] = [...entries.entries()]
         .map(([id, e]) => {
             const values = { total: e.total, g3: e.g3, g2: e.g2, g1: e.g1, errors: e.errors };
-            const mark = e.total ? receptionMarkPercent((e.n1 * 0.5 + e.n2 * 1 + e.n3 * 2 + e.n4 * 3) / e.total) : "—";
-            const mark2 = mark2Of(e);
-            return { id, name: e.name, values, mark, mark2 };
+            return { id, name: e.name, values, mark: markOf(e) };
         })
         .sort((a, b) => b.values.total - a.values.total);
     // Recalcula el mark del total a partir de los pesos crudos agregados
@@ -192,14 +188,12 @@ export function receiveSkillTable(gameStats: StatDoc[]): SkillTable {
     let n1 = 0, n2 = 0, n3 = 0, n4 = 0;
     for (const e of entries.values()) { n1 += e.n1; n2 += e.n2; n3 += e.n3; n4 += e.n4; }
     const totalValues = sumRows(rows, ["total", "g3", "g2", "g1", "errors"]);
-    const totalMark = totalValues.total ? receptionMarkPercent((n1 * 0.5 + n2 * 1 + n3 * 2 + n4 * 3) / totalValues.total) : "—";
-    const totalMark2 = mark2Of({ total: totalValues.total, n4 });
+    const totalMark = markOf({ total: totalValues.total, n1, n2, n3, n4 });
     return {
         columns,
         rows,
-        total: { id: "__total__", name: "", values: totalValues, mark: totalMark, mark2: totalMark2 },
+        total: { id: "__total__", name: "", values: totalValues, mark: totalMark },
         markLabelKey: "team.markReceivePct",
-        mark2LabelKey: "team.colPerfectPct",
     };
 }
 

@@ -398,14 +398,16 @@ import {
     breakStats,
     currentSetsWon,
     deriveCredits,
+    GRADE_COLORS,
     isGameStat,
     isPointEnder,
     isRival,
     mergeCredits,
     mergeGradeBuckets,
     pct,
+    perfectReceptionPercent,
     radarAxes,
-    receptionMarkPercent,
+    receptionMarkLabel,
     receptionTotals,
     sideOutStats,
     unforcedShare,
@@ -587,8 +589,12 @@ const gameStatsByMatch = computed(() => loadedMatches.value.map((m) => (m.stats 
 const kpiSideOut = computed(() => sideOutStats(pointEnders.value));
 const kpiBreak = computed(() => breakStats(pointEnders.value));
 const kpiReception = computed(() => receptionTotals(gameStats.value));
+// Etiqueta canónica "NN% (MM%)" — ver comentario homólogo en
+// PlayerDetailSection.vue / `receptionMarkLabel`.
 const kpiReceptionMark = computed(() =>
-    kpiReception.value.total > 0 ? receptionMarkPercent(kpiReception.value.sum / kpiReception.value.total) : "—"
+    kpiReception.value.total > 0
+        ? receptionMarkLabel(kpiReception.value.sum / kpiReception.value.total, perfectReceptionPercent(kpiReception.value) ?? 0)
+        : "—"
 );
 // Retrofit fase 2a: la eficiencia FIVB pasa a contar kills con `isKill`
 // (incluye los derivados de la captura en cancha, ver A).
@@ -759,7 +765,7 @@ const receptionChart = computed(() => ({
         { name: t("stats.recGrade1"), data: receptionHistory.value.bad },
         { name: t("stats.recGrade0"), data: receptionHistory.value.errors },
     ],
-    chartOptions: <ApexOptions>{ ...lineChartBase(), colors: ["#CBFB45", "#6E93FF", "#94a3b8", "#F87171"] },
+    chartOptions: <ApexOptions>{ ...lineChartBase(), colors: [GRADE_COLORS[3], GRADE_COLORS[2], GRADE_COLORS[1], GRADE_COLORS[0]] },
 }));
 
 const attackChart = computed(() => ({
