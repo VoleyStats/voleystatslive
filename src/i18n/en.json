@@ -125,7 +125,7 @@
       "q5": "Do I need an internet connection?",
       "a5": "Not for logging: the app works fully offline, so you can capture and check stats in any gym. You only need internet to share the live feed on this web, and for the OBS overlay or the public team page (both Pro plan features), or for cloud backup (Normal plan).",
       "q6": "How much does it cost?",
-      "a6": "Downloading the app and logging your matches — full capture and stats for every match and set — is free. The Normal plan (€19.99/year or €3.99/month) adds Rally Map, the team history and season stats with filters, PDF reports, multi-device sync, cloud backup and team/tournament export. The Pro plan (€34.99/year or €6.99/month) adds sharing matches live, the OBS overlay, the public team page and sharing the team with other coaches. There's also a €2.99 match pass to unlock the live feed, Rally Map and the PDF report for a single match, no subscription needed. Watching the live feeds on the web is always free for whoever gets the code."
+      "a6": "Downloading the app and logging your matches — full capture and stats for every match and set — is free. The Normal plan (€19.99/year or €3.99/month) adds Rally Map, the team history and season stats with filters, PDF reports, multi-device sync, cloud backup, team/tournament export and sharing the team with other coaches. The Pro plan (€34.99/year or €6.99/month) adds sharing matches live, the OBS overlay and the public team page. There's also a €2.99 match pass to unlock the live feed, Rally Map and the PDF report for a single match, no subscription needed. Watching the live feeds on the web is always free for whoever gets the code."
     }
   },
   "overlay": {
@@ -276,6 +276,9 @@
       "a44": "Dig",
       "a45": "3-Dig",
       "a46": "Over pass in play",
+      "a48": "Yellow card",
+      "a49": "Delay warning",
+      "a50": "Red card",
       "a98": "Adjustment in score",
       "a99": "Player change"
     },

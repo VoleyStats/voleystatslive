@@ -12,8 +12,8 @@ Voley Stats está pensada para entrenadores, cuerpos técnicos, analistas y juga
 - Marcador, rotación y sacador automáticos.
 - Directo en la web (plan Pro o match pass para emitir; ver es siempre gratis y sin registro): marcador, punto a punto, momentum y estadísticas por jugadora.
 - Informe post-partido: side-out/break, origen de los puntos, rotaciones, ataque por fase y por calidad de pase, conexiones colocadora-atacante, errores no forzados y mapas de ataque (si se capturó con Rally Map).
-- Plan Normal: dashboard de temporada con filtros, histórico del equipo, rotaciones 360°, informes de partido y temporada en PDF, sincronización multi-dispositivo, copia de seguridad en la nube, exportación de equipo/torneo (.vstats) y zonas de recepción personalizadas.
-- Plan Pro: compartir partidos en directo (código de partido), overlay para OBS, página pública del equipo y compartir el equipo con otros entrenadores (roles editor/visor).
+- Plan Normal: dashboard de temporada con filtros, histórico del equipo, rotaciones 360°, informes de partido y temporada en PDF, sincronización multi-dispositivo, copia de seguridad en la nube, exportación de equipo/torneo (.vstats), zonas de recepción personalizadas y compartir el equipo con otros entrenadores (roles editor/visor).
+- Plan Pro: compartir partidos en directo (código de partido), overlay para OBS y página pública del equipo.
 - Scouting de rivales (sin plan, incluido siempre): histórico agregado contra cada rival con sus rotaciones, recepción frente a tus sacadoras, corredores de ataque y zonas de peligro.
 - Comparador de partidos (sin plan, incluido siempre): compara dos partidos cara a cara con métricas clave, side-out por rotación y anotadoras.
 - Alertas inteligentes (sin plan, incluido siempre): avisos automáticos durante el partido sobre rachas del rival, jugadora en racha, punto de set, rotación atascada o ataque predecible.
@@ -32,7 +32,7 @@ Voley Stats está pensada para entrenadores, cuerpos técnicos, analistas y juga
 - Plataforma: solo iPad (iPadOS), en el App Store: https://apps.apple.com/us/app/voley-stats/id6737778450. No hay versión Android publicada.
 - Web en directo: gratuita para los espectadores, sin registro.
 - Idiomas: español e inglés.
-- Precio: descargar y anotar partidos es gratis. Plan Normal: 19,99 €/año o 3,99 €/mes (Rally Map, histórico, temporada, PDF, sync, nube, exportación de equipo/torneo). Plan Pro: 34,99 €/año o 6,99 €/mes (todo lo de Normal + directo, overlay OBS, página pública del equipo, compartir equipo). Match pass: 2,99 € de compra única por partido (desbloquea directo, Rally Map e informe PDF para ese partido, sin suscripción). Compras gestionadas vía App Store (StoreKit).
+- Precio: descargar y anotar partidos es gratis. Plan Normal: 19,99 €/año o 3,99 €/mes (Rally Map, histórico, temporada, PDF, sync, nube, exportación de equipo/torneo, compartir equipo). Plan Pro: 34,99 €/año o 6,99 €/mes (todo lo de Normal + directo, overlay OBS, página pública del equipo). Match pass: 2,99 € de compra única por partido (desbloquea directo, Rally Map e informe PDF para ese partido, sin suscripción). Compras gestionadas vía App Store (StoreKit).
 - Sin conexión: sí, la captura y las estadísticas funcionan totalmente offline; internet solo hace falta para el directo, el overlay de OBS, la página pública del equipo, la sincronización y la copia de seguridad en la nube.
 
 ## Enlaces
