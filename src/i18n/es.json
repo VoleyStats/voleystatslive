@@ -292,7 +292,7 @@
       "fault": "Falta",
       "adjust": "Ajuste",
       "freeball": "Free ball",
-      "downhit": "Down ball"
+      "downhit": "Free"
     }
   },
   "players": {
@@ -377,7 +377,7 @@
     "techniqueSpike": "Remate",
     "techniqueTip": "Finta",
     "techniqueBlockout": "Block-out",
-    "techniqueDownhit": "Pase fácil",
+    "techniqueDownhit": "Free",
     "tablesTitle": "Tablas por destreza",
     "colPlayer": "Jugadora",
     "rowTotal": "TOTAL",

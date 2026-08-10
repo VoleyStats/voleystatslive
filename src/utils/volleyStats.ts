@@ -321,15 +321,25 @@ export interface AreaTotals {
     errors: number;
 }
 
+// Área cruda "free ball" (25/35/36/37) — decisión del owner (spec
+// acciones-free-downball): la familia free desaparece como categoría propia
+// en toda tabla/sección/donut orientada a usuario y sus históricos pasan a
+// contar como defensa (área 2). No confundir con "downhit"/área 9 (12/14/19),
+// que se mantiene como categoría propia, solo renombrada a "Free" en la UI.
+const FREE_BALL_AREA = 8;
+const DEFENSE_AREA = 2;
+
 // Totales por área de juego (`action.area`, propio equipo) — total de
 // acciones, "ganados" (`action.type === "earn"`) y errores
-// (`action.type === "error"`).
+// (`action.type === "error"`). Los históricos de free ball (área 8) se
+// pliegan en defensa (área 2), ver `FREE_BALL_AREA`.
 export function areaTotals(stats: StatDoc[]): AreaTotals[] {
     const map = new Map<number, AreaTotals>();
     for (const s of stats) {
         if (isRival(s) || isAdmin(s)) continue;
-        const area = Number(s?.action?.area ?? -1);
+        let area = Number(s?.action?.area ?? -1);
         if (area < 0) continue;
+        if (area === FREE_BALL_AREA) area = DEFENSE_AREA;
         const entry = map.get(area) ?? { area, total: 0, won: 0, errors: 0 };
         entry.total++;
         if (s?.action?.type === "earn") entry.won++;

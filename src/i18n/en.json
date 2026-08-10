@@ -292,7 +292,7 @@
       "fault": "Fault",
       "adjust": "Adjust",
       "freeball": "Free ball",
-      "downhit": "Down ball"
+      "downhit": "Free"
     }
   },
   "players": {
@@ -377,7 +377,7 @@
     "techniqueSpike": "Spike",
     "techniqueTip": "Tip",
     "techniqueBlockout": "Block-out",
-    "techniqueDownhit": "Down ball",
+    "techniqueDownhit": "Free",
     "tablesTitle": "Tables by skill",
     "colPlayer": "Player",
     "rowTotal": "TOTAL",

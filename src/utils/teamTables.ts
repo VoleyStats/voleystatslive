@@ -33,12 +33,18 @@ export interface SkillTable {
 // ids de acción por destreza, tal como los agrupa la app (actionsByType).
 export const BLOCK_IDS = ["7", "13", "20"];
 export const SERVE_TABLE_IDS = ["15", "8", "39", "40", "41"];
-export const DIG_IDS = ["23", "5", "21", "43", "44", "45", "46"];
+// Free ball histórico (25 error, 35/36/37 grados 1/2/3): decisión del owner
+// (spec acciones-free-downball) — la pestaña/tabla propia desaparece y estos
+// ids pasan a sumar en defensa (total; el 25 también en la columna de
+// errores, igual que la app). Ya no hay captura nueva con estos ids (quedan
+// filtrados en el grid de las apps), pero los históricos siguen agregando
+// aquí.
+export const FREE_IDS = ["25", "35", "36", "37"];
+export const DIG_IDS = ["23", "5", "21", "43", "44", "45", "46", ...FREE_IDS];
 export const RECEIVE_TABLE_IDS = ["1", "2", "3", "4", "22"];
 export const FAULT_IDS = ["28", "29", "30", "31", "32", "33", "34"];
 export const ATTACK_TABLE_IDS = ATTACK_IDS; // ["6","9","10","11","16","17","47"] (mismo conjunto)
 export const SET_IDS = ["24", "42"];
-export const FREE_IDS = ["25", "35", "36", "37"];
 export const DOWNHIT_IDS = ["12", "14", "19"];
 
 function sumRows(rows: SkillRow[], keys: string[]): Record<string, number> {
@@ -225,7 +231,8 @@ export function blockSkillTable(gameStats: StatDoc[]): SkillTable {
 }
 
 // ------------------------------------------------------------------------
-// Defensa: columnas [total, errores(23)]. Sin mark.
+// Defensa: columnas [total, errores(23, y 25 de los históricos de free
+// ball plegados aquí — ver DIG_IDS)]. Sin mark.
 // ------------------------------------------------------------------------
 export function digSkillTable(gameStats: StatDoc[]): SkillTable {
     const columns: SkillColumn[] = [
@@ -240,7 +247,7 @@ export function digSkillTable(gameStats: StatDoc[]): SkillTable {
         if (!id) continue;
         const e = entries.get(id) ?? { name: s.player?.name || id, total: 0, errors: 0 };
         e.total++;
-        if (a === "23") e.errors++;
+        if (a === "23" || a === "25") e.errors++;
         entries.set(id, e);
     }
     const rows: SkillRow[] = [...entries.entries()]
@@ -316,46 +323,6 @@ export function setSkillTable(gameStats: StatDoc[]): SkillTable {
         .map(([id, e]) => ({ id, name: e.name, values: { total: e.total, errors: e.errors } }))
         .sort((a, b) => b.values.total - a.values.total);
     return { columns, rows, total: { id: "__total__", name: "", values: sumRows(rows, ["total", "errors"]) } };
-}
-
-// ------------------------------------------------------------------------
-// Free ball: columnas [total, 3(37), 2(36), 1(35), errores(25)].
-// mark = (n35*1 + n36*2 + n37*3)/total (0-3).
-// ------------------------------------------------------------------------
-export function freeSkillTable(gameStats: StatDoc[]): SkillTable {
-    const columns: SkillColumn[] = [
-        { key: "total", labelKey: "team.colTotal" },
-        { key: "g3", labelKey: "team.col3" },
-        { key: "g2", labelKey: "team.col2" },
-        { key: "g1", labelKey: "team.col1" },
-        { key: "errors", labelKey: "team.colErrors" },
-    ];
-    const entries = new Map<string, { name: string; total: number; g3: number; g2: number; g1: number; errors: number }>();
-    for (const s of gameStats) {
-        const a = aid(s);
-        if (isRival(s) || !FREE_IDS.includes(a)) continue;
-        const id = String(s.player?.id ?? "");
-        if (!id) continue;
-        const e = entries.get(id) ?? { name: s.player?.name || id, total: 0, g3: 0, g2: 0, g1: 0, errors: 0 };
-        e.total++;
-        if (a === "37") e.g3++;
-        else if (a === "36") e.g2++;
-        else if (a === "35") e.g1++;
-        else if (a === "25") e.errors++;
-        entries.set(id, e);
-    }
-    const markOf = (v: Record<string, number>) => (v.total ? ((v.g1 * 1 + v.g2 * 2 + v.g3 * 3) / v.total).toFixed(1) : "—");
-    const rows: SkillRow[] = [...entries.entries()]
-        .map(([id, e]) => ({ id, name: e.name, values: { total: e.total, g3: e.g3, g2: e.g2, g1: e.g1, errors: e.errors } }))
-        .map((r) => ({ ...r, mark: markOf(r.values) }))
-        .sort((a, b) => b.values.total - a.values.total);
-    const totalValues = sumRows(rows, ["total", "g3", "g2", "g1", "errors"]);
-    return {
-        columns,
-        rows,
-        total: { id: "__total__", name: "", values: totalValues, mark: markOf(totalValues) },
-        markLabelKey: "team.markFree03",
-    };
 }
 
 // ------------------------------------------------------------------------

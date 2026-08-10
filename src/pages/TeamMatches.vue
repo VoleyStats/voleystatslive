@@ -607,10 +607,12 @@ const areaRows = computed(() => areaTotals(gameStats.value));
 
 // "Datos absolutos" en la app son 6 pies (serve/receive/block/dig/set/attack)
 // con total/ganados/errores, no una tabla — reutiliza `areaRows` (misma
-// fórmula, sin tocarla) y solo cambia cómo se presenta. Áreas extra 7-9
-// (ajuste/free/downhit) se muestran como pies adicionales solo si el equipo
-// tiene datos ahí (la tabla original de faltas/ajuste no era parte del
-// formato de la app).
+// fórmula, sin tocarla) y solo cambia cómo se presenta. Áreas extra 7/9
+// (ajuste/downhit) se muestran como pies adicionales solo si el equipo tiene
+// datos ahí (la tabla original de faltas/ajuste no era parte del formato de
+// la app). El área 8 (free ball) ya no tiene pie propio (spec
+// acciones-free-downball): `areaTotals` pliega sus históricos en el área 2
+// (defensa, dentro de AREA_DONUT_DEFS) antes de llegar aquí.
 const AREA_DONUT_COLORS = ["#CBFB45", "#F87171", "rgba(148,163,184,0.35)"];
 const AREA_DONUT_DEFS = [
     { area: 4, labelKey: "stats.areas.serve" },
@@ -622,7 +624,6 @@ const AREA_DONUT_DEFS = [
 ] as const;
 const EXTRA_AREA_DONUT_DEFS = [
     { area: 7, labelKey: "stats.areas.adjust" },
-    { area: 8, labelKey: "stats.areas.freeball" },
     { area: 9, labelKey: "stats.areas.downhit" },
 ] as const;
 

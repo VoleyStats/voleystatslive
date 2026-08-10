@@ -739,11 +739,16 @@ const momentum = computed(() => {
     };
 });
 
+// Errores propios por área (bloque "General"). Los históricos de free ball
+// (área 8) se pliegan en defensa (área 2) — misma regla que `areaTotals`
+// (ver volleyStats.ts): la familia free ya no aparece como categoría propia
+// en ninguna tabla/gráfico orientado a usuario.
 const errors = computed(() => {
     const grouped = new Map<number, number>();
     for (const s of gameStats.value) {
         if (s.to === 2 && !isRival(s) && s.action?.type === "error") {
-            const area = Number(s.action?.area ?? -1);
+            let area = Number(s.action?.area ?? -1);
+            if (area === 8) area = 2;
             grouped.set(area, (grouped.get(area) ?? 0) + 1);
         }
     }

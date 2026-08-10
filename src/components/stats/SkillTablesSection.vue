@@ -86,7 +86,6 @@ import {
     digSkillTable,
     downhitTotals,
     faultSkillTable,
-    freeSkillTable,
     receiveSkillTable,
     serveSkillTable,
     setSkillTable,
@@ -98,8 +97,11 @@ const props = defineProps<{
     allStats: StatDoc[];
 }>();
 
-// Etiquetas de pestaña reutilizando `stats.areas.*` (ya cubren las 9
-// destrezas exactas de esta sección).
+// Etiquetas de pestaña reutilizando `stats.areas.*` (ya cubren las 8
+// destrezas exactas de esta sección). La pestaña "free ball" propia
+// desapareció (spec acciones-free-downball): sus históricos ahora suman en
+// "dig" (ver `DIG_IDS` en teamTables.ts). "downhit" se mantiene, solo
+// renombrada a "Free" en el diccionario.
 const SKILL_DEFS = [
     { key: "attack", labelKey: "stats.areas.attack" },
     { key: "serve", labelKey: "stats.areas.serve" },
@@ -107,7 +109,6 @@ const SKILL_DEFS = [
     { key: "block", labelKey: "stats.areas.block" },
     { key: "dig", labelKey: "stats.areas.defense" },
     { key: "set", labelKey: "stats.areas.setting" },
-    { key: "free", labelKey: "stats.areas.freeball" },
     { key: "fault", labelKey: "stats.areas.fault" },
     { key: "downhit", labelKey: "stats.areas.downhit" },
 ] as const;
@@ -122,7 +123,6 @@ const skillTables = computed(() => ({
     block: blockSkillTable(props.stats),
     dig: digSkillTable(props.stats),
     set: setSkillTable(props.stats),
-    free: freeSkillTable(props.stats),
     fault: faultSkillTable(props.stats),
 }));
 const currentSkillTable = computed(() =>

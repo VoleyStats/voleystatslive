@@ -474,11 +474,13 @@ const receptionDistChart = computed(() => ({
 }));
 
 // ------------------------------------------------------------------ otras áreas
+// Área 8 (free ball) ya no tiene fila propia (spec acciones-free-downball):
+// `areaTotals` pliega sus históricos en el área 2 (defensa) antes de llegar
+// aquí, así que la fila "defense" ya los incluye sin cambios adicionales.
 const OTHER_AREA_DEFS = [
     { area: 1, labelKey: "stats.areas.block" },
     { area: 2, labelKey: "stats.areas.defense" },
     { area: 3, labelKey: "stats.areas.setting" },
-    { area: 8, labelKey: "stats.areas.freeball" },
 ] as const;
 const otherAreaRows = computed(() => {
     const rows = areaTotals(playerStats.value);
