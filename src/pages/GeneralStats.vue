@@ -77,6 +77,44 @@
             </template>
         </template>
 
+        <!-- ============ PROGRAMADO: AÚN NO HA EMPEZADO ============ -->
+        <!-- `live=true` compartido con antelación pero sin puntos capturados
+             todavía y con fecha futura (ver `isMatchNotStarted`): se enseñan
+             los equipos y la fecha/hora, sin marcador ni indicador "en vivo"
+             engañosos. En cuanto llegue el primer stat real (mismo listener
+             onSnapshot ya activo) este bloque se oculta solo. -->
+        <template v-else-if="notStarted">
+            <article class="card w-full p-5">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="inline-flex items-center gap-2 text-xs font-semibold text-slate-400">
+                        <i class="bi bi-calendar-event"></i>
+                        {{ $t('stats.notStarted') }}
+                    </span>
+                </div>
+
+                <div class="grid grid-cols-2 gap-2">
+                    <div class="flex flex-col items-center justify-center gap-1.5 text-center rounded-xl bg-brand-500/10 border border-brand-500/20 py-6 px-2">
+                        <p class="text-sm font-display font-semibold text-brand-300 truncate w-full">{{ usName }}</p>
+                        <RouterLink
+                            v-if="teamId"
+                            :to="{ name: 'team', params: { id: teamId } }"
+                            class="mt-1 inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/[0.04] px-2 py-0.5 text-[11px] text-slate-300 hover:text-white hover:border-brand-500/40 transition-colors"
+                        >
+                            <i class="bi bi-people-fill text-brand-300"></i>
+                            {{ $t('stats.viewTeam') }}
+                        </RouterLink>
+                    </div>
+                    <div class="flex flex-col items-center justify-center gap-1.5 text-center rounded-xl bg-white/[0.04] border border-white/10 py-6 px-2">
+                        <p class="text-sm font-display font-semibold text-slate-300 truncate w-full">{{ themName }}</p>
+                    </div>
+                </div>
+
+                <p v-if="scheduledDateLabel" class="mt-4 text-center text-sm text-slate-300">
+                    <i class="bi bi-clock mr-1.5 text-slate-500"></i>{{ scheduledDateLabel }}
+                </p>
+            </article>
+        </template>
+
         <template v-else>
             <!-- ============ MARCADOR ============ -->
             <article class="card w-full p-5">
@@ -328,7 +366,7 @@ import { useDocument } from "vuefire";
 import VueApexCharts from "vue3-apexcharts";
 import type { ApexOptions } from "apexcharts";
 
-const { t, te } = useI18n();
+const { t, te, locale } = useI18n();
 import EmptyState from "../components/EmptyState.vue";
 import SkeletonCard from "../components/SkeletonCard.vue";
 import SkeletonChart from "../components/SkeletonChart.vue";
@@ -348,6 +386,7 @@ import {
     deriveCredits,
     isMatchCacheable,
     isMatchFinished,
+    isMatchNotStarted,
     isRival,
     isUnforced,
     pointsOrigin,
@@ -453,6 +492,29 @@ const stopStatsModeWatch = watch(
 onUnmounted(() => statsUnsub?.());
 
 const notFound = computed(() => match.value === null && baseStats.loaded && baseStats.data.length === 0);
+
+// Reloj de baja frecuencia para `notStarted` (abajo): sin esto, un partido
+// "no empezado" cuya fecha programada ya pasó se quedaría así hasta que
+// llegase el primer stat por `onSnapshot` (podría tardar si el equipo
+// capturador se retrasa) en vez de caer solo al pasar la hora prevista.
+const nowTick = ref(Date.now());
+const nowTickInterval = setInterval(() => { nowTick.value = Date.now(); }, 30_000);
+onUnmounted(() => clearInterval(nowTickInterval));
+
+// Partido compartido con antelación (`live=true`, código ya generado) pero
+// sin ningún punto capturado todavía y con fecha futura: se muestra la
+// tarjeta "aún no ha empezado" en vez del marcador/pestañas en vivo — ver
+// `isMatchNotStarted` en volleyStats.ts. Se recalcula solo cuando llega el
+// primer stat real (onSnapshot) o al cruzar `nowTick` la fecha del partido.
+const notStarted = computed(
+    () => baseStats.loaded && isMatchNotStarted(match.value, baseStats.data.length, nowTick.value)
+);
+const scheduledDateLabel = computed(() => {
+    const sec = Number(match.value?.date ?? 0);
+    if (!sec) return "";
+    return new Intl.DateTimeFormat(locale.value, { dateStyle: "long", timeStyle: "short" }).format(new Date(sec * 1000));
+});
+
 const nSets = computed(() => match.value?.n_sets ?? 5);
 const usName = computed(() => match.value?.team?.name || t("stats.usFallback"));
 // Enlace a la página pública del equipo: la app serializa el equipo completo

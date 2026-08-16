@@ -413,6 +413,41 @@ export function isMatchCacheable(match: StatDoc, now: number = Date.now(), fallb
     return now - dateSec * 1000 > STALE_LIVE_MATCH_MS;
 }
 
+// Suma de puntos publicados en `sets_scoreboard` (todos los sets, incluido el
+// que está en curso): la app recalcula y republica ese array en cada punto
+// anotado (`Match.updateLiveScoreboard`, ver VoleyStatsApp/CLAUDE.md), así
+// que 0 aquí implica de forma fiable que ningún punto se ha jugado todavía
+// (puede haber, aun así, alguna stat administrativa — tiempo muerto —
+// capturada). Proxy barato (sin leer la subcolección `stats`) para
+// `isMatchNotStarted` cuando el llamador no tiene el recuento real de stats
+// cargado (listados de equipo, ver useTeamStats.ts/TeamMatches.vue).
+export function publishedPointsTotal(match: StatDoc): number {
+    const board: StatDoc[] = Array.isArray(match?.sets_scoreboard) ? match.sets_scoreboard : [];
+    return board.reduce((sum: number, s: StatDoc) => sum + Number(s?.score_us ?? 0) + Number(s?.score_them ?? 0), 0);
+}
+
+// "Partido programado, aún no ha empezado": la app permite activar el
+// directo (generar `code` + publicar `live_matches/{code}`) con días de
+// antelación, para poder compartir el enlace antes del partido — así que
+// `live === true` por sí solo NO implica que haya juego en curso. Se
+// considera "no empezado" cuando, además de `live === true`, no se ha
+// anotado ningún punto todavía Y la `date` (fecha/hora del partido,
+// `Match.toJSON()`) está en el futuro respecto a `now`. Sin `date` (docs
+// antiguos que nunca la publicaron) o con `date` ya pasada, se cae siempre
+// al criterio "en vivo" habitual — evita ocultar un partido real que
+// arrancó tarde, sin `date`, o con el reloj del dispositivo capturador
+// desincronizado.
+// `statsCount`: nº exacto de stats ya cargadas si se conoce (GeneralStats.vue,
+// subcolección ya leída) — `0` es entonces el criterio literal "cero stats".
+// `null`: usa el proxy barato `publishedPointsTotal` (listados de equipo, la
+// subcolección no se pide solo para listar).
+export function isMatchNotStarted(match: StatDoc, statsCount: number | null, now: number = Date.now()): boolean {
+    if (!match || match.live !== true) return false;
+    const dateSec = Number(match?.date ?? 0);
+    if (!dateSec || dateSec * 1000 <= now) return false;
+    return (statsCount === null ? publishedPointsTotal(match) : statsCount) === 0;
+}
+
 // ------------------------------------------------------------------------
 // B/C. Radar de equipo / por jugadora (5 ejes, 0-100)
 // ------------------------------------------------------------------------

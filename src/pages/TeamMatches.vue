@@ -128,6 +128,13 @@
                         {{ $t('team.live') }}
                     </span>
                     <span
+                        v-else-if="m.notStarted"
+                        class="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-xs font-semibold text-slate-300"
+                    >
+                        <i class="bi bi-calendar-event"></i>
+                        {{ $t('team.scheduled') }}
+                    </span>
+                    <span
                         v-else-if="m.result"
                         class="rounded-full border px-2.5 py-1 font-display text-sm font-bold"
                         :class="m.won ? 'border-brand-500/40 bg-brand-500/15 text-brand-300' : 'border-red-500/40 bg-red-500/15 text-red-400'"
@@ -400,6 +407,7 @@ import {
     deriveCredits,
     GRADE_COLORS,
     isGameStat,
+    isMatchNotStarted,
     isPointEnder,
     isRival,
     mergeCredits,
@@ -480,14 +488,22 @@ const initials = computed(() =>
 
 // ------------------------------------------------------------------ lista
 const df = computed(() => new Intl.DateTimeFormat(locale.value, { dateStyle: "medium" }));
+// Con hora: solo para partidos "programados" (ver `notStarted` abajo), donde
+// la hora sí importa (todavía no hay marcador que la sustituya).
+const dfWithTime = computed(() => new Intl.DateTimeFormat(locale.value, { dateStyle: "medium", timeStyle: "short" }));
 const matchRows = computed(() =>
     filteredMatches.value.map((m) => {
         let result = "";
         let won = false;
         let live = false;
+        // `live=true` sin ningún punto capturado y con fecha futura: la app
+        // permite activar el directo con días de antelación (ver
+        // `isMatchNotStarted`) — no se muestra como "en directo" hasta que
+        // haya juego real.
+        const notStarted = !!m.match && isMatchNotStarted(m.match, null);
         if (m.match) {
             const { us, them } = currentSetsWon(m.match);
-            live = !m.finished && (us > 0 || them > 0 || m.match.live === true);
+            live = !notStarted && !m.finished && (us > 0 || them > 0 || m.match.live === true);
             if (m.finished || us > 0 || them > 0) {
                 result = `${us}-${them}`;
                 won = us > them;
@@ -496,8 +512,9 @@ const matchRows = computed(() =>
         return {
             code: m.code,
             opponent: m.opponent,
-            dateLabel: df.value.format(new Date(m.date * 1000)),
+            dateLabel: (notStarted ? dfWithTime : df).value.format(new Date(m.date * 1000)),
             live,
+            notStarted,
             result,
             won,
         };
