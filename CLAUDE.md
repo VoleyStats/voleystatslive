@@ -14,7 +14,7 @@ Tres repos independientes, acoplados solo por Firestore:
 
 | Repo | GitHub | Rol | Rama de trabajo |
 |---|---|---|---|
-| iOS | `Pauhdr/voley_stats` | **Implementación de referencia**; escribe Firestore | `dev` |
+| iOS | `VoleyStats/voleyStatsApp` | **Implementación de referencia**; escribe Firestore | `dev` |
 | Android | `VoleyStats/VoleyStats-android` | Port a paridad con iOS; escribe Firestore | `main` |
 | Web (este repo) | `VoleyStats/voleystatslive` | Visor público; solo LEE Firestore | `main` |
 

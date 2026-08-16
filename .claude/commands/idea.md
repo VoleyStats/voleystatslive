@@ -15,7 +15,7 @@ Tres repos independientes (sin código compartido; el único acoplamiento es Fir
 
 | Repo | GitHub | Rol | Rama de trabajo |
 |---|---|---|---|
-| iOS (SwiftUI) | `Pauhdr/voley_stats` | Implementación de referencia | `dev` |
+| iOS (SwiftUI) | `VoleyStats/voleyStatsApp` | Implementación de referencia | `dev` |
 | Android (Kotlin/Compose) | `VoleyStats/VoleyStats-android` | Port a paridad con iOS | `main` |
 | Web (Vue 3) | `VoleyStats/voleystatslive` | Visor público; solo LEE Firestore | `main` |
 
@@ -54,7 +54,7 @@ Si la idea es ambigua, elige la interpretación más razonable y decláralo en "
 
 ## 4. Crea la issue
 
-- Repo destino: el repo **principal** del cambio. Si es iOS+Android, créala en `Pauhdr/voley_stats` con checklist de paridad para Android; si es solo web, en `VoleyStats/voleystatslive`.
+- Repo destino: el repo **principal** del cambio. Si es iOS+Android, créala en `VoleyStats/voleyStatsApp` con checklist de paridad para Android; si es solo web, en `VoleyStats/voleystatslive`.
 - Asegura la label: `gh label create spec -R <owner/repo> --color 5319E7 --description "Spec pendiente de aprobación" 2>/dev/null || true`
 - Crea: `gh issue create -R <owner/repo> --title "<título corto>" --body-file <fichero> --label spec`
 - Solo si el trabajo en otro repo es sustancial y separable, crea una issue satélite en ese repo enlazando la principal.
