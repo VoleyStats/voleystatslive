@@ -8,6 +8,18 @@ Guía para Claude Code al trabajar en este repo.
 
 Stack: **Vue 3** (`<script setup>`, TS) + **vue-router** (history mode) + **vuefire**/Firebase (solo Firestore) + **Tailwind** (dark-only) + **ApexCharts** (`vue3-apexcharts`) + **vue-i18n**. Build con **Vite** (rolldown). Deploy en Vercel como SPA (`vercel.json` reescribe todo a `index.html`).
 
+## Ecosistema y flujo de trabajo
+
+Tres repos independientes, acoplados solo por Firestore:
+
+| Repo | GitHub | Rol | Rama de trabajo |
+|---|---|---|---|
+| iOS | `Pauhdr/voley_stats` | **Implementación de referencia**; escribe Firestore | `dev` |
+| Android | `VoleyStats/VoleyStats-android` | Port a paridad con iOS; escribe Firestore | `main` |
+| Web (este repo) | `VoleyStats/voleystatslive` | Visor público; solo LEE Firestore | `main` |
+
+En local los hermanos están en `../VoleyStatsApp/` y `../VoleyStats-Android/`; en una sesión cloud donde no estén clonados, inspecciónalos con `gh` (la credencial puede leer los tres). Flujo de specs: las ideas se convierten en issues con label `spec` vía el comando `/idea` (`.claude/commands/idea.md`) — investigación + spec, sin implementar. La implementación se pide aparte y llega como PR contra `main`.
+
 ## Comandos
 
 ```bash
