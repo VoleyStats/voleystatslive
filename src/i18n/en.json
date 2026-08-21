@@ -447,7 +447,7 @@
         "list": [
           "Account (optional): if you choose to create an account, your email and password are managed with Firebase Authentication (Google).",
           "Content you create: teams, players (name, jersey number, position, birth date, physical measurements) and match statistics. This content is stored on your device and is only transmitted if you enable live sharing (Firebase Firestore), device sync, or cloud backup (Supabase).",
-          "Player photos: never leave your device; they are not uploaded to any server."
+          "Player photos: stored on your device and, if you enable sync, shared with the other accounts that belong to that same team. They are held in a private Supabase space reachable only through short-lived links, and only for the accounts on that team. They are never published on the website, never appear in the live statistics and are never shared with third parties."
         ]
       },
       {
