@@ -5,11 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <script>document.documentElement.classList.add('js')</script>
 
-    <!-- Primary meta -->
-    <title>Voley Stats — App de estadísticas de voleibol para iPad | Directo y scouting</title>
+    <!-- Primary meta. Estos son los valores de la PORTADA y, además, lo único
+         que ven los rastreadores que no ejecutan JavaScript (los de IA, entre
+         otros). Deben coincidir palabra por palabra con `seo.home` de
+         src/i18n/es.json, que es lo que `installSeo` escribe en caliente: si
+         divergen, cada rastreador se lleva una versión distinta del sitio.
+         El título anterior medía 76 caracteres y Google lo truncaba. -->
+    <title>Voley Stats — App de estadísticas de voleibol en directo para iPad</title>
     <meta
       name="description"
-      content="App de estadísticas de voleibol para iPad. Anota el partido mientras entrenas —incluso sin conexión—, comparte las estadísticas en directo y analiza cada set con informes de scouting. Gratis para empezar."
+      content="App de estadísticas de voleibol para iPad. Anota el partido incluso sin conexión, comparte las estadísticas en directo y analiza cada set. Gratis para empezar."
     />
     <meta name="keywords" content="estadísticas de voleibol, app estadísticas voleibol iPad, scouting voleibol, análisis de partidos de voleibol, estadísticas en directo voleibol, app para entrenadores de voleibol, marcador voleibol en vivo, estadísticas voley" />
     <meta name="author" content="Voley Stats" />
@@ -25,7 +30,13 @@
 
     <!-- Open Graph -->
     <meta property="og:type" content="website" />
-    <meta property="og:site_name" content="Voley Stats Live" />
+    <!-- El nombre del sitio debe ser IDÉNTICO aquí, en el schema WebSite de
+         abajo, en Organization y en App Store Connect. Cuando esas señales se
+         contradecían ("Voley Stats" vs "Voley Stats Live" vs "Voley stats") y
+         además faltaba por completo el schema WebSite, Google se inventó la
+         etiqueta del sitio y la mostraba como "volley stata" en su búsqueda
+         con IA. No introduzcas variantes nuevas. -->
+    <meta property="og:site_name" content="Voley Stats" />
     <meta property="og:locale" content="es_ES" />
     <meta property="og:locale:alternate" content="en_US" />
     <meta property="og:title" content="Voley Stats — App de estadísticas de voleibol para iPad" />
@@ -151,12 +162,31 @@
       }
     </script>
 
-    <!-- Structured data: Organization + WebSite -->
+    <!-- Structured data: WebSite.
+         Este bloque FALTABA (el comentario de abajo decía "Organization +
+         WebSite" pero solo había Organization). Es el schema del que Google
+         saca el nombre del sitio en resultados: sin él, y con og:site_name y
+         Organization discrepando, generaba el nombre por su cuenta y lo
+         mostraba mal. `alternateName` recoge las variantes que ya circulan
+         para que las resuelva a esta misma entidad en vez de inventarse otra. -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "Voley Stats",
+        "alternateName": ["VoleyStats", "Voley Stats Live", "Voley stats"],
+        "url": "https://voleystats.vercel.app/",
+        "inLanguage": ["es", "en"]
+      }
+    </script>
+
+    <!-- Structured data: Organization -->
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
         "@type": "Organization",
-        "name": "Voley Stats Live",
+        "name": "Voley Stats",
+        "alternateName": "Voley Stats Live",
         "url": "https://voleystats.vercel.app/",
         "logo": "https://voleystats.vercel.app/logo.png",
         "email": "voleystats@gmail.com",

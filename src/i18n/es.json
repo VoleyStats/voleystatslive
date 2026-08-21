@@ -1,4 +1,34 @@
 {
+  "seo": {
+    "home": {
+      "title": "Voley Stats — App de estadísticas de voleibol en directo para iPad",
+      "description": "App de estadísticas de voleibol para iPad. Anota el partido incluso sin conexión, comparte las estadísticas en directo y analiza cada set. Gratis para empezar."
+    },
+    "teamCode": {
+      "title": "Estadísticas de voleibol en directo por código — Voley Stats",
+      "description": "Introduce el código del partido o el enlace del equipo y sigue el marcador y las estadísticas de voleibol en directo, gratis y sin registrarte."
+    },
+    "team": {
+      "title": "Partidos compartidos del equipo — Voley Stats",
+      "description": "Todos los partidos que este equipo ha compartido: marcador por set, estadísticas y seguimiento en directo mientras se juega."
+    },
+    "privacy": {
+      "title": "Política de privacidad — Voley Stats",
+      "description": "Qué datos trata Voley Stats, con qué finalidad y cómo ejercer tus derechos sobre ellos."
+    },
+    "terms": {
+      "title": "Condiciones de uso — Voley Stats",
+      "description": "Condiciones de uso de la app Voley Stats y de la web pública de estadísticas en directo."
+    },
+    "deleteAccount": {
+      "title": "Eliminar cuenta — Voley Stats",
+      "description": "Cómo eliminar tu cuenta de Voley Stats y todos los datos asociados a ella."
+    },
+    "contact": {
+      "title": "Contacto — Voley Stats",
+      "description": "¿Dudas, sugerencias o un problema con la app? Escríbenos y te respondemos."
+    }
+  },
   "layout": {
     "back": "Volver",
     "homeLink": "Voley Stats - inicio",
@@ -162,7 +192,28 @@
     "label": "Código del partido o enlace del equipo",
     "placeholder": "Pega aquí el código o el enlace",
     "submit": "Acceder",
-    "back": "Volver al inicio"
+    "back": "Volver al inicio",
+    "explain": {
+      "title": "¿Qué es el código del partido?",
+      "intro": "Cada partido que se comparte en directo desde la app de iPad genera un código único. Quien está anotando —normalmente el entrenador o alguien del cuerpo técnico— lo reparte por WhatsApp, lo enseña como QR o pasa el enlace de la página del equipo. Con cualquiera de los tres entras al marcador y a las estadísticas en vivo, sin cuenta y sin instalar nada.",
+      "steps": [
+        {
+          "title": "Pide el código a tu equipo",
+          "text": "Lo genera la app al activar el directo de un partido. También sirve el enlace completo del partido o el de la página del equipo: pégalo tal cual en el campo de arriba y lo reconoce solo."
+        },
+        {
+          "title": "Sigue el partido en vivo",
+          "text": "Marcador set a set, evolución punto a punto, momentum del partido y estadísticas por jugadora, actualizándose mientras se juega."
+        },
+        {
+          "title": "Consúltalo también después",
+          "text": "El enlace sigue funcionando cuando acaba el partido: side-out y break, rendimiento por rotación, ataque por fase y el resto del análisis quedan disponibles."
+        }
+      ],
+      "freeTitle": "Gratis y sin registro",
+      "freeText": "Ver las estadísticas en directo no cuesta nada ni exige crear una cuenta. Solo quien captura el partido necesita la app de iPad y un plan que incluya el directo.",
+      "appCta": "¿Eres tú quien anota los partidos? Descarga Voley Stats para iPad"
+    }
   },
   "stats": {
     "notFoundTitle": "Partido no encontrado",

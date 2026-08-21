@@ -56,11 +56,11 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, watch } from "vue";
+import { computed } from "vue";
 import { RouterLink } from "vue-router";
 import { useI18n } from "vue-i18n";
 
-const { t, locale } = useI18n();
+const { t } = useI18n();
 
 // Sin backend: el contacto es solo por correo (mailto con asunto prellenado).
 const CONTACT_EMAIL = "voleystats@gmail.com";
@@ -89,9 +89,6 @@ const cards = computed(() => [
   },
 ]);
 
-const setTitle = () => {
-  document.title = t("contact.docTitle");
-};
-onMounted(setTitle);
-watch(locale, setTitle);
+// El <title> —y con él description, canonical y og:*— lo pone ahora
+// `installSeo` a partir de `meta.seo` de la ruta. Ver useSeo.ts.
 </script>

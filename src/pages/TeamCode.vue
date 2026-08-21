@@ -44,6 +44,48 @@
       </RouterLink>
     </div>
   </section>
+
+  <!-- Contenido indexable. Antes esta ruta era solo el formulario de arriba:
+       aunque se arregle el canonical (ver src/composables/useSeo.ts), Google no
+       indexa una página sin contenido, así que /team-code seguiría fuera del
+       índice. Esto además responde la consulta real que trae aquí a la gente
+       ("cómo ver las estadísticas de mi equipo online"). -->
+  <section class="px-5 pb-20">
+    <div class="mx-auto max-w-3xl">
+      <h2 class="text-xl font-bold">{{ $t('teamCode.explain.title') }}</h2>
+      <p class="mt-3 text-sm leading-relaxed text-slate-400">
+        {{ $t('teamCode.explain.intro') }}
+      </p>
+
+      <ol class="mt-8 grid gap-4 sm:grid-cols-3">
+        <li
+          v-for="(step, i) in ($tm('teamCode.explain.steps') as any[])"
+          :key="i"
+          class="card p-5"
+        >
+          <span
+            class="flex h-7 w-7 items-center justify-center rounded-lg bg-brand-500/15 text-xs font-bold text-brand-300"
+          >{{ i + 1 }}</span>
+          <h3 class="mt-3 text-sm font-semibold">{{ $rt(step.title) }}</h3>
+          <p class="mt-1.5 text-sm leading-relaxed text-slate-400">{{ $rt(step.text) }}</p>
+        </li>
+      </ol>
+
+      <div class="card mt-6 p-5">
+        <h3 class="text-sm font-semibold">{{ $t('teamCode.explain.freeTitle') }}</h3>
+        <p class="mt-1.5 text-sm leading-relaxed text-slate-400">
+          {{ $t('teamCode.explain.freeText') }}
+        </p>
+        <a
+          href="https://apps.apple.com/us/app/voley-stats/id6737778450"
+          class="mt-4 inline-flex items-center gap-1.5 text-sm text-brand-300 hover:text-brand-200 transition"
+        >
+          {{ $t('teamCode.explain.appCta') }}
+          <i class="bi bi-arrow-right"></i>
+        </a>
+      </div>
+    </div>
+  </section>
 </template>
 
 <script lang="ts" setup>

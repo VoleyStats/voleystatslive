@@ -1,4 +1,34 @@
 {
+  "seo": {
+    "home": {
+      "title": "Voley Stats — Live volleyball stats app for iPad",
+      "description": "Volleyball statistics app for iPad. Track the match while you coach —even offline—, share live stats on the web and break down every set with scouting reports."
+    },
+    "teamCode": {
+      "title": "Live volleyball stats by match code — Voley Stats",
+      "description": "Enter the match code or your team link and follow the scoreboard and live volleyball statistics — free, no sign-up needed."
+    },
+    "team": {
+      "title": "Team shared matches — Voley Stats",
+      "description": "Every match this team has shared: set-by-set score, statistics and live tracking while the match is being played."
+    },
+    "privacy": {
+      "title": "Privacy Policy — Voley Stats",
+      "description": "What data Voley Stats processes, why, and how to exercise your rights over it."
+    },
+    "terms": {
+      "title": "Terms of Use — Voley Stats",
+      "description": "Terms of use for the Voley Stats app and the public live statistics website."
+    },
+    "deleteAccount": {
+      "title": "Delete account — Voley Stats",
+      "description": "How to delete your Voley Stats account and every piece of data tied to it."
+    },
+    "contact": {
+      "title": "Contact — Voley Stats",
+      "description": "Questions, suggestions or a problem with the app? Write to us and we'll reply."
+    }
+  },
   "layout": {
     "back": "Back",
     "homeLink": "Voley Stats - home",
@@ -162,7 +192,28 @@
     "label": "Match code or team link",
     "placeholder": "Paste the code or link here",
     "submit": "Enter",
-    "back": "Back to home"
+    "back": "Back to home",
+    "explain": {
+      "title": "What is the match code?",
+      "intro": "Every match shared live from the iPad app generates a unique code. Whoever is tracking the match —usually the coach or someone on the staff— shares it over WhatsApp, shows it as a QR code, or passes on the team page link. Any of the three gets you to the live scoreboard and statistics, with no account and nothing to install.",
+      "steps": [
+        {
+          "title": "Ask your team for the code",
+          "text": "The app generates it when live sharing is turned on for a match. The full match link or the team page link work too: paste either one into the field above and it will be recognised automatically."
+        },
+        {
+          "title": "Follow the match live",
+          "text": "Set-by-set score, point-by-point progression, match momentum and per-player statistics, updating while the match is being played."
+        },
+        {
+          "title": "Come back to it afterwards",
+          "text": "The link keeps working once the match ends: side-out and break, performance by rotation, attack by phase and the rest of the breakdown stay available."
+        }
+      ],
+      "freeTitle": "Free, no sign-up",
+      "freeText": "Watching live statistics costs nothing and needs no account. Only the person tracking the match needs the iPad app and a plan that includes live sharing.",
+      "appCta": "Are you the one tracking the matches? Get Voley Stats for iPad"
+    }
   },
   "stats": {
     "notFoundTitle": "Match not found",

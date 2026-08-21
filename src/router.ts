@@ -7,6 +7,7 @@ const routes = [
     path: '/',
     name: 'home',
     component: Home,
+    meta: { seo: 'home' },
   },
   {
     // Broadcast scoreboard for OBS Browser Source. `bare` skips the site chrome
@@ -14,32 +15,37 @@ const routes = [
     path: '/overlay/:code',
     name: 'overlay',
     component: () => import('./pages/Overlay.vue'),
-    meta: { bare: true }
+    meta: { bare: true, noindex: true }
   },
   {
     path: '/team-code',
     name: 'code',
     component: () => import('./pages/TeamCode.vue'),
+    meta: { seo: 'teamCode' },
   },
   {
     path: '/privacy',
     name: 'privacy',
     component: () => import('./pages/Privacy.vue'),
+    meta: { seo: 'privacy' },
   },
   {
     path: '/terms',
     name: 'terms',
     component: () => import('./pages/Terms.vue'),
+    meta: { seo: 'terms' },
   },
   {
     path: '/delete-account',
     name: 'deleteAccount',
     component: () => import('./pages/DeleteAccount.vue'),
+    meta: { seo: 'deleteAccount' },
   },
   {
     path: '/contact',
     name: 'contact',
     component: () => import('./pages/Contact.vue'),
+    meta: { seo: 'contact' },
   },
   {
     path: '/stats/:id',
@@ -49,6 +55,7 @@ const routes = [
         path: '',
         name: 'stats',
         component: () => import('./pages/StatsView.vue'),
+        meta: { noindex: true },
       },
       // Antes página aparte ('players' → PlayerStats.vue); ahora es la
       // pestaña "Por jugadora" de GeneralStats.vue. Redirige preservando el
@@ -70,6 +77,7 @@ const routes = [
     path: '/team/:id',
     name: 'team',
     component: () => import('./pages/TeamMatches.vue'),
+    meta: { seo: 'team' },
   },
   {
     // Enlace corto que muestra la app (voleystats-live.vercel.app/<código>):

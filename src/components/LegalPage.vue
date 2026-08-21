@@ -45,7 +45,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, watch } from "vue";
+import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 
 /**
@@ -55,7 +55,7 @@ import { useI18n } from "vue-i18n";
  */
 const props = defineProps<{ baseKey: "privacy" | "terms" | "deleteAccount" }>();
 
-const { t, tm, rt, te, locale } = useI18n();
+const { t, tm, rt, te } = useI18n();
 
 interface LegalSection {
   heading?: string;
@@ -77,9 +77,7 @@ const note = computed(() =>
   te(`${props.baseKey}.note`) ? t(`${props.baseKey}.note`) : ""
 );
 
-const setTitle = () => {
-  document.title = t(`${props.baseKey}.docTitle`);
-};
-onMounted(setTitle);
-watch(locale, setTitle);
+// El <title> —y con él description, canonical y og:*— lo pone ahora
+// `installSeo` a partir de `meta.seo` de la ruta, para que el título y la
+// URL canónica no puedan divergir. Ver src/composables/useSeo.ts.
 </script>
