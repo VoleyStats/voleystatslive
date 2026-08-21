@@ -498,7 +498,7 @@
         "list": [
           "Cuenta (opcional): si decides crear una cuenta, tu correo electrónico y contraseña se gestionan con Firebase Authentication (Google).",
           "Contenido que generas: equipos, jugadoras (nombre, dorsal, posición, fecha de nacimiento, medidas físicas) y estadísticas de tus partidos. Este contenido se guarda en tu dispositivo y solo se transmite si activas el directo (Firebase Firestore), la sincronización entre dispositivos o la copia de seguridad en la nube (Supabase).",
-          "Fotos de jugadoras: nunca salen de tu dispositivo; no se suben a ningún servidor."
+          "Fotos de jugadoras: se guardan en tu dispositivo y, si activas la sincronización, se comparten con las demás cuentas que pertenecen a ese mismo equipo. Se alojan en un espacio privado de Supabase al que solo se llega mediante enlaces temporales, y únicamente para las cuentas de ese equipo. Nunca se publican en la web, nunca aparecen en las estadísticas en directo y nunca se ceden a terceros."
         ]
       },
       {
