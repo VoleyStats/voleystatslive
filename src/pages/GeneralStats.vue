@@ -94,7 +94,10 @@
 
                 <div class="grid grid-cols-2 gap-2">
                     <div class="flex flex-col items-center justify-center gap-1.5 text-center rounded-xl bg-brand-500/10 border border-brand-500/20 py-6 px-2">
-                        <p class="text-sm font-display font-semibold text-brand-300 truncate w-full">{{ usName }}</p>
+                        <div class="flex items-center justify-center gap-2 w-full min-w-0">
+                            <TeamCrest :url="usLogo" :size="22" :alt="usName" />
+                            <p class="text-sm font-display font-semibold text-brand-300 truncate">{{ usName }}</p>
+                        </div>
                         <RouterLink
                             v-if="teamId"
                             :to="{ name: 'team', params: { id: teamId } }"
@@ -105,7 +108,10 @@
                         </RouterLink>
                     </div>
                     <div class="flex flex-col items-center justify-center gap-1.5 text-center rounded-xl bg-white/[0.04] border border-white/10 py-6 px-2">
-                        <p class="text-sm font-display font-semibold text-slate-300 truncate w-full">{{ themName }}</p>
+                        <div class="flex items-center justify-center gap-2 w-full min-w-0">
+                            <TeamCrest :url="themLogo" :size="22" :alt="themName" />
+                            <p class="text-sm font-display font-semibold text-slate-300 truncate">{{ themName }}</p>
+                        </div>
                     </div>
                 </div>
 
@@ -133,7 +139,10 @@
                 <div class="grid grid-cols-2 gap-2">
                     <div class="text-center rounded-xl bg-brand-500/10 border border-brand-500/20 py-4">
                         <p class="text-5xl md:text-6xl font-display font-bold text-brand-300">{{ score[0] }}</p>
-                        <p class="text-xs text-slate-400 mt-2 truncate px-2">{{ usName }}</p>
+                        <div class="mt-2 px-2 flex items-center justify-center gap-1.5 min-w-0">
+                            <TeamCrest :url="usLogo" :size="18" :alt="usName" />
+                            <p class="text-xs text-slate-400 truncate">{{ usName }}</p>
+                        </div>
                         <RouterLink
                             v-if="teamId"
                             :to="{ name: 'team', params: { id: teamId } }"
@@ -145,7 +154,10 @@
                     </div>
                     <div class="text-center rounded-xl bg-white/[0.04] border border-white/10 py-4">
                         <p class="text-5xl md:text-6xl font-display font-bold text-slate-300">{{ score[1] }}</p>
-                        <p class="text-xs text-slate-400 mt-2 truncate px-2">{{ themName }}</p>
+                        <div class="mt-2 px-2 flex items-center justify-center gap-1.5 min-w-0">
+                            <TeamCrest :url="themLogo" :size="18" :alt="themName" />
+                            <p class="text-xs text-slate-400 truncate">{{ themName }}</p>
+                        </div>
                     </div>
                 </div>
 
@@ -368,6 +380,7 @@ import type { ApexOptions } from "apexcharts";
 
 const { t, te, locale } = useI18n();
 import EmptyState from "../components/EmptyState.vue";
+import TeamCrest from "../components/TeamCrest.vue";
 import SkeletonCard from "../components/SkeletonCard.vue";
 import SkeletonChart from "../components/SkeletonChart.vue";
 import Rotations360Section from "../components/stats/Rotations360Section.vue";
@@ -524,6 +537,12 @@ const teamId = computed(() => {
     return id && id !== "0" ? id : "";
 });
 const themName = computed(() => match.value?.opponent || t("stats.themFallback"));
+// Escudos (aditivos, `""` cuando no hay): el propio viaja dentro de `team`, el
+// del rival lo resuelve la app desde su ficha y lo denormaliza en la raíz del
+// doc de partido. Sin escudo, `TeamCrest` no pinta nada (slot vacío) y la
+// cabecera queda como estaba.
+const usLogo = computed(() => String(match.value?.team?.logo_url ?? ""));
+const themLogo = computed(() => String(match.value?.opponent_logo_url ?? ""));
 const currentSet = computed(() => match.value?.current_set ?? 1);
 
 // Set seleccionado: sigue el set en curso durante el directo; en el informe

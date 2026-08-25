@@ -6,38 +6,19 @@ import { collection, doc, onSnapshot, orderBy, query } from "firebase/firestore"
 import { useDocument } from "vuefire"
 import { db } from "../firebase"
 import { ADMIN_IDS, aid, deriveCredits, isRival, pointsOrigin, rivalServing } from "../utils/volleyStats"
-
-const { t } = useI18n()
-
+import TeamCrest from "../components/TeamCrest.vue"
+import { safeLogoUrl } from "../utils/teamLogo"
 // Everything the scoreboard needs already lives on the match doc: the app
 // rewrites `sets_scoreboard` (per-set scores, current set included) on every
 // point, plus `sets_us`/`sets_them`/`current_set`. So we subscribe only to
-// `live_matches/{code}` — no need to read the (potentially huge) stats subcollection.
-interface SetScore {
-    number: number
-    score_us: number
-    score_them: number
-}
-interface LiveMatch {
-    team?: { id?: string; name?: string; color?: string }
-    opponent?: string
-    n_sets?: number
-    sets_us?: number
-    sets_them?: number
-    current_set?: number
-    set_closed?: boolean
-    sets_scoreboard?: SetScore[]
-}
+// `live_matches/{code}` — no need to read the (potentially huge) stats
+// subcollection. Shapes live in `src/interfaces/firestore.ts`; the remote
+// placement config (`teams/{team.id}.overlay`: `pos`/`scale`/`banners`/`logos`)
+// mirrors the URL params below and, once published, takes priority over them —
+// see the priority cascade (session > remote > URL > default) further down.
+import type { LiveMatch, SetScore, TeamOverlayConfig as RemoteOverlay } from "../interfaces/firestore"
 
-// Remote placement config, published (optionally) on `teams/{team.id}.overlay`
-// by the apps: `pos`/`scale`/`banners` mirror the URL params below and, once
-// published, take priority over them — see the priority cascade (session >
-// remote > URL > default) further down.
-interface RemoteOverlay {
-    pos?: string
-    scale?: number
-    banners?: string
-}
+const { t } = useI18n()
 
 const route = useRoute()
 const router = useRouter()
@@ -69,8 +50,12 @@ const demoData = computed<LiveMatch | null>(() => {
     if (!demo.value) return null
     const between = demo.value === "between"
     return {
-        team: { name: "C.V. Valencia", color: "1e90ff" },
+        // Crests: the app's own icon from `public/` (same-origin, so it passes
+        // `safeLogoUrl`) stands in for both teams — placement in OBS has to be
+        // decided against the WIDEST layout, which is the one with two crests.
+        team: { name: "C.V. Valencia", color: "1e90ff", logo_url: "/icon-192.png" },
         opponent: "Barça",
+        opponent_logo_url: "/icon-192.png",
         n_sets: 5,
         sets_us: 1,
         sets_them: 1,
@@ -124,12 +109,23 @@ function parseBannersMode(v: unknown): BannersMode | null {
     const s = String(v ?? "")
     return (BANNERS_MODES as readonly string[]).includes(s) ? (s as BannersMode) : null
 }
+// Team crests on/off. Same cascade as the rest, and the DEFAULT IS ON: an app
+// build that never publishes `overlay.logos` (or a bare `?setup`-less URL) must
+// still show crests, so only an explicit `false`/`0` turns them off.
+function parseLogos(v: unknown): boolean | null {
+    if (typeof v === "boolean") return v
+    const s = String(v ?? "").toLowerCase()
+    if (s === "1" || s === "true") return true
+    if (s === "0" || s === "false") return false
+    return null
+}
 
 // Parsed once from the URL at load time — immutable for the life of the page
 // (unlike the session overrides below, these never change once resolved).
 const posUrlParam = parsePos(route.query.pos)
 const scaleUrlParam = parseScale(route.query.scale)
 const bannersUrlParam = parseBannersMode(route.query.banners)
+const logosUrlParam = parseLogos(route.query.logos)
 
 // Populated ONLY by the `?setup` panel's controls (see the `@click`/`v-model`
 // handlers below) — stays `null` for the whole session otherwise, including
@@ -137,6 +133,7 @@ const bannersUrlParam = parseBannersMode(route.query.banners)
 const posSession = ref<Pos | null>(null)
 const scaleSession = ref<number | null>(null)
 const bannersSession = ref<BannersMode | null>(null)
+const logosSession = ref<boolean | null>(null)
 
 const pos = computed<Pos>(() => posSession.value ?? parsePos(remoteOverlay.value?.pos) ?? posUrlParam ?? "bottom-left")
 const scale = computed<number>(() => scaleSession.value ?? parseScale(remoteOverlay.value?.scale) ?? scaleUrlParam ?? 1)
@@ -152,6 +149,16 @@ const scaleInput = computed<number>({
 const bannersMode = computed<BannersMode>(
     () => bannersSession.value ?? parseBannersMode(remoteOverlay.value?.banners) ?? bannersUrlParam ?? "side"
 )
+const showLogos = computed<boolean>(
+    () => logosSession.value ?? parseLogos(remoteOverlay.value?.logos) ?? logosUrlParam ?? true
+)
+// Writable proxy for the setup panel's checkbox, same shape as `scaleInput`.
+const logosInput = computed<boolean>({
+    get: () => showLogos.value,
+    set: (v) => {
+        logosSession.value = v
+    },
+})
 // Resolves the mode above into one of the 4 concrete edges the CSS actually
 // draws. Auto modes derive the edge from `pos` (the bar's screen corner):
 // "side" flares toward the horizontal center, "stack" toward the vertical
@@ -209,6 +216,31 @@ const themName = computed(() => match.value?.opponent || "Visitante")
 // as "Voley Stats" rather than a generic color.
 const usColor = computed(() => cssColor(match.value?.team?.color, "#6E93FF"))
 const themColor = "#F87171"
+// Crests. `""` (no logo published, or crests switched off) falls back to the
+// color chip, which is exactly what the scoreboard showed before this existed.
+// The URL is passed through untouched — `TeamCrest`/`safeLogoUrl` own the host
+// check and the cache-buster must survive intact.
+const usLogo = computed(() => (showLogos.value ? match.value?.team?.logo_url ?? "" : ""))
+const themLogo = computed(() => (showLogos.value ? match.value?.opponent_logo_url ?? "" : ""))
+// Each team row is its OWN grid, so the identifier column has to be sized
+// globally or a match where only one side has a crest would end up with
+// misaligned names. One crest anywhere widens the column for both rows; the
+// color chip then just centers inside it (see `.chip` in the styles below).
+// Consumed from the CSS via `v-bind()`.
+const CREST_SIZE = 30
+const CREST_SIZE_BIG = 48
+const anyCrest = computed(() => !!safeLogoUrl(usLogo.value) || !!safeLogoUrl(themLogo.value))
+const idCol = computed(() => (anyCrest.value ? `${CREST_SIZE}px` : "14px"))
+const idColBig = computed(() => (anyCrest.value ? `${CREST_SIZE_BIG}px` : "22px"))
+// Forma del chip de color, por la misma razón: si un equipo trae escudo (ya
+// recortado en círculo por la app) y el otro no, un cuadradito redondeado justo
+// encima de un círculo canta. Cuando hay algún escudo en el marcador el chip se
+// vuelve redondo también; sin ningún escudo conserva su radio de siempre y la
+// barra queda pixel a pixel como estaba. Solo se sobreescribe dentro de
+// `.team-row`/`.big-team`: el chip del rótulo de sustitución usa la regla base
+// `.chip` y se queda cuadrado siempre.
+const chipRadius = computed(() => (anyCrest.value ? "50%" : "4px"))
+const chipRadiusBig = computed(() => (anyCrest.value ? "50%" : "6px"))
 
 const currentSet = computed(() => match.value?.current_set ?? 1)
 const scoreboard = computed<SetScore[]>(() => match.value?.sets_scoreboard ?? [])
@@ -504,6 +536,7 @@ const finalOverlayUrl = computed(() => {
     if (posSession.value) q.pos = posSession.value
     if (scaleSession.value != null) q.scale = String(scaleSession.value)
     if (bannersSession.value) q.banners = bannersSession.value
+    if (logosSession.value != null) q.logos = logosSession.value ? "1" : "0"
     const resolved = router.resolve({ name: "overlay", params: { code }, query: q })
     return `${window.location.origin}${resolved.href}`
 })
@@ -593,8 +626,14 @@ onUnmounted(() => {
                     </Transition>
                     <div class="compact">
                         <div class="compact-head">SET {{ currentSet }}</div>
+                        <!-- El escudo ocupa el mismo hueco que el chip de color
+                             y cae a ese mismo chip (slot) cuando no hay logo,
+                             falla la carga o el operador los apaga: sin escudos
+                             la barra queda idéntica a como era. -->
                         <div class="team-row">
-                            <span class="chip" :style="{ background: usColor }"></span>
+                            <TeamCrest :url="usLogo" :size="30" :alt="usName">
+                                <span class="chip" :style="{ background: usColor }"></span>
+                            </TeamCrest>
                             <span class="tname">{{ usName }}</span>
                             <span class="sets">{{ effUs }}</span>
                             <span class="pts-wrap">
@@ -603,7 +642,9 @@ onUnmounted(() => {
                             </span>
                         </div>
                         <div class="team-row">
-                            <span class="chip" :style="{ background: themColor }"></span>
+                            <TeamCrest :url="themLogo" :size="30" :alt="themName">
+                                <span class="chip" :style="{ background: themColor }"></span>
+                            </TeamCrest>
                             <span class="tname">{{ themName }}</span>
                             <span class="sets">{{ effThem }}</span>
                             <span class="pts-wrap">
@@ -619,12 +660,16 @@ onUnmounted(() => {
                     <div class="headline">{{ headline }}</div>
                     <div class="panel">
                         <div class="big-team" :class="{ winner: matchOver && effUs > effThem }">
-                            <span class="chip" :style="{ background: usColor }"></span>
+                            <TeamCrest :url="usLogo" :size="48" :alt="usName">
+                                <span class="chip" :style="{ background: usColor }"></span>
+                            </TeamCrest>
                             <span class="bname">{{ usName }}</span>
                             <span class="bsets">{{ effUs }}</span>
                         </div>
                         <div class="big-team" :class="{ winner: matchOver && effThem > effUs }">
-                            <span class="chip" :style="{ background: themColor }"></span>
+                            <TeamCrest :url="themLogo" :size="48" :alt="themName">
+                                <span class="chip" :style="{ background: themColor }"></span>
+                            </TeamCrest>
                             <span class="bname">{{ themName }}</span>
                             <span class="bsets">{{ effThem }}</span>
                         </div>
@@ -753,6 +798,11 @@ onUnmounted(() => {
                     <span></span>
                 </div>
             </div>
+
+            <label class="mt-5 flex items-center justify-between gap-3">
+                <span class="text-xs font-medium uppercase tracking-widest text-brand-300">{{ t("overlay.setupLogos") }}</span>
+                <input v-model="logosInput" type="checkbox" class="h-4 w-4 accent-volt-400" />
+            </label>
 
             <label class="mt-5 flex items-center justify-between gap-3">
                 <span class="text-xs font-medium uppercase tracking-widest text-brand-300">{{ t("overlay.setupDemo") }}</span>
@@ -975,7 +1025,9 @@ onUnmounted(() => {
 }
 .team-row {
     display: grid;
-    grid-template-columns: 14px 1fr auto auto;
+    /* Primera columna = identificador del equipo (escudo o chip de color).
+       `idCol` vale 14px —el ancho de siempre— cuando no hay ningún escudo. */
+    grid-template-columns: v-bind(idCol) 1fr auto auto;
     align-items: center;
     column-gap: 14px;
     padding: 3px 0;
@@ -983,10 +1035,16 @@ onUnmounted(() => {
 /* Team color identifier — always visible regardless of who's serving (see
    .serve-dot below for that indicator, anchored to the points instead). */
 .chip {
+    /* Centrado en su columna: cuando el OTRO equipo sí tiene escudo la columna
+       es más ancha, y el chip debe quedar en el mismo eje que ese escudo. */
+    justify-self: center;
     width: 14px;
     height: 14px;
     border-radius: 4px;
     box-shadow: 0 0 0 1.5px rgba(255, 255, 255, 0.35) inset, 0 1px 3px rgba(0, 0, 0, 0.45);
+}
+.team-row .chip {
+    border-radius: v-bind(chipRadius);
 }
 .tname {
     font-family: var(--font-display);
@@ -1064,7 +1122,7 @@ onUnmounted(() => {
 }
 .big-team {
     display: grid;
-    grid-template-columns: 22px 1fr auto;
+    grid-template-columns: v-bind(idColBig) 1fr auto;
     align-items: center;
     column-gap: 22px;
     padding: 8px 0;
@@ -1076,7 +1134,7 @@ onUnmounted(() => {
 .big-team .chip {
     width: 22px;
     height: 22px;
-    border-radius: 6px;
+    border-radius: v-bind(chipRadiusBig);
 }
 .bname {
     font-family: var(--font-display);

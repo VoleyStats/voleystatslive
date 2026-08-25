@@ -14,6 +14,7 @@ import {
 import { useDocument } from "vuefire";
 import { db } from "../firebase";
 import { isMatchCacheable, isMatchFinished, type StatDoc } from "../utils/volleyStats";
+import type { TeamDoc, TeamMatchIndexEntry } from "../interfaces/firestore";
 
 // Capa de datos de estadísticas agregadas de un equipo (multipartido),
 // leída desde `teams/{id}` (índice de partidos) + `live_matches/{code}`
@@ -120,6 +121,12 @@ function writeCache(code: string, data: CachedMatch): void {
 
 // Solo se conservan los campos que consume esta capa (marcador de sets,
 // metadatos del partido) — evita inflar la caché con campos que la web no usa.
+// Ojo al añadir campos aquí: es una lista blanca del doc de partido, así que un
+// campo nuevo del contrato NO aparece en las entradas ya cacheadas hasta que
+// caducan. `team` se copia entero (de ahí que `team.logo_url` viaje solo);
+// `opponent_logo_url` se deja fuera a propósito porque `/team/:id` no pinta
+// escudos de rival — si algún día lo hiciera, hay que añadirlo AQUÍ y subir
+// `CACHE_SCHEMA_VERSION`.
 function trimMatch(match: StatDoc): StatDoc {
     return {
         opponent: match.opponent,
@@ -187,12 +194,10 @@ async function mapWithConcurrency<T, R>(
     return results;
 }
 
-export interface TeamMatchIndexEntry {
-    code: string;
-    opponent: string;
-    date: number;
-    season?: string;
-}
+// La forma de una entrada del índice `teams/{id}.matches[]` vive con el resto
+// del contrato de Firestore; se reexporta aquí por compatibilidad con quien ya
+// la importaba de este módulo.
+export type { TeamMatchIndexEntry };
 
 export interface TeamMatchData {
     code: string;
@@ -227,7 +232,7 @@ function rawStats(stats: StatDoc[]): StatDoc[] {
 const COMMIT_THROTTLE_MS = 300;
 
 export function useTeamStats(teamId: string) {
-    const team = useDocument(doc(db, "teams", teamId));
+    const team = useDocument<TeamDoc>(doc(db, "teams", teamId));
 
     // Map plano (NO reactive()): se mutan sus objetos en el sitio (docs y
     // stats se rellenan progresivamente sobre la MISMA instancia por código,

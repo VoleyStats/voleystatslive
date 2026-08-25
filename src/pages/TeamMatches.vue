@@ -20,12 +20,14 @@
 
         <article v-else class="card w-full p-5 flex flex-col gap-4">
             <div class="flex items-center gap-4">
-                <span
-                    class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-white/10 font-display font-bold text-lg"
-                    :style="{ background: teamColor + '33', color: teamColor }"
-                >
-                    {{ initials }}
-                </span>
+                <TeamCrest :url="teamLogo" :size="48" :alt="teamName">
+                    <span
+                        class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-white/10 font-display font-bold text-lg"
+                        :style="{ background: teamColor + '33', color: teamColor }"
+                    >
+                        {{ initials }}
+                    </span>
+                </TeamCrest>
                 <span class="flex-1 min-w-0">
                     <span class="block text-lg font-bold truncate">{{ teamName }}</span>
                     <span class="block text-xs text-slate-400">{{ $t('team.sharedMatches', matchRows.length) }}</span>
@@ -386,6 +388,7 @@ import { useI18n } from "vue-i18n";
 import VueApexCharts from "vue3-apexcharts";
 import type { ApexOptions } from "apexcharts";
 import EmptyState from "../components/EmptyState.vue";
+import TeamCrest from "../components/TeamCrest.vue";
 import SkeletonCard from "../components/SkeletonCard.vue";
 import SkeletonChart from "../components/SkeletonChart.vue";
 import SkeletonRow from "../components/SkeletonRow.vue";
@@ -485,6 +488,10 @@ const teamColor = computed(() => {
 const initials = computed(() =>
     teamName.value.split(/\s+/).map((w: string) => w[0]).join("").slice(0, 3).toUpperCase()
 );
+// Escudo del equipo: campo aditivo de `teams/{id}` (`""` cuando no hay). Si
+// falta —o si la imagen falla al cargar— la cabecera vuelve a la insignia de
+// iniciales de siempre, que es el contenido del slot de `TeamCrest`.
+const teamLogo = computed(() => String(team.value?.logo_url ?? ""));
 
 // ------------------------------------------------------------------ lista
 const df = computed(() => new Intl.DateTimeFormat(locale.value, { dateStyle: "medium" }));
