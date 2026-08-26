@@ -6,7 +6,17 @@
         :message="$t('stats.notFoundMessage')"
     />
 
-    <section v-else class="min-h-screen px-4 pb-24 flex flex-col gap-4 items-center max-w-3xl mx-auto">
+    <!-- Los skeletons están calcados a la forma real a propósito (ver el
+         comentario de abajo), pero el relevo seguía siendo un corte seco. El
+         contenido real entra con un fundido corto que aprovecha esa costura.
+         La clase va en la <section> y no envolviendo el bloque `v-else` porque
+         los dos estados son bloques HERMANOS multi-raíz: meterlos en un div
+         rompería el `flex flex-col gap-4` de esta misma section. -->
+    <section
+        v-else
+        class="min-h-screen px-4 pb-24 flex flex-col gap-4 items-center max-w-3xl mx-auto"
+        :class="{ 'vsl-fade-in': baseStats.loaded }"
+    >
         <!-- ============ CARGANDO: SKELETON ============ -->
         <template v-if="!baseStats.loaded">
             <!-- Skeleton de marcador: evita el flash de "0-0" con nombres fallback. -->
@@ -36,7 +46,7 @@
                 <button
                     v-for="tab in visibleTabs"
                     :key="tab.key"
-                    class="shrink-0 rounded-full px-3 py-1.5 text-xs border transition-colors"
+                    class="shrink-0 rounded-full px-3 py-1.5 text-xs border pressable"
                     :class="activeTab === tab.key
                         ? 'bg-white text-slate-900 border-white font-semibold'
                         : 'border-white/10 bg-white/[0.04] text-slate-300 hover:border-white/30'"
@@ -101,7 +111,7 @@
                         <RouterLink
                             v-if="teamId"
                             :to="{ name: 'team', params: { id: teamId } }"
-                            class="mt-1 inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/[0.04] px-2 py-0.5 text-[11px] text-slate-300 hover:text-white hover:border-brand-500/40 transition-colors"
+                            class="mt-1 inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/[0.04] px-2 py-0.5 text-[11px] text-slate-300 hover:text-white hover:border-brand-500/40 pressable"
                         >
                             <i class="bi bi-people-fill text-brand-300"></i>
                             {{ $t('stats.viewTeam') }}
@@ -146,7 +156,7 @@
                         <RouterLink
                             v-if="teamId"
                             :to="{ name: 'team', params: { id: teamId } }"
-                            class="mt-1.5 inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/[0.04] px-2 py-0.5 text-[11px] text-slate-300 hover:text-white hover:border-brand-500/40 transition-colors"
+                            class="mt-1.5 inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/[0.04] px-2 py-0.5 text-[11px] text-slate-300 hover:text-white hover:border-brand-500/40 pressable"
                         >
                             <i class="bi bi-people-fill text-brand-300"></i>
                             {{ $t('stats.viewTeam') }}
@@ -165,7 +175,7 @@
                 <div class="mt-4 flex items-center gap-2 overflow-x-auto">
                     <button
                         v-if="matchOver"
-                        class="shrink-0 rounded-full px-3 py-1.5 text-sm border transition-colors"
+                        class="shrink-0 rounded-full px-3 py-1.5 text-sm border pressable"
                         :class="set === 0
                             ? 'bg-white text-slate-900 border-white font-semibold'
                             : 'border-white/10 bg-white/[0.04] text-slate-300 hover:border-white/30'"
@@ -176,7 +186,7 @@
                     <button
                         v-for="n in nSets"
                         :key="n"
-                        class="shrink-0 rounded-full px-3 py-1.5 text-sm border transition-colors"
+                        class="shrink-0 rounded-full px-3 py-1.5 text-sm border pressable"
                         :class="set === n
                             ? 'bg-white text-slate-900 border-white font-semibold'
                             : 'border-white/10 bg-white/[0.04] text-slate-300 hover:border-white/30'"
@@ -187,7 +197,7 @@
                     </button>
                     <button
                         v-if="!matchOver && manualSet !== null && manualSet !== currentSet"
-                        class="shrink-0 rounded-full px-3 py-1.5 text-xs border border-volt-500/40 text-volt-400"
+                        class="shrink-0 rounded-full px-3 py-1.5 text-xs border border-volt-500/40 text-volt-400 pressable"
                         @click="manualSet = null"
                     >
                         <i class="bi bi-broadcast"></i> {{ $t('stats.backToLive') }}
@@ -207,7 +217,7 @@
                 <button
                     v-for="tab in visibleTabs"
                     :key="tab.key"
-                    class="shrink-0 rounded-full px-3 py-1.5 text-xs border transition-colors"
+                    class="shrink-0 rounded-full px-3 py-1.5 text-xs border pressable"
                     :class="activeTab === tab.key
                         ? 'bg-white text-slate-900 border-white font-semibold'
                         : 'border-white/10 bg-white/[0.04] text-slate-300 hover:border-white/30'"
@@ -344,7 +354,21 @@
             <template v-else-if="activeTab === 'pointByPoint'">
                 <article class="card w-full p-4">
                     <p class="text-sm font-semibold mb-3">{{ $t('stats.pointByPoint') }}</p>
-                    <ul class="space-y-1.5 max-h-96 overflow-y-auto pr-1">
+                    <!-- El timeline va invertido (lo nuevo arriba, ver `timeline`)
+                         dentro de un contenedor con scroll: cada punto empujaba
+                         hacia abajo la fila que se estaba leyendo, sin avisar. La
+                         fila nueva entra deslizándose desde arriba del contenedor
+                         (translateY(-100%) de SU PROPIA altura, no un valor en px)
+                         y las de debajo se apartan con la transición de `move`.
+                         El `:key="set"` del grupo es a propósito: al cambiar de set
+                         se recrea entero y las filas se montan sin animar, en vez
+                         de barajarse las 150 de golpe. -->
+                    <TransitionGroup
+                        :key="set"
+                        tag="ul"
+                        name="tl"
+                        class="space-y-1.5 max-h-96 overflow-y-auto pr-1"
+                    >
                         <li
                             v-for="p in timeline"
                             :key="p.key"
@@ -355,7 +379,7 @@
                             <span class="h-2 w-2 shrink-0 rounded-full" :class="p.ours ? 'bg-brand-400' : 'bg-red-400'"></span>
                             <span class="text-slate-300 truncate">{{ p.label }}</span>
                         </li>
-                    </ul>
+                    </TransitionGroup>
                 </article>
 
                 <article class="card w-full p-4">
@@ -377,6 +401,7 @@ import { useDocument } from "vuefire";
 // Registro local (no global en main.ts): solo esta página paga por ApexCharts.
 import VueApexCharts from "vue3-apexcharts";
 import type { ApexOptions } from "apexcharts";
+import { CHART_ANIMATIONS_OFF } from "../utils/chartMotion";
 
 const { t, te, locale } = useI18n();
 import EmptyState from "../components/EmptyState.vue";
@@ -642,11 +667,16 @@ const pct = (won: number, total: number): string =>
 
 // ------------------------------------------------------------------ punto a punto
 const timeline = computed(() =>
-    [...pointEnders.value].reverse().map((s, i) => {
+    [...pointEnders.value].reverse().map((s) => {
         const label = actionLabel(s);
         const who = isRival(s) ? themName.value : s.player?.name ?? "";
         return {
-            key: s.id ?? i,
+            // `Stat.toJSON()` publica `id`, así que la key es estable aunque la
+            // lista crezca por arriba. `order` (único y monótono por stat) cubre
+            // un doc antiguo sin `id`; el ÍNDICE no vale: al entrar un punto
+            // nuevo arriba se desplazan todos y Vue reciclaría cada fila en la
+            // de al lado (animarían todas, y el contenido saltaría).
+            key: s.id ?? `o${s.order}`,
             score: `${s.score_us}-${s.score_them}`,
             ours: s.to === 1,
             label: who ? `${label} · ${who}` : label,
@@ -789,7 +819,9 @@ const momentum = computed(() => {
     return {
         series: [{ data: pts.map((s) => s.score_us - s.score_them) }],
         chartOptions: <ApexOptions>{
-            chart: { type: "bar", toolbar: { show: false }, sparkline: { enabled: false } },
+            // Una barra POR PUNTO (150-200 al final de un partido) y el
+            // `onSnapshot` reescribiendo la serie en cada punto: sin animación.
+            chart: { type: "bar", toolbar: { show: false }, sparkline: { enabled: false }, animations: CHART_ANIMATIONS_OFF },
             grid: { show: false, padding: { left: 0, right: 0 } },
             plotOptions: {
                 bar: {
@@ -837,7 +869,9 @@ const errors = computed(() => {
     return {
         series: [{ name: t("stats.errorsSeries"), data: entries.map(([, v]) => v) }],
         chartOptions: <ApexOptions>{
-            chart: { type: "bar", toolbar: { show: false } },
+            // Visible durante el directo (pestaña General): se recalcula con
+            // cada punto, así que se pinta sin animación.
+            chart: { type: "bar", toolbar: { show: false }, animations: CHART_ANIMATIONS_OFF },
             fill: { colors: ["#6E93FF"] },
             grid: { show: false, padding: { left: 0, right: 0 } },
             plotOptions: { bar: { borderRadius: 6, columnWidth: 30, borderRadiusApplication: "end" } },

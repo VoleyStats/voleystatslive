@@ -18,7 +18,7 @@
             </div>
         </article>
 
-        <article v-else class="card w-full p-5 flex flex-col gap-4">
+        <article v-else class="card w-full p-5 flex flex-col gap-4 vsl-fade-in">
             <div class="flex items-center gap-4">
                 <TeamCrest :url="teamLogo" :size="48" :alt="teamName">
                     <span
@@ -38,7 +38,7 @@
             <!-- solo si el equipo ya publica current_season -->
             <div v-if="hasSeasons" class="w-full flex items-center gap-2 overflow-x-auto">
                 <button
-                    class="shrink-0 rounded-full px-3 py-1.5 text-xs border transition-colors"
+                    class="shrink-0 rounded-full px-3 py-1.5 text-xs border pressable"
                     :class="selectedSeason === 'all'
                         ? 'bg-white text-slate-900 border-white font-semibold'
                         : 'border-white/10 bg-white/[0.04] text-slate-300 hover:border-white/30'"
@@ -49,7 +49,7 @@
                 <button
                     v-for="sid in seasonIds"
                     :key="sid"
-                    class="shrink-0 rounded-full px-3 py-1.5 text-xs border transition-colors"
+                    class="shrink-0 rounded-full px-3 py-1.5 text-xs border pressable"
                     :class="selectedSeason === sid
                         ? 'bg-white text-slate-900 border-white font-semibold'
                         : 'border-white/10 bg-white/[0.04] text-slate-300 hover:border-white/30'"
@@ -59,7 +59,7 @@
                 </button>
                 <button
                     v-if="hasUnseasonedMatches"
-                    class="shrink-0 rounded-full px-3 py-1.5 text-xs border transition-colors"
+                    class="shrink-0 rounded-full px-3 py-1.5 text-xs border pressable"
                     :class="selectedSeason === '__none__'
                         ? 'bg-white text-slate-900 border-white font-semibold'
                         : 'border-white/10 bg-white/[0.04] text-slate-300 hover:border-white/30'"
@@ -73,7 +73,7 @@
         <!-- Pestañas: partidos / estadísticas agregadas -->
         <div class="w-full flex items-center gap-2">
             <button
-                class="flex-1 rounded-full px-3 py-2 text-sm border transition-colors"
+                class="flex-1 rounded-full px-3 py-2 text-sm border pressable"
                 :class="view === 'matches'
                     ? 'bg-white text-slate-900 border-white font-semibold'
                     : 'border-white/10 bg-white/[0.04] text-slate-300 hover:border-white/30'"
@@ -82,7 +82,7 @@
                 {{ $t('team.tabMatches') }}
             </button>
             <button
-                class="flex-1 rounded-full px-3 py-2 text-sm border transition-colors"
+                class="flex-1 rounded-full px-3 py-2 text-sm border pressable"
                 :class="view === 'stats'
                     ? 'bg-white text-slate-900 border-white font-semibold'
                     : 'border-white/10 bg-white/[0.04] text-slate-300 hover:border-white/30'"
@@ -112,11 +112,17 @@
                 </article>
             </template>
             <template v-else>
+                <!-- Entrada escalonada al relevar al skeleton: 40ms por fila y
+                     tope a las 8 primeras (una temporada entera son decenas de
+                     partidos y el escalonado no puede convertirse en una espera).
+                     Es puro `opacity`, así que la fila se puede pulsar desde el
+                     primer fotograma aunque todavía no se vea del todo. -->
                 <RouterLink
-                    v-for="m in matchRows"
+                    v-for="(m, i) in matchRows"
                     :key="m.code"
                     :to="{ name: 'stats', params: { id: m.code } }"
-                    class="card w-full p-4 flex items-center gap-3 hover:border-brand-500/40 transition-colors"
+                    class="card w-full p-4 flex items-center gap-3 hover:border-brand-500/40 pressable vsl-fade-in"
+                    :style="{ animationDelay: `${Math.min(i, 8) * 40}ms` }"
                 >
                     <span class="flex-1 min-w-0">
                         <span class="block font-semibold truncate">{{ $t('team.vs', { opponent: m.opponent }) }}</span>
@@ -161,7 +167,7 @@
                     <button
                         v-for="tab in STATS_TABS"
                         :key="tab.key"
-                        class="shrink-0 rounded-full px-3 py-1.5 text-xs border transition-colors"
+                        class="shrink-0 rounded-full px-3 py-1.5 text-xs border pressable"
                         :class="statsTab === tab.key
                             ? 'bg-white text-slate-900 border-white font-semibold'
                             : 'border-white/10 bg-white/[0.04] text-slate-300 hover:border-white/30'"
@@ -225,7 +231,7 @@
                         <button
                             v-for="tab in STATS_TABS"
                             :key="tab.key"
-                            class="shrink-0 rounded-full px-3 py-1.5 text-xs border transition-colors"
+                            class="shrink-0 rounded-full px-3 py-1.5 text-xs border pressable"
                             :class="statsTab === tab.key
                                 ? 'bg-white text-slate-900 border-white font-semibold'
                                 : 'border-white/10 bg-white/[0.04] text-slate-300 hover:border-white/30'"
@@ -309,6 +315,7 @@
                         :stats="gameStats"
                         :derived-kills="derivedKills"
                         :reception-grade-buckets="receptionGradeBuckets"
+                        :live-updating="hasLiveMatch"
                     />
                 </template>
 
@@ -367,6 +374,7 @@
                         :derived-aces="derivedAces"
                         :credited-by="derivedCredits.creditedBy"
                         :match-groups="gameStatsByMatch"
+                        :live-updating="hasLiveMatch"
                     />
                 </template>
 
@@ -387,6 +395,7 @@ import { useI18n } from "vue-i18n";
 // Registro local (no global en main.ts): solo esta página paga por ApexCharts.
 import VueApexCharts from "vue3-apexcharts";
 import type { ApexOptions } from "apexcharts";
+import { CHART_ANIMATIONS_ENTRY, CHART_ANIMATIONS_OFF } from "../utils/chartMotion";
 import EmptyState from "../components/EmptyState.vue";
 import TeamCrest from "../components/TeamCrest.vue";
 import SkeletonCard from "../components/SkeletonCard.vue";
@@ -528,6 +537,14 @@ const matchRows = computed(() =>
     })
 );
 
+// Animación de las gráficas de esta página: el agregado incluye los stats del
+// partido en directo, que `useTeamStats` mantiene con `onSnapshot` — mientras
+// haya uno, cada punto reescribe `gameStats` y repinta TODAS las gráficas, así
+// que se pintan sin animación. Sin partido en directo el agregado es estático
+// y conservan su entrada corta. Ver `utils/chartMotion.ts`.
+const hasLiveMatch = computed(() => matchRows.value.some((m) => m.live));
+const chartAnimations = computed(() => (hasLiveMatch.value ? CHART_ANIMATIONS_OFF : CHART_ANIMATIONS_ENTRY));
+
 // ------------------------------------------------------------------ agregación
 // Solo los partidos cuyo doc se ha podido leer (finalizados o en directo);
 // los códigos rotos/purgados quedan fuera de las estadísticas.
@@ -663,7 +680,7 @@ function areaDonut(def: { area: number; labelKey: string }) {
         total,
         series: [won, errors, other],
         chartOptions: <ApexOptions>{
-            chart: { type: "donut", background: "transparent" },
+            chart: { type: "donut", background: "transparent", animations: chartAnimations.value },
             labels: [t("team.colWon"), t("team.colErrors"), t("team.colOther")],
             colors: AREA_DONUT_COLORS,
             legend: { labels: { colors: "#cbd5e1" }, position: "bottom", fontSize: "11px" },
@@ -681,7 +698,7 @@ const radarAxisLabels = computed(() =>
     RADAR_AXIS_ORDER.map((k) => t(`team.radar${k.charAt(0).toUpperCase()}${k.slice(1)}`))
 );
 const radarChartOptions = (color: string): ApexOptions => ({
-    chart: { type: "radar", toolbar: { show: false }, background: "transparent" },
+    chart: { type: "radar", toolbar: { show: false }, background: "transparent", animations: chartAnimations.value },
     xaxis: { categories: radarAxisLabels.value, labels: { style: { colors: Array(5).fill("#94a3b8"), fontSize: "11px" } } },
     yaxis: { show: false, min: 0, max: 100 },
     plotOptions: { radar: { polygons: { strokeColors: "rgba(255,255,255,0.08)", connectorColors: "rgba(255,255,255,0.08)" } } },
@@ -760,7 +777,7 @@ const attackHistory = computed(() => {
 });
 
 const lineChartBase = (): ApexOptions => ({
-    chart: { type: "line", toolbar: { show: false }, zoom: { enabled: false } },
+    chart: { type: "line", toolbar: { show: false }, zoom: { enabled: false }, animations: chartAnimations.value },
     grid: { borderColor: "rgba(255,255,255,0.06)", padding: { left: 8, right: 8 } },
     stroke: { curve: "smooth", width: 2 },
     dataLabels: { enabled: false },

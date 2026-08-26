@@ -92,6 +92,7 @@ import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 import VueApexCharts from "vue3-apexcharts";
 import type { ApexOptions } from "apexcharts";
+import { CHART_ANIMATIONS_ENTRY, CHART_ANIMATIONS_OFF } from "../../utils/chartMotion";
 import {
     activePlayerIds,
     attackByTechnique,
@@ -113,11 +114,22 @@ import {
     type StatDoc,
 } from "../../utils/volleyStats";
 
-const props = defineProps<{
-    stats: StatDoc[];
-    derivedKills: Set<StatDoc>;
-    receptionGradeBuckets: Map<number, GradeBucket>;
-}>();
+const props = withDefaults(
+    defineProps<{
+        stats: StatDoc[];
+        derivedKills: Set<StatDoc>;
+        receptionGradeBuckets: Map<number, GradeBucket>;
+        /** Los datos de entrada se repintan en vivo (`onSnapshot`). */
+        liveUpdating?: boolean;
+    }>(),
+    { liveUpdating: false }
+);
+
+// Animación de las gráficas: esta sección es un informe estático (solo se
+// muestra con el partido terminado en /stats/:id), así que conserva una
+// entrada corta. `/team/:id` la reutiliza sobre un agregado que SÍ puede
+// llevar un partido en directo dentro y pasa `live-updating` para apagarla.
+const chartAnimations = computed(() => (props.liveUpdating ? CHART_ANIMATIONS_OFF : CHART_ANIMATIONS_ENTRY));
 
 const { t } = useI18n();
 
@@ -224,7 +236,7 @@ const receptionGradeRows = computed(() =>
 const receptionGradeChart = computed(() => ({
     series: receptionGradeRows.value.map((r) => r.attempts),
     chartOptions: <ApexOptions>{
-        chart: { type: "donut", background: "transparent" },
+        chart: { type: "donut", background: "transparent", animations: chartAnimations.value },
         labels: receptionGradeRows.value.map((r) => r.label),
         colors: receptionGradeRows.value.map((r) => GRADE_COLORS[r.grade]),
         legend: { labels: { colors: "#cbd5e1" }, position: "bottom" },
@@ -256,7 +268,7 @@ const techniqueRows = computed(() =>
 const techniqueChart = computed(() => ({
     series: techniqueRows.value.map((r) => r.attempts),
     chartOptions: <ApexOptions>{
-        chart: { type: "donut", background: "transparent" },
+        chart: { type: "donut", background: "transparent", animations: chartAnimations.value },
         labels: techniqueRows.value.map((r) => r.label),
         colors: techniqueRows.value.map((r) => TECHNIQUE_COLORS[r.key] ?? "#94a3b8"),
         legend: { labels: { colors: "#cbd5e1" }, position: "bottom" },

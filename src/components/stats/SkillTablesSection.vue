@@ -5,7 +5,7 @@
             <button
                 v-for="sk in SKILL_DEFS"
                 :key="sk.key"
-                class="shrink-0 rounded-full px-3 py-1.5 text-xs border transition-colors"
+                class="shrink-0 rounded-full px-3 py-1.5 text-xs border pressable"
                 :class="selectedSkill === sk.key
                     ? 'bg-white text-slate-900 border-white font-semibold'
                     : 'border-white/10 bg-white/[0.04] text-slate-300 hover:border-white/30'"

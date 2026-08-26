@@ -170,7 +170,7 @@
       <article
         v-for="(feature, i) in appFeatures"
         :key="feature.title"
-        class="card p-6 hover:border-brand-500/40 hover:-translate-y-1 transition-all duration-300 reveal"
+        class="card p-6 card-hover hover:border-brand-500/40 hover:-translate-y-1 reveal"
         :style="revealDelay(i)"
       >
         <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-brand-500/20 to-volt-500/10 border border-white/10">
@@ -232,17 +232,30 @@
             @click="toggleQuestion(index)"
           >
             <h3 class="text-base font-semibold text-white">{{ q.question }}</h3>
+            <!-- Un solo glifo que GIRA (+ → ×) en vez de intercambiar
+                 `bi-plus-lg`/`bi-dash-lg`: la clase `transition-transform` ya
+                 estaba puesta, pero el elemento no recibía nunca una utilidad
+                 de transform, así que era una declaración muerta. -->
             <i
-              class="bi text-brand-300 transition-transform duration-200 shrink-0"
-              :class="qSelection.includes(index) ? 'bi-dash-lg' : 'bi-plus-lg'"
+              class="bi bi-plus-lg text-brand-300 shrink-0 transition-transform duration-200 ease-[var(--ease-out)]"
+              :class="qSelection.includes(index) ? 'rotate-45' : 'rotate-0'"
             ></i>
           </button>
-          <p
-            v-show="qSelection.includes(index)"
-            class="px-5 pb-5 -mt-1 text-sm text-slate-400 leading-relaxed"
-          >
-            {{ q.answer }}
-          </p>
+          <!-- Expandir/plegar con transición interrumpible (`grid-template-rows`
+               0fr↔1fr, puro CSS): es UI reversible a mitad de camino y con
+               `v-show` la altura de la tarjeta se teletransportaba, empujando
+               de golpe a todas las de abajo. -->
+          <div class="faq-answer" :class="{ 'is-open': qSelection.includes(index) }">
+            <!-- El div intermedio existe porque el elemento que colapsa NO puede
+                 llevar padding: con `box-sizing: border-box` una caja nunca se
+                 encoge por debajo de su propio padding, así que el `pb-5` del
+                 <p> dejaba 16px de aire en cada respuesta cerrada. -->
+            <div>
+              <p class="px-5 pb-5 -mt-1 text-sm text-slate-400 leading-relaxed">
+                {{ q.answer }}
+              </p>
+            </div>
+          </div>
         </article>
       </div>
     </div>
@@ -257,25 +270,57 @@ import { useI18n } from "vue-i18n";
 const { t } = useI18n();
 
 /* -------- Reveal on scroll (progressive enhancement, SEO-safe) -------- */
+// Duración de `.js .reveal` en style.css. Se repite aquí solo para saber
+// CUÁNDO ha terminado la revelación y poder retirar la clase.
+const REVEAL_MS = 700;
+const STAGGER_MS = 80;
 let observer: IntersectionObserver | null = null;
+const settleTimers = new Set<number>();
+
+// Al terminar la revelación se retira la clase. Dos motivos: (1) `.reveal`
+// declara `will-change: opacity, transform`, que sin esto deja ~12 capas
+// compositadas vivas para siempre aunque el IntersectionObserver ya haya hecho
+// `unobserve`; (2) su `transition` de 0.7s gobierna el elemento entero, así
+// que mientras la clase siga puesta el hover de las tarjetas de features
+// tardaría 0.7s en vez de 150ms. El estado final de `.is-visible`
+// (`opacity: 1; transform: none`) es idéntico al natural del elemento, así que
+// quitar ambas clases no mueve un píxel.
+function settleReveal(el: HTMLElement) {
+  el.classList.remove("reveal", "is-visible");
+}
+
 onMounted(() => {
   const els = Array.from(document.querySelectorAll<HTMLElement>(".reveal"));
   observer = new IntersectionObserver(
     (entries) => {
       entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add("is-visible");
-          observer?.unobserve(entry.target);
-        }
+        if (!entry.isIntersecting) return;
+        const el = entry.target as HTMLElement;
+        el.classList.add("is-visible");
+        observer?.unobserve(el);
+        const delay = Number(el.style.getPropertyValue("--reveal-delay").replace("ms", "")) || 0;
+        const timer = window.setTimeout(() => {
+          settleTimers.delete(timer);
+          settleReveal(el);
+        }, REVEAL_MS + delay + 60);
+        settleTimers.add(timer);
       });
     },
     { threshold: 0.12, rootMargin: "0px 0px -40px 0px" }
   );
   els.forEach((el) => observer?.observe(el));
 });
-onBeforeUnmount(() => observer?.disconnect());
+onBeforeUnmount(() => {
+  observer?.disconnect();
+  settleTimers.forEach((t) => clearTimeout(t));
+  settleTimers.clear();
+});
 
-const revealDelay = (i: number) => ({ transitionDelay: `${i * 80}ms` });
+// El escalonado va en una custom property que SOLO lee la declaración de
+// `.reveal` (ver style.css), no en `transition-delay`: como propiedad propia
+// del elemento, un `transition-delay` inline se lo comían también el hover y
+// cualquier otra transición futura de la misma tarjeta.
+const revealDelay = (i: number) => ({ "--reveal-delay": `${i * STAGGER_MS}ms` });
 
 /* -------- Contenido (computed sobre t() para reaccionar al idioma) -------- */
 const heroStats = computed(() => [

@@ -5,6 +5,20 @@
 @layer base {
   :root {
     color-scheme: dark;
+
+    /* ---------------- Tokens de movimiento ----------------
+       Hermanos de los tokens de color (`ink`/`brand`/`volt` en
+       tailwind.config.js): TODA curva de animación del repo sale de aquí, no
+       se teclea a mano. Presupuestos que los acompañan: pulsación 100-160ms,
+       tooltips 125-200ms, desplegables 150-250ms, modales/paneles 200-500ms,
+       y NADA de UI por encima de 300ms (el marketing de la portada sí puede,
+       ver `.reveal`).
+         --ease-out    → entradas y cualquier cosa que responda a un gesto.
+         --ease-in-out → movimiento de A a B que empieza y acaba en pantalla.
+         --ease-drawer → curva tipo iOS para paneles que entran desde un borde. */
+    --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+    --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+    --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
   }
 
   html {
@@ -46,8 +60,28 @@
   }
 
   .btn {
-    @apply inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-semibold transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400 focus-visible:ring-offset-2 focus-visible:ring-offset-ink-950;
+    @apply inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-semibold focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400 focus-visible:ring-offset-2 focus-visible:ring-offset-ink-950 active:scale-[0.97];
+    /* Lista explícita en vez de `transition-all`: `all` arrastraba el
+       `box-shadow` del anillo de foco, el `border-color` de `.btn-ghost` y el
+       `backdrop-filter`, todo fuera de GPU. El movimiento (el `-translate-y`
+       de hover y el `scale` de pulsación) usa `--ease-out`; el color, `ease`.
+       `--press-ms` deja la pulsación en 100ms y la vuelta en 160ms: un press
+       y un release con el mismo timing se leen como un rebote. */
+    --press-ms: 160ms;
+    transition: transform var(--press-ms) var(--ease-out), background-color 160ms ease,
+      border-color 160ms ease, box-shadow 200ms ease;
   }
+  .btn:active {
+    --press-ms: 100ms;
+  }
+  /* El anillo de foco de teclado APARECE, no se funde: es feedback de
+     accesibilidad, no decoración. `box-shadow` (donde vive el `ring` de
+     Tailwind) sale de la lista mientras el botón tiene el foco visible. */
+  .btn:focus-visible {
+    transition: transform var(--press-ms) var(--ease-out), background-color 160ms ease,
+      border-color 160ms ease;
+  }
+
   .btn-primary {
     @apply btn bg-volt-400 text-ink-950 hover:bg-volt-300 hover:shadow-glow-volt hover:-translate-y-0.5;
   }
@@ -56,6 +90,28 @@
   }
   .btn-ghost {
     @apply btn border border-white/15 bg-white/5 text-white backdrop-blur hover:bg-white/10 hover:border-white/25;
+  }
+
+  /* Feedback de pulsación para superficies que no son `.btn` (tarjeta de
+     partido, píldoras de pestaña/set): en /stats/:id y /team/:id se navegan
+     con el pulgar durante un partido y hasta ahora lo único que respondía era
+     un `hover` que en táctil llega DESPUÉS del tap. Sustituye a
+     `transition-colors`, que dejaba `transform` fuera de la transición. */
+  .pressable {
+    --press-ms: 160ms;
+    transition: transform var(--press-ms) var(--ease-out), background-color 160ms ease,
+      border-color 160ms ease, color 160ms ease;
+  }
+  .pressable:active {
+    --press-ms: 100ms;
+    transform: scale(0.97);
+  }
+
+  /* Hover de tarjeta (portada). Declaración PROPIA, separada de `.reveal`:
+     compartirla hacía que el hover heredase los 0.7s de la revelación y su
+     `transition-delay` escalonado de hasta 800ms. */
+  .card-hover {
+    transition: transform 150ms var(--ease-out), border-color 150ms ease;
   }
 
   .card {
@@ -70,12 +126,37 @@
     @apply bg-gradient-to-r from-brand-300 via-brand-400 to-volt-400 bg-clip-text text-transparent;
   }
 
+  /* Respuesta del FAQ (portada). `grid-template-rows: 0fr → 1fr` en vez de
+     animar `height` a mano: es interrumpible a mitad (la persona puede volver
+     a pulsar antes de que termine) sin medir nada en JS, y el padding vive en
+     el hijo, así que plegado ocupa exactamente 0. */
+  .faq-answer {
+    display: grid;
+    grid-template-rows: 0fr;
+    opacity: 0;
+    transition: grid-template-rows 220ms var(--ease-out), opacity 220ms var(--ease-out);
+  }
+  .faq-answer > * {
+    overflow: hidden;
+    min-height: 0;
+  }
+  .faq-answer.is-open {
+    grid-template-rows: 1fr;
+    opacity: 1;
+  }
+
   /* Progressive-enhancement reveal: content is visible by default (no-JS
-     crawlers see everything); the .js gate only hides it when JS is present. */
+     crawlers see everything); the .js gate only hides it when JS is present.
+     Los 0.7s son deliberados: esto es marketing de portada, no UI.
+     El escalonado viaja en `--reveal-delay` (lo pone `Home.vue`) en vez de en
+     un `transition-delay` inline, para que no pueda contaminar ninguna otra
+     transición del mismo elemento. La clase se retira al terminar la
+     revelación (ver `Home.vue`), que es lo que libera el `will-change`. */
   .js .reveal {
     opacity: 0;
     transform: translateY(28px);
-    transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: opacity 0.7s var(--ease-out) var(--reveal-delay, 0ms),
+      transform 0.7s var(--ease-out) var(--reveal-delay, 0ms);
     will-change: opacity, transform;
   }
   .js .reveal.is-visible {
@@ -84,8 +165,72 @@
   }
 }
 
+/* Fundido de entrada reutilizable: contenido que sustituye a un skeleton y
+   filas nuevas de una lista. Es una animación de una sola pasada, así que el
+   estado final es el natural del elemento (nada queda "animado" de por vida). */
+@keyframes vsl-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+.vsl-fade-in {
+  /* `backwards` y no `both`: solo hace falta que el estado inicial valga
+     durante el `animation-delay` (el escalonado de la lista de partidos). Con
+     `both` la animación se queda "rellenando" para siempre y el elemento se
+     queda promovido a su propia capa de composición de por vida — el mismo
+     pecado que el `will-change` permanente de `.reveal`. */
+  animation: vsl-fade-in 200ms var(--ease-out) backwards;
+}
+
+/* Lista punto a punto de /stats/:id (`TransitionGroup name="tl"`). La fila
+   nueva entra por ARRIBA, que es de donde viene (el timeline está invertido),
+   desplazándose su propia altura —porcentaje, no píxeles— y las de debajo se
+   apartan con `tl-move` en lugar de dar un salto seco bajo el dedo.
+   A propósito NO hay `.tl-leave-active`: sin transición de salida, Vue retira
+   las filas al instante (deshacer un punto no merece coreografía). */
+.tl-enter-active {
+  transition: transform 260ms var(--ease-out), opacity 260ms var(--ease-out);
+}
+.tl-enter-from {
+  opacity: 0;
+  transform: translateY(-100%);
+}
+.tl-move {
+  transition: transform 260ms var(--ease-out);
+}
+
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
-  .js .reveal { opacity: 1; transform: none; transition: none; }
-  * { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; }
+  /* Reduced motion es MENOS movimiento, no cero: la revelación conserva su
+     fundido (información: "esto acaba de entrar") y pierde solo el
+     desplazamiento de 28px, que es lo que marea. */
+  .js .reveal { transform: none; }
+  /* Los pulsos del indicador EN VIVO y de los skeletons son ESTADO y feedback
+     de carga, no decoración: en vez de congelarlos con un `*` global (que
+     además alcanzaba a cualquier animación futura), el bucle se cambia por un
+     fundido de una pasada. */
+  .animate-pulse {
+    animation: vsl-fade-in 0.2s ease;
+  }
+  /* Decoración pura de la portada: esta sí se apaga del todo. El halo
+     `pulse-ring` late DETRÁS de un punto sólido idéntico, así que apagarlo
+     sin más lo dejaría como un segundo círculo opaco: se oculta, que es
+     justo donde terminaba su fotograma final. */
+  .animate-pulse-ring {
+    animation: none;
+    opacity: 0;
+  }
+  .animate-float,
+  .animate-shimmer {
+    animation: none;
+  }
+  /* Transiciones de UI: se acortan a un cambio prácticamente instantáneo en
+     lugar de desaparecer, para no perder el estado intermedio. */
+  .vsl-fade-in,
+  .pressable,
+  .card-hover,
+  .btn {
+    transition-duration: 0.01ms;
+    animation-duration: 0.01ms;
+  }
 }

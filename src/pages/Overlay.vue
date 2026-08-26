@@ -182,9 +182,14 @@ const bannerAxis = computed<"vertical" | "horizontal">(() =>
     bannerDir.value === "top" || bannerDir.value === "bottom" ? "vertical" : "horizontal"
 )
 
+// El `scale(var(--sb-enter-scale, 1))` del final es el hueco donde la
+// transición entre estados (ver `.sb-*` en los estilos) mete su escala de
+// entrada/salida: estos estilos son INLINE y ganan a cualquier regla de la
+// hoja, así que un `transform` en `.sb-enter-from` no se aplicaría — la
+// escala tiene que COMPONERSE aquí, no sustituir a la colocación.
 const compactStyle = computed(() => {
     const m = "3vmin"
-    const base: Record<string, string> = { transform: `scale(${scale.value})` }
+    const base: Record<string, string> = { transform: `scale(${scale.value}) scale(var(--sb-enter-scale, 1))` }
     switch (pos.value) {
         case "bottom-right":
             return { ...base, bottom: m, right: m, transformOrigin: "bottom right" }
@@ -197,7 +202,7 @@ const compactStyle = computed(() => {
     }
 })
 const expandedStyle = computed(() => ({
-    transform: `translate(-50%, -50%) scale(${scale.value})`,
+    transform: `translate(-50%, -50%) scale(${scale.value}) scale(var(--sb-enter-scale, 1))`,
 }))
 
 // --- Derived match state ---
@@ -585,7 +590,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-    <div class="overlay-root">
+    <div class="overlay-root" :class="{ 'is-setup': isSetup }">
         <div v-if="isSetup" class="setup-checkerboard"></div>
 
         <template v-if="ready">
@@ -884,6 +889,24 @@ onUnmounted(() => {
     text-decoration: none;
 }
 
+/* El desenfoque de fondo (`backdrop-filter`) SOLO existe en `?setup`.
+   En OBS la página se compone con alfa (`.overlay-root` no tiene fondo y
+   `onMounted` fuerza `background: transparent`), así que el backdrop de estos
+   elementos es píxel TRANSPARENTE: no desenfoca el vídeo de YouTube —eso lo
+   compone OBS después—, desenfoca la nada. A cambio, cada elemento con
+   `backdrop-filter` fuerza una raíz de composición que se reevalúa en cada
+   repintado (o sea, en cada punto) y en CADA FOTOGRAMA de la transición entre
+   estados, en un portátil que además está codificando vídeo. Lo único donde
+   el efecto se ve de verdad es sobre el tablero de ajedrez de `?setup`, que
+   es donde se queda. */
+.overlay-root.is-setup .compact,
+.overlay-root.is-setup .banner {
+    backdrop-filter: blur(6px);
+}
+.overlay-root.is-setup .panel {
+    backdrop-filter: blur(10px);
+}
+
 /* ---------- COMPACT ---------- */
 .compact-wrap {
     position: absolute;
@@ -893,7 +916,6 @@ onUnmounted(() => {
     min-width: 340px;
     padding: 10px 16px 14px;
     background: rgba(var(--c-ink-900-rgb), 0.88);
-    backdrop-filter: blur(6px);
     border: 1px solid rgba(var(--c-brand-500-rgb), 0.24);
     border-radius: 12px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
@@ -911,7 +933,6 @@ onUnmounted(() => {
     min-width: 340px;
     padding: 10px 16px 10px 14px;
     background: rgba(var(--c-ink-950-rgb), 0.94);
-    backdrop-filter: blur(6px);
     border: 1px solid rgba(255, 255, 255, 0.12);
     border-left: 4px solid rgba(255, 255, 255, 0.3);
     border-radius: 12px;
@@ -1028,6 +1049,11 @@ onUnmounted(() => {
     /* Primera columna = identificador del equipo (escudo o chip de color).
        `idCol` vale 14px —el ancho de siempre— cuando no hay ningún escudo. */
     grid-template-columns: v-bind(idCol) 1fr auto auto;
+    /* `idCol` salta de 14px a 30px cuando aparece un escudo (el streamer lo
+       sube a mitad de partido, o alguien toca la casilla de `?setup`) y el
+       nombre del equipo se desplazaba 16px en seco, en directo. Solo se anima
+       ese salto: sin cambio de escudo no hay nada que transicionar. */
+    transition: grid-template-columns 0.22s var(--ease-out);
     align-items: center;
     column-gap: 14px;
     padding: 3px 0;
@@ -1115,7 +1141,6 @@ onUnmounted(() => {
     min-width: 560px;
     padding: 34px 48px;
     background: rgba(var(--c-ink-850-rgb), 0.92);
-    backdrop-filter: blur(10px);
     border: 1px solid rgba(var(--c-brand-500-rgb), 0.2);
     border-radius: 20px;
     box-shadow: 0 24px 70px rgba(0, 0, 0, 0.55);
@@ -1123,6 +1148,8 @@ onUnmounted(() => {
 .big-team {
     display: grid;
     grid-template-columns: v-bind(idColBig) 1fr auto;
+    /* Mismo salto que en `.team-row`, aquí de 22px a 48px. */
+    transition: grid-template-columns 0.22s var(--ease-out);
     align-items: center;
     column-gap: 22px;
     padding: 8px 0;
@@ -1260,24 +1287,37 @@ onUnmounted(() => {
     color: var(--c-volt-400);
 }
 
-/* ---------- transition between the two states ---------- */
-.sb-enter-active,
+/* ---------- transition between the two states ----------
+   Con `mode="out-in"` las dos fases se SUMAN, así que 0.45s + 0.45s dejaban el
+   marcador ausente casi un segundo justo al cerrar un set — el momento en que
+   más gente lo está mirando. 180ms de salida + 260ms de entrada (440 en total)
+   caben en el presupuesto de panel y siguen sin solapar los dos estados, que
+   es lo que `out-in` compra. La entrada añade la escala que la declaración
+   anterior prometía y nunca aplicaba: `transform` estaba en la lista pero
+   ningún `*-from`/`*-to` lo tocaba (media declaración muerta y una entrada que
+   era un fundido pelado). Ver `compactStyle`/`expandedStyle` para por qué la
+   escala viaja en una custom property. */
+.sb-enter-active {
+    transition: opacity 0.26s var(--ease-out), transform 0.26s var(--ease-out);
+}
 .sb-leave-active {
-    transition: opacity 0.45s ease, transform 0.45s ease;
+    transition: opacity 0.18s var(--ease-out), transform 0.18s var(--ease-out);
 }
 .compact-wrap.sb-enter-from,
-.compact-wrap.sb-leave-to {
-    opacity: 0;
-}
+.compact-wrap.sb-leave-to,
 .expanded.sb-enter-from,
 .expanded.sb-leave-to {
     opacity: 0;
+    --sb-enter-scale: 0.94;
 }
 
-/* ---------- banner enter/leave ---------- */
+/* ---------- banner enter/leave ----------
+   Es un aviso momentáneo (un toast): entra con `--ease-out` y dentro del
+   presupuesto de 150-250ms, no con `ease` y 350. El desplazamiento de 8px y su
+   dirección (entra desde la barra) sí eran correctos y se conservan. */
 .banner-enter-active,
 .banner-leave-active {
-    transition: opacity 0.35s ease, transform 0.35s ease;
+    transition: opacity 0.22s var(--ease-out), transform 0.22s var(--ease-out);
 }
 .banner-above.banner-enter-from,
 .banner-above.banner-leave-to {
@@ -1290,10 +1330,14 @@ onUnmounted(() => {
     transform: translateY(-8px);
 }
 
-/* ---------- side banner: slide out from behind the bar ---------- */
+/* ---------- side banner: slide out from behind the bar ----------
+   MISMO aviso que el de arriba, así que mismo timing: lo que justifica el
+   comentario de la geometría (recorrido del 100% para salir de detrás de la
+   barra, en vez de 8px) es la GEOMETRÍA, no que este tarde 0.4s y el otro
+   0.35s con curvas distintas. La geometría se conserva; el timing se unifica. */
 .banner-side-enter-active,
 .banner-side-leave-active {
-    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+    transition: transform 0.22s var(--ease-out), opacity 0.22s var(--ease-out);
 }
 .banner-extend-right.banner-side-enter-from,
 .banner-extend-right.banner-side-leave-to {

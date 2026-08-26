@@ -2,6 +2,15 @@
 export default {
   content: ["./index.html", "./src/**/*.{vue,js,ts,jsx,tsx}"],
   darkMode: "selector",
+  // Envuelve TODA variante `hover:` en `@media (hover: hover) and (pointer:
+  // fine)`. Sin esto, en táctil el navegador dispara un hover falso al tocar
+  // y NO lo retira: los CTA con `hover:-translate-y-*` (`.btn-primary` de
+  // /team-code, tarjetas de la portada) se quedaban levantados con el glow
+  // pegado hasta el siguiente tap. Una línea que gatea todos los hover del
+  // repo; el `:active` de `.btn`/`.pressable` es lo que da feedback en táctil.
+  future: {
+    hoverOnlyWhenSupported: true,
+  },
   theme: {
     extend: {
       colors: {

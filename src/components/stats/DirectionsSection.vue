@@ -6,7 +6,7 @@
                 <button
                     v-for="f in DIRECTION_FAMILIES"
                     :key="f.key"
-                    class="shrink-0 rounded-full px-3 py-1.5 text-xs border transition-colors"
+                    class="shrink-0 rounded-full px-3 py-1.5 text-xs border pressable"
                     :class="directionsFamily === f.key
                         ? 'bg-white text-slate-900 border-white font-semibold'
                         : 'border-white/10 bg-white/[0.04] text-slate-300 hover:border-white/30'"
@@ -17,7 +17,7 @@
             </div>
             <div class="flex items-center gap-1.5 ml-auto">
                 <button
-                    class="shrink-0 rounded-full px-3 py-1.5 text-xs border transition-colors"
+                    class="shrink-0 rounded-full px-3 py-1.5 text-xs border pressable"
                     :class="directionsSide === 'us'
                         ? 'bg-white text-slate-900 border-white font-semibold'
                         : 'border-white/10 bg-white/[0.04] text-slate-300 hover:border-white/30'"
@@ -26,7 +26,7 @@
                     {{ $t('team.directionsUs') }}
                 </button>
                 <button
-                    class="shrink-0 rounded-full px-3 py-1.5 text-xs border transition-colors"
+                    class="shrink-0 rounded-full px-3 py-1.5 text-xs border pressable"
                     :class="directionsSide === 'rival'
                         ? 'bg-white text-slate-900 border-white font-semibold'
                         : 'border-white/10 bg-white/[0.04] text-slate-300 hover:border-white/30'"
@@ -38,7 +38,7 @@
         </div>
         <div v-if="directionsSide === 'us' && rosterPlayers.length" class="flex items-center gap-2 overflow-x-auto pb-1 mb-3">
             <button
-                class="shrink-0 rounded-full px-3 py-1.5 text-xs border transition-colors"
+                class="shrink-0 rounded-full px-3 py-1.5 text-xs border pressable"
                 :class="directionsPlayerId === 'all'
                     ? 'bg-white text-slate-900 border-white font-semibold'
                     : 'border-white/10 bg-white/[0.04] text-slate-300 hover:border-white/30'"
@@ -49,7 +49,7 @@
             <button
                 v-for="p in rosterPlayers"
                 :key="p.id"
-                class="shrink-0 rounded-full px-3 py-1.5 text-xs border transition-colors"
+                class="shrink-0 rounded-full px-3 py-1.5 text-xs border pressable"
                 :class="directionsPlayerId === p.id
                     ? 'bg-white text-slate-900 border-white font-semibold'
                     : 'border-white/10 bg-white/[0.04] text-slate-300 hover:border-white/30'"

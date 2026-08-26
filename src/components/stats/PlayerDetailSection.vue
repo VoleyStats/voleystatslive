@@ -13,7 +13,7 @@
                 <button
                     v-for="p in rosterPlayers"
                     :key="p.id"
-                    class="shrink-0 rounded-full px-3 py-1.5 text-xs border transition-colors"
+                    class="shrink-0 rounded-full px-3 py-1.5 text-xs border pressable"
                     :class="currentPlayerId === p.id
                         ? 'bg-white text-slate-900 border-white font-semibold'
                         : 'border-white/10 bg-white/[0.04] text-slate-300 hover:border-white/30'"
@@ -122,7 +122,7 @@
                 <button
                     v-for="f in DIRECTION_FAMILIES"
                     :key="f.key"
-                    class="shrink-0 rounded-full px-3 py-1.5 text-xs border transition-colors"
+                    class="shrink-0 rounded-full px-3 py-1.5 text-xs border pressable"
                     :class="directionsFamily === f.key
                         ? 'bg-white text-slate-900 border-white font-semibold'
                         : 'border-white/10 bg-white/[0.04] text-slate-300 hover:border-white/30'"
@@ -182,6 +182,7 @@ import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import VueApexCharts from "vue3-apexcharts";
 import type { ApexOptions } from "apexcharts";
+import { CHART_ANIMATIONS_ENTRY, CHART_ANIMATIONS_OFF } from "../../utils/chartMotion";
 import CourtMap from "../CourtMap.vue";
 import EmptyState from "../EmptyState.vue";
 import { SERVE_TABLE_IDS } from "../../utils/teamTables";
@@ -211,18 +212,29 @@ import {
     type StatDoc,
 } from "../../utils/volleyStats";
 
-const props = defineProps<{
-    stats: StatDoc[];
-    allStats?: StatDoc[];
-    derivedKills: Set<StatDoc>;
-    derivedAces: Set<StatDoc>;
-    creditedBy?: Map<StatDoc, StatDoc>;
-    matchGroups?: StatDoc[][];
-    nSets?: number;
-    set?: number;
-}>();
+const props = withDefaults(
+    defineProps<{
+        stats: StatDoc[];
+        allStats?: StatDoc[];
+        derivedKills: Set<StatDoc>;
+        derivedAces: Set<StatDoc>;
+        creditedBy?: Map<StatDoc, StatDoc>;
+        matchGroups?: StatDoc[][];
+        nSets?: number;
+        set?: number;
+        /** Los datos de entrada se repintan en vivo (`onSnapshot`). */
+        liveUpdating?: boolean;
+    }>(),
+    { liveUpdating: false }
+);
 
 const { t } = useI18n();
+
+// Animación de las gráficas: en /stats/:id esta pestaña solo existe con el
+// partido terminado (informe estático) y conserva una entrada corta; en
+// /team/:id el agregado puede llevar un partido en directo dentro, y entonces
+// el padre pide apagarla. Ver `utils/chartMotion.ts`.
+const chartAnimations = computed(() => (props.liveUpdating ? CHART_ANIMATIONS_OFF : CHART_ANIMATIONS_ENTRY));
 
 // Selección global de jugadora — expuesta como `v-model:player-id` para que
 // el padre pueda mantenerla viva entre cambios de pestaña (las pestañas se
@@ -339,7 +351,7 @@ const radarValues = computed(() =>
 const radarChart = computed(() => ({
     series: [{ name: currentPlayer.value?.name ?? "", data: RADAR_AXIS_ORDER.map((k) => radarValues.value[k]) }],
     chartOptions: <ApexOptions>{
-        chart: { type: "radar", toolbar: { show: false }, background: "transparent" },
+        chart: { type: "radar", toolbar: { show: false }, background: "transparent", animations: chartAnimations.value },
         xaxis: { categories: radarAxisLabels.value, labels: { style: { colors: Array(5).fill("#94a3b8"), fontSize: "11px" } } },
         yaxis: { show: false, min: 0, max: 100 },
         plotOptions: { radar: { polygons: { strokeColors: "rgba(255,255,255,0.08)", connectorColors: "rgba(255,255,255,0.08)" } } },
@@ -382,7 +394,7 @@ const techniqueRows = computed(() =>
 const techniqueChart = computed(() => ({
     series: techniqueRows.value.map((r) => r.attempts),
     chartOptions: <ApexOptions>{
-        chart: { type: "donut", background: "transparent" },
+        chart: { type: "donut", background: "transparent", animations: chartAnimations.value },
         labels: techniqueRows.value.map((r) => r.label),
         colors: techniqueRows.value.map((r) => TECHNIQUE_COLORS[r.key] ?? "#94a3b8"),
         legend: { labels: { colors: "#cbd5e1" }, position: "bottom" },
@@ -415,7 +427,7 @@ const receptionGradeRows = computed(() =>
 const receptionGradeChart = computed(() => ({
     series: receptionGradeRows.value.map((r) => r.attempts),
     chartOptions: <ApexOptions>{
-        chart: { type: "donut", background: "transparent" },
+        chart: { type: "donut", background: "transparent", animations: chartAnimations.value },
         labels: receptionGradeRows.value.map((r) => r.label),
         colors: receptionGradeRows.value.map((r) => GRADE_COLORS[r.grade]),
         legend: { labels: { colors: "#cbd5e1" }, position: "bottom" },
@@ -444,7 +456,7 @@ const serveDistribution = computed(() =>
 const serveDistChart = computed(() => ({
     series: serveDistribution.value.map((r) => r.n),
     chartOptions: <ApexOptions>{
-        chart: { type: "donut", background: "transparent" },
+        chart: { type: "donut", background: "transparent", animations: chartAnimations.value },
         labels: serveDistribution.value.map((r) => r.label),
         colors: serveDistribution.value.map((r) => r.color),
         legend: { labels: { colors: "#cbd5e1" }, position: "bottom" },
@@ -464,7 +476,7 @@ const receptionDistribution = computed(() =>
 const receptionDistChart = computed(() => ({
     series: receptionDistribution.value.map((r) => r.n),
     chartOptions: <ApexOptions>{
-        chart: { type: "donut", background: "transparent" },
+        chart: { type: "donut", background: "transparent", animations: chartAnimations.value },
         labels: receptionDistribution.value.map((r) => r.label),
         colors: receptionDistribution.value.map((r) => r.color),
         legend: { labels: { colors: "#cbd5e1" }, position: "bottom" },
