@@ -1,32 +1,47 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!-- `lastmod` se mantiene A MANO: pon la fecha real en que cambió el
+     contenido de esa página, no la del despliegue. Google ignora (y
+     desconfía de) los sitemaps que actualizan lastmod en cada build sin
+     que la página haya cambiado, y aquí lastmod es justo la señal que
+     necesitamos que se crea: el rastreo de este dominio es lento y es lo
+     único que le dice que merece la pena volver.
+     Al añadir una ruta estática indexable, añádela también a `router.ts`,
+     a `ROUTES` de `scripts/prerender-head.mjs` y al nav del <noscript> de
+     `index.html`. -->
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://voleystats.vercel.app/</loc>
+    <lastmod>2026-08-28</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
     <loc>https://voleystats.vercel.app/team-code</loc>
+    <lastmod>2026-08-28</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://voleystats.vercel.app/contact</loc>
+    <lastmod>2026-08-28</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.4</priority>
   </url>
   <url>
     <loc>https://voleystats.vercel.app/privacy</loc>
+    <lastmod>2026-08-28</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
     <loc>https://voleystats.vercel.app/terms</loc>
+    <lastmod>2026-08-28</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
     <loc>https://voleystats.vercel.app/delete-account</loc>
+    <lastmod>2026-08-28</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
