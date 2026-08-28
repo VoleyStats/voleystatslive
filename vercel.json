@@ -1,10 +1,14 @@
 {
-  "cleanUrls": true,
+  "redirects": [
+    { "source": "/(team-code|privacy|terms|delete-account|contact).html", "destination": "/$1", "permanent": true }
+  ],
   "rewrites": [
-    {
-      "source": "/(.*)",
-      "destination": "/index.html"
-    }
+    { "source": "/team-code", "destination": "/team-code.html" },
+    { "source": "/privacy", "destination": "/privacy.html" },
+    { "source": "/terms", "destination": "/terms.html" },
+    { "source": "/delete-account", "destination": "/delete-account.html" },
+    { "source": "/contact", "destination": "/contact.html" },
+    { "source": "/(.*)", "destination": "/index.html" }
   ],
   "headers": [
     {
