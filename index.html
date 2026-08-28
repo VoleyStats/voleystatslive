@@ -268,10 +268,33 @@
           de voleibol. Anota cada acción del partido —incluso sin conexión—,
           sigue el marcador y las estadísticas en directo desde esta web,
           analiza cada set por fases y jugadoras y genera informes de scouting.
-          Descárgala en el App Store:
-          https://apps.apple.com/us/app/voley-stats/id6737778450 .
           Activa JavaScript para usar la web.
         </p>
+        <p>
+          <a href="https://apps.apple.com/us/app/voley-stats/id6737778450" style="color:#7dd3fc">Descargar Voley Stats en el App Store</a>
+        </p>
+        <!-- Grafo de enlaces para rastreadores. TODOS los enlaces internos del
+             sitio viven dentro de componentes Vue (`RouterLink`), así que el
+             HTML servido no tenía ni un solo <a href>: Search Console reportaba
+             /team-code como "Google no reconoce esta URL — no se ha detectado
+             ninguna página de referencia", es decir jamás rastreada. Google sí
+             renderiza JS, pero eso va a una cola diferida que en un dominio sin
+             autoridad puede no llegar nunca, y los rastreadores de IA no
+             renderizan en absoluto. Estos enlaces son la única vía de
+             descubrimiento que no depende de ejecutar JavaScript.
+             Al añadir una ruta estática indexable, añádela también aquí (y en
+             `scripts/prerender-head.mjs` y `public/sitemap.xml`). -->
+        <nav>
+          <h2>Secciones</h2>
+          <ul>
+            <li><a href="/" style="color:#7dd3fc">Inicio: qué es Voley Stats</a></li>
+            <li><a href="/team-code" style="color:#7dd3fc">Ver estadísticas en directo con el código del equipo</a></li>
+            <li><a href="/contact" style="color:#7dd3fc">Contacto</a></li>
+            <li><a href="/privacy" style="color:#7dd3fc">Política de privacidad</a></li>
+            <li><a href="/terms" style="color:#7dd3fc">Condiciones de uso</a></li>
+            <li><a href="/delete-account" style="color:#7dd3fc">Eliminar cuenta</a></li>
+          </ul>
+        </nav>
       </div>
     </noscript>
     <script type="module" src="/src/main.ts"></script>
