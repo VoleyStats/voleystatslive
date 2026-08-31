@@ -193,15 +193,7 @@
           {{ $t('home.download.text') }}
         </p>
         <div class="mt-8 flex flex-wrap justify-center gap-3">
-          <a
-            href="https://apps.apple.com/us/app/voley-stats/id6737778450"
-            target="_blank"
-            rel="noopener"
-            class="btn-primary text-base"
-          >
-            <i class="bi bi-apple text-lg"></i>
-            {{ $t('home.download.appStore') }}
-          </a>
+          <StoreButtons />
           <RouterLink to="/team-code" class="btn-ghost text-base">
             {{ $t('home.download.web') }}
           </RouterLink>
@@ -263,6 +255,7 @@
 </template>
 
 <script lang="ts" setup>
+import StoreButtons from "../components/StoreButtons.vue";
 import { computed, onMounted, onBeforeUnmount, ref } from "vue";
 import { RouterLink } from "vue-router";
 import { useI18n } from "vue-i18n";
@@ -387,6 +380,12 @@ const appFeatures = computed(() => [
   { icon: "bi-bell", title: t("home.features.f9Title"), description: t("home.features.f9Text") },
   { icon: "bi-hourglass-split", title: t("home.features.f10Title"), description: t("home.features.f10Text") },
   { icon: "bi-person-vcard", title: t("home.features.f11Title"), description: t("home.features.f11Text") },
+  { icon: "bi-grid-3x3", title: t("home.features.f12Title"), description: t("home.features.f12Text") },
+  { icon: "bi-broadcast", title: t("home.features.f13Title"), description: t("home.features.f13Text") },
+  { icon: "bi-people", title: t("home.features.f14Title"), description: t("home.features.f14Text") },
+  { icon: "bi-cloud-arrow-up", title: t("home.features.f15Title"), description: t("home.features.f15Text") },
+  { icon: "bi-hand-index", title: t("home.features.f16Title"), description: t("home.features.f16Text") },
+  { icon: "bi-calendar-check", title: t("home.features.f17Title"), description: t("home.features.f17Text") },
 ]);
 
 const faqs = computed(() =>

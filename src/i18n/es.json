@@ -1,8 +1,8 @@
 {
   "seo": {
     "home": {
-      "title": "Voley Stats — App de estadísticas de voleibol en directo para iPad",
-      "description": "App de estadísticas de voleibol para iPad. Anota el partido incluso sin conexión, comparte las estadísticas en directo y analiza cada set. Gratis para empezar."
+      "title": "Voley Stats — App de estadísticas de voleibol en directo para iPad y Android",
+      "description": "App de estadísticas de voleibol para iPad y Android. Anota el partido incluso sin conexión, comparte las estadísticas en directo y analiza cada set. Gratis para empezar."
     },
     "teamCode": {
       "title": "Estadísticas de voleibol en directo por código — Voley Stats",
@@ -65,7 +65,7 @@
       "eyebrow": "Voleibol · Analítica en tiempo real",
       "titleStart": "Las estadísticas de tu equipo,",
       "titleHighlight": "en directo",
-      "subtitle": "Anota el partido desde el iPad mientras diriges —incluso sin conexión—, comparte el marcador y las estadísticas en directo y analiza cada set a fondo al terminar. Adiós a las planillas de papel.",
+      "subtitle": "Anota el partido desde la tablet mientras diriges —incluso sin conexión—, comparte el marcador y las estadísticas en directo y analiza cada set a fondo al terminar. Adiós a las planillas de papel.",
       "download": "Descargar app",
       "watchLive": "Ver estadísticas en vivo",
       "stat1Value": "6",
@@ -85,7 +85,7 @@
     "product": {
       "eyebrow": "El producto",
       "title": "Controla el partido al completo",
-      "text": "Anota cada acción con la rejilla rápida, pensada para que una sola persona pueda entrenar y anotar a la vez, o directamente sobre el mapa de la pista con el Rally Map (disponible en el plan Normal), con las trayectorias de ataque y saque. Tú eliges el detalle: cada toque o solo las acciones que acaban en punto. Y los cambios los decides con datos, no con intuición.",
+      "text": "Anota cada acción con la rejilla rápida, pensada para que una sola persona pueda entrenar y anotar a la vez, o directamente sobre el mapa de la pista con el Rally Map (disponible en el plan Análisis), con las trayectorias de ataque y saque. Tú eliges el detalle: cada toque o solo las acciones que acaban en punto. Y los cambios los decides con datos, no con intuición.",
       "point1": "Marcador, rotación y sacador se actualizan solos.",
       "point2": "Detección automática de rachas de aciertos y errores.",
       "point3": "Desglose por jugador y por área del campo.",
@@ -101,18 +101,18 @@
       "title": "De la cancha al informe en tres pasos",
       "subtitle": "Sin curva de aprendizaje. Empieza a registrar en tu primer partido.",
       "step1Title": "Registra las acciones",
-      "step1Text": "Anota cada jugada desde el iPad con la rejilla rápida o sobre el mapa de la pista, con cambios, tiempos muertos y recepción valorada. Funciona sin conexión, en cualquier pabellón.",
+      "step1Text": "Anota cada jugada desde la tablet con la rejilla rápida o sobre el mapa de la pista, con cambios, tiempos muertos y recepción valorada. Funciona sin conexión, en cualquier pabellón.",
       "step2Title": "Sigue el directo",
-      "step2Text": "Con el plan Pro o un match pass, comparte el código del partido y emite el marcador y las estadísticas en directo. Verlo desde la web es siempre gratis para quien reciba el código.",
+      "step2Text": "Con el plan Análisis Live o un match pass, comparte el código del partido y emite el marcador y las estadísticas en directo. Verlo desde la web es siempre gratis para quien reciba el código.",
       "step3Title": "Analiza el informe",
-      "step3Text": "Al terminar tienes el informe completo del partido: side-out y break, rotaciones, mapas de ataque (si capturaste con Rally Map) y mucho más. Con el plan Normal, expórtalo en PDF para revisarlo con el equipo."
+      "step3Text": "Al terminar tienes el informe completo del partido: side-out y break, rotaciones, mapas de ataque (si capturaste con Rally Map) y mucho más. Con el plan Análisis, expórtalo en PDF para revisarlo con el equipo."
     },
     "features": {
       "eyebrow": "Funciones",
       "title": "Todo lo que necesita tu cuerpo técnico",
       "subtitle": "Herramientas pensadas para entrenadores, analistas y jugadores.",
       "f1Title": "Marcador en vivo",
-      "f1Text": "Sigue el resultado set a set y la evolución del partido en tiempo real desde cualquier dispositivo. Emitir el directo es una función del plan Pro (o de un match pass); verlo es siempre gratis.",
+      "f1Text": "Sigue el resultado set a set y la evolución del partido en tiempo real desde cualquier dispositivo. Emitir el directo es una función del plan Análisis Live (o de un match pass); verlo es siempre gratis.",
       "f2Title": "Estadísticas por jugador",
       "f2Text": "Evalúa el rendimiento individual en cada área y encuentra los puntos fuertes de tu plantilla.",
       "f3Title": "Análisis por fases",
@@ -120,7 +120,7 @@
       "f4Title": "Curva de registro",
       "f4Text": "Visualiza las rachas de puntos y errores para entender los momentos clave de cada set.",
       "f5Title": "Informes en PDF",
-      "f5Text": "Con el plan Normal, exporta informes de partido y de temporada en PDF para compartir con tu cuerpo técnico y jugadoras.",
+      "f5Text": "Con el plan Análisis, exporta informes de partido y de temporada en PDF para compartir con tu cuerpo técnico y jugadoras.",
       "f6Title": "Acceso por código",
       "f6Text": "Comparte un simple código y todo el equipo consulta las estadísticas online, sin registros complejos.",
       "f7Title": "Scouting de rivales",
@@ -132,11 +132,23 @@
       "f10Title": "Resumen entre sets",
       "f10Text": "Un panel pensado para los 3 minutos de descanso: fases, rotaciones, tendencias del rival y las claves del siguiente set en lenguaje claro.",
       "f11Title": "Fichas de jugadora",
-      "f11Text": "Con el plan Normal, cada jugadora tiene una ficha completa: radar de habilidades, ataque, saque-recepción y evolución física, dentro del panel de temporada."
+      "f11Text": "Con el plan Análisis, cada jugadora tiene una ficha completa: radar de habilidades, ataque, saque-recepción y evolución física, dentro del panel de temporada.",
+      "f12Title": "Rally Map",
+      "f12Text": "Anota cada balón tocando la pista: origen, destino, bloqueo y faltas. La calidad de recepción y defensa se deduce de dónde cae. Disponible con el plan Análisis.",
+      "f13Title": "Overlay para retransmisiones",
+      "f13Text": "Superpón el marcador en directo sobre tu emisión de YouTube o Twitch con OBS, con los colores y los rótulos de tu equipo. Función del plan Análisis Live.",
+      "f14Title": "Equipo compartido",
+      "f14Text": "Invita a tu cuerpo técnico con un QR y reparte permisos: quien puede anotar, quien solo consulta. La plantilla y las fotos se comparten entre todas las cuentas.",
+      "f15Title": "Sincronización y copia de seguridad",
+      "f15Text": "Tus equipos y partidos viajan entre tus dispositivos y quedan respaldados en la nube. Puedes restaurarlos en cualquier momento, también entre iPad y Android.",
+      "f16Title": "Atajos a tu medida",
+      "f16Text": "Desliza o haz doble toque sobre la tarjeta de una jugadora para anotar tus acciones más frecuentes de un solo gesto, y elige qué hace cada uno.",
+      "f17Title": "Plantilla y convocatorias",
+      "f17Text": "Ficha de cada jugadora con foto, dorsal, posición y medidas, convocatoria por partido y vista de calendario para toda la temporada."
     },
     "download": {
       "title": "Lleva a tu equipo al siguiente nivel",
-      "text": "Descarga Voley Stats para iPad y anota tu próximo partido gratis. Pásate al plan Normal cuando quieras el histórico de temporada, los informes en PDF y la copia en la nube, o al plan Pro para compartir tus partidos en directo.",
+      "text": "Descarga Voley Stats para iPad o Android y anota tu próximo partido gratis. Pásate al plan Análisis cuando quieras el histórico de temporada, los informes en PDF y la copia en la nube, o al plan Análisis Live para compartir tus partidos en directo.",
       "appStore": "App Store",
       "web": "Consultar en la web"
     },
@@ -145,17 +157,17 @@
       "title": "¿Tienes dudas?",
       "subtitle": "Y si no encuentras tu respuesta, escríbenos a voleystats{'@'}gmail.com y te ayudamos.",
       "q1": "¿Qué es Voley Stats Live?",
-      "a1": "Es la web en directo de Voley Stats, la app de iPad para capturar y analizar estadísticas de voleibol. Anotas cada acción del partido desde la app y cualquiera puede seguir el marcador y las estadísticas en vivo desde esta web, gratis y sin registrarse.",
+      "a1": "Es la web en directo de Voley Stats, la app para iPad y Android con la que se capturan y analizan estadísticas de voleibol. Anotas cada acción del partido desde la app y cualquiera puede seguir el marcador y las estadísticas en vivo desde esta web, gratis y sin registrarse.",
       "q2": "¿Cómo consulto las estadísticas de mi equipo online?",
       "a2": "Entra en la sección 'Ver en vivo', introduce el código de tu equipo y accede al marcador y a las estadísticas del partido en directo, con desglose por set y por jugador.",
       "q3": "¿Qué estadísticas puedo registrar?",
       "a3": "Todo lo que pasa en la pista: cada toque o solo las acciones que acaban en punto, trayectorias de ataque y saque sobre el mapa de la pista, recepción valorada en 4 niveles, calidad de saque, juego por fases K1/K2, cambios y tiempos muertos. El marcador, la rotación y el sacador se actualizan solos.",
       "q4": "¿Puedo descargar un informe del partido?",
-      "a4": "Sí. Al terminar el partido la app genera un informe completo: side-out y break, origen de los puntos, rotaciones, ataque por fase y por calidad de pase, conexiones colocadora-atacante, errores no forzados y mapas de ataque (si capturaste ese partido con Rally Map). Exportarlo en PDF está disponible con el plan Normal o con un match pass para ese partido.",
+      "a4": "Sí. Al terminar el partido la app genera un informe completo: side-out y break, origen de los puntos, rotaciones, ataque por fase y por calidad de pase, conexiones colocadora-atacante, errores no forzados y mapas de ataque (si capturaste ese partido con Rally Map). Exportarlo en PDF está disponible con el plan Análisis o con un match pass para ese partido.",
       "q5": "¿Necesito conexión a internet?",
-      "a5": "No para anotar: la app funciona completamente sin conexión, así que puedes capturar y consultar estadísticas en cualquier pabellón. Solo necesitas internet para compartir el directo en esta web, y para el overlay para OBS o la página pública del equipo (ambos del plan Pro), o para la copia de seguridad en la nube (plan Normal).",
+      "a5": "No para anotar: la app funciona completamente sin conexión, así que puedes capturar y consultar estadísticas en cualquier pabellón. Solo necesitas internet para compartir el directo en esta web, y para el overlay para OBS o la página pública del equipo (ambos del plan Análisis Live), o para la copia de seguridad en la nube (plan Análisis).",
       "q6": "¿Cuánto cuesta?",
-      "a6": "Descargar la app y anotar tus partidos —captura completa y estadísticas de cada partido y set— es gratis. El plan Normal (19,99 €/año o 3,99 €/mes) añade Rally Map, el histórico del equipo y las estadísticas de temporada con filtros, informes en PDF, sincronización multi-dispositivo, copia de seguridad en la nube, exportación de equipo/torneo y compartir el equipo con otros entrenadores. El plan Pro (34,99 €/año o 6,99 €/mes) suma compartir partidos en directo, el overlay para OBS y la página pública del equipo. También hay un match pass de 2,99 € para desbloquear el directo, el Rally Map y el informe en PDF de un solo partido, sin suscripción. Ver los directos desde la web es siempre gratis para quien recibe el código."
+      "a6": "Descargar la app y anotar tus partidos —captura completa y estadísticas de cada partido y set— es gratis. El plan Análisis (19,99 €/año o 3,99 €/mes) añade Rally Map, el histórico del equipo y las estadísticas de temporada con filtros, informes en PDF, sincronización multi-dispositivo, copia de seguridad en la nube, exportación de equipo/torneo y compartir el equipo con otros entrenadores. El plan Análisis Live (34,99 €/año o 6,99 €/mes) suma compartir partidos en directo, el overlay para OBS y la página pública del equipo. También hay un match pass de 2,99 € para desbloquear el directo, el Rally Map y el informe en PDF de un solo partido, sin suscripción. Ver los directos desde la web es siempre gratis para quien recibe el código."
     }
   },
   "overlay": {
@@ -196,7 +208,7 @@
     "back": "Volver al inicio",
     "explain": {
       "title": "¿Qué es el código del partido?",
-      "intro": "Cada partido que se comparte en directo desde la app de iPad genera un código único. Quien está anotando —normalmente el entrenador o alguien del cuerpo técnico— lo reparte por WhatsApp, lo enseña como QR o pasa el enlace de la página del equipo. Con cualquiera de los tres entras al marcador y a las estadísticas en vivo, sin cuenta y sin instalar nada.",
+      "intro": "Cada partido que se comparte en directo desde la app genera un código único. Quien está anotando —normalmente el entrenador o alguien del cuerpo técnico— lo reparte por WhatsApp, lo enseña como QR o pasa el enlace de la página del equipo. Con cualquiera de los tres entras al marcador y a las estadísticas en vivo, sin cuenta y sin instalar nada.",
       "steps": [
         {
           "title": "Pide el código a tu equipo",
@@ -212,8 +224,8 @@
         }
       ],
       "freeTitle": "Gratis y sin registro",
-      "freeText": "Ver las estadísticas en directo no cuesta nada ni exige crear una cuenta. Solo quien captura el partido necesita la app de iPad y un plan que incluya el directo.",
-      "appCta": "¿Eres tú quien anota los partidos? Descarga Voley Stats para iPad"
+      "freeText": "Ver las estadísticas en directo no cuesta nada ni exige crear una cuenta. Solo quien captura el partido necesita la app —en iPad o en Android— y un plan que incluya el directo.",
+      "appCta": "¿Eres tú quien anota los partidos? Descarga Voley Stats"
     }
   },
   "stats": {
@@ -476,13 +488,13 @@
     "sections": [
       {
         "paragraphs": [
-          "Esta política explica qué datos trata la app Voley Stats para iPad y esta web (voleystats.vercel.app), y cómo los protegemos."
+          "Esta política explica qué datos trata la app Voley Stats para iPad y Android y esta web (voleystats.vercel.app), y cómo los protegemos."
         ]
       },
       {
         "heading": "Responsable del tratamiento",
         "paragraphs": [
-          "Voley Stats está desarrollada por Pau Hermosilla, desarrollador individual. Para cualquier cuestión sobre privacidad puedes escribir a voleystats{'@'}gmail.com."
+          "Voley Stats está desarrollada por Pau Hermosilla. Para cualquier cuestión sobre privacidad puedes escribir a voleystats{'@'}gmail.com."
         ]
       },
       {
@@ -515,9 +527,17 @@
         ]
       },
       {
+        "heading": "Cookies y almacenamiento local",
+        "paragraphs": [
+          "Esta web no utiliza cookies. Tampoco usamos analítica, publicidad ni ningún servicio de terceros que rastree tu navegación, así que no hay nada que consentir y no verás ningún aviso de cookies.",
+          "Lo único que guardamos en tu navegador es almacenamiento local (localStorage) con una función estrictamente técnica: recordar el idioma que elegiste y guardar en caché las estadísticas de los partidos que consultas, para que la página no tenga que descargarlas otra vez. Esos datos no salen de tu dispositivo, no permiten identificarte y puedes borrarlos vaciando los datos del sitio en tu navegador."
+        ]
+      },
+      {
         "heading": "Conservación y eliminación",
         "paragraphs": [
-          "Conservamos los datos de tu cuenta mientras esta exista. Puedes eliminarla, junto con tus copias de seguridad y datos sincronizados, en cualquier momento — consulta cómo hacerlo en Eliminar cuenta (voleystats.vercel.app/delete-account)."
+          "Conservamos los datos de tu cuenta mientras esta exista. Puedes eliminarla, junto con tus copias de seguridad y datos sincronizados, en cualquier momento — consulta cómo hacerlo en Eliminar cuenta (voleystats.vercel.app/delete-account).",
+          "Las estadísticas que publicas en directo se conservan mientras el equipo exista en la app: así puedes consultar el histórico de temporadas anteriores desde esta web. Cuando eliminas un equipo, sus partidos publicados y su página pública se borran automáticamente."
         ]
       },
       {
@@ -586,7 +606,7 @@
       {
         "heading": "1. Quiénes somos y objeto",
         "paragraphs": [
-          "Voley Stats es una app para iPad, disponible en el App Store, para capturar y analizar estadísticas de voleibol. Esta web (voleystats.vercel.app) permite seguir partidos en directo y consultar informes y estadísticas compartidas desde la app. Estas condiciones regulan el uso de ambas."
+          "Voley Stats es una app para iPad y Android, disponible en el App Store y en Google Play, para capturar y analizar estadísticas de voleibol. Esta web (voleystats.vercel.app) permite seguir partidos en directo y consultar informes y estadísticas compartidas desde la app. Estas condiciones regulan el uso de ambas."
         ]
       },
       {
@@ -598,7 +618,7 @@
       {
         "heading": "3. La app",
         "paragraphs": [
-          "Te concedemos una licencia de uso personal, no exclusiva e intransferible para utilizar la app. La app ofrece suscripciones (los planes Normal y Pro) y un pase de partido de compra única, gestionados a través del App Store de Apple y sujetos a sus condiciones. A la app le aplica el EULA estándar de Apple."
+          "Te concedemos una licencia de uso personal, no exclusiva e intransferible para utilizar la app. La app ofrece suscripciones (los planes Análisis y Análisis Live) y un pase de partido de compra única, gestionados a través del App Store de Apple o de Google Play según la plataforma, y sujetos a sus condiciones. A la app le aplica el EULA estándar de Apple en iPad."
         ]
       },
       {
@@ -680,5 +700,9 @@
         "link": "Leer la política de privacidad"
       }
     }
+  },
+  "common": {
+    "appStore": "App Store",
+    "googlePlay": "Google Play"
   }
 }

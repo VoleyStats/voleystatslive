@@ -76,19 +76,17 @@
         <p class="mt-1.5 text-sm leading-relaxed text-slate-400">
           {{ $t('teamCode.explain.freeText') }}
         </p>
-        <a
-          href="https://apps.apple.com/us/app/voley-stats/id6737778450"
-          class="mt-4 inline-flex items-center gap-1.5 text-sm text-brand-300 hover:text-brand-200 transition"
-        >
-          {{ $t('teamCode.explain.appCta') }}
-          <i class="bi bi-arrow-right"></i>
-        </a>
+        <p class="mt-4 text-sm text-slate-400">{{ $t('teamCode.explain.appCta') }}</p>
+        <div class="mt-3 flex flex-wrap gap-2">
+          <StoreButtons variant="ghost" size="sm" />
+        </div>
       </div>
     </div>
   </section>
 </template>
 
 <script lang="ts" setup>
+import StoreButtons from "../components/StoreButtons.vue";
 import { ref } from "vue";
 import { RouterLink, useRouter } from "vue-router";
 

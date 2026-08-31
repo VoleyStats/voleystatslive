@@ -20,7 +20,7 @@
 // OJO: esto prerenderiza el HEAD, no el BODY. Google (que ejecuta JS) ya no
 // tiene excusa para no indexar; los rastreadores de IA siguen viendo el body
 // vacío + `llms.txt`. Para eso haría falta SSG real (vite-ssg).
-import { readFileSync, writeFileSync } from 'node:fs'
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -39,7 +39,14 @@ const ROUTES = [
 ]
 
 const template = readFileSync(resolve(root, 'dist/index.html'), 'utf8')
-const seo = JSON.parse(readFileSync(resolve(root, 'src/i18n/es.json'), 'utf8')).seo
+const seoByLocale = {
+  es: JSON.parse(readFileSync(resolve(root, 'src/i18n/es.json'), 'utf8')).seo,
+  en: JSON.parse(readFileSync(resolve(root, 'src/i18n/en.json'), 'utf8')).seo,
+}
+// La portada tambien se prerenderiza: es la unica ruta estatica que no estaba
+// en ROUTES porque ya la emite Vite como `index.html`, pero necesita su
+// `hreflang` igual que las demas.
+const ALL = [{ path: '/', file: 'index.html', seo: 'home' }, ...ROUTES]
 
 // Falla ruidosamente: si alguien reescribe el head de `index.html` y una de
 // estas etiquetas deja de existir, prefiero romper el build a publicar en
@@ -51,17 +58,32 @@ function replace(html, pattern, replacement, label, file) {
 
 const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;')
 
-for (const route of ROUTES) {
+// El ingles vive bajo `/en` (ver src/router.ts): mismas paginas, otra URL, y
+// cada una declarando a la otra con `hreflang`. Sin esto las dos versiones
+// comparten direccion y el buscador solo ve una.
+const localePath = (locale, path) => (locale === 'es' ? path : path === '/' ? '/en' : `/en${path}`)
+
+for (const locale of ['es', 'en']) {
+for (const route of ALL) {
+  const seo = seoByLocale[locale]
   const entry = seo[route.seo]
-  if (!entry) throw new Error(`prerender: falta seo.${route.seo} en src/i18n/es.json`)
-  const url = ORIGIN + route.path
+  if (!entry) throw new Error(`prerender: falta seo.${route.seo} en src/i18n/${locale}.json`)
+  const path = localePath(locale, route.path)
+  const url = ORIGIN + path
+  const alternates = [
+    `<link rel="alternate" hreflang="es" href="${ORIGIN}${localePath('es', route.path)}" />`,
+    `<link rel="alternate" hreflang="en" href="${ORIGIN}${localePath('en', route.path)}" />`,
+    `<link rel="alternate" hreflang="x-default" href="${ORIGIN}${localePath('es', route.path)}" />`,
+  ].join('\n    ')
   const title = esc(entry.title)
   const description = esc(entry.description)
 
   let html = template
   html = replace(html, /<title>[\s\S]*?<\/title>/, `<title>${title}</title>`, '<title>', route.file)
   html = replace(html, /<meta\s+name="description"[\s\S]*?\/>/, `<meta name="description" content="${description}" />`, 'meta description', route.file)
-  html = replace(html, /<link rel="canonical"[^>]*>/, `<link rel="canonical" href="${url}" />`, 'canonical', route.file)
+  html = replace(html, /<link rel="canonical"[^>]*>/, `<link rel="canonical" href="${url}" />\n    ${alternates}`, 'canonical', route.file)
+  html = replace(html, /<html lang="[a-z-]+"/, `<html lang="${locale}"`, '<html lang>', route.file)
+  html = html.replace(/<meta property="og:locale" content="[^"]*"/, `<meta property="og:locale" content="${locale === 'es' ? 'es_ES' : 'en_US'}"`)
   html = replace(html, /<meta property="og:title"[\s\S]*?\/>/, `<meta property="og:title" content="${title}" />`, 'og:title', route.file)
   html = replace(html, /<meta\s+property="og:description"[\s\S]*?\/>/, `<meta property="og:description" content="${description}" />`, 'og:description', route.file)
   html = replace(html, /<meta property="og:url"[^>]*>/, `<meta property="og:url" content="${url}" />`, 'og:url', route.file)
@@ -72,6 +94,9 @@ for (const route of ROUTES) {
   // en las demás páginas sería marcado de contenido que ahí no se muestra.
   html = html.replace(/\n\s*<!-- Structured data: FAQ[\s\S]*?<\/script>/, '')
 
-  writeFileSync(resolve(root, 'dist', route.file), html)
-  console.log(`prerender: dist/${route.file}  ${route.path}`)
+  const outFile = locale === 'es' ? route.file : `en/${route.file}`
+  mkdirSync(dirname(resolve(root, 'dist', outFile)), { recursive: true })
+  writeFileSync(resolve(root, 'dist', outFile), html)
+  console.log(`prerender: dist/${outFile}  ${path}`)
+}
 }

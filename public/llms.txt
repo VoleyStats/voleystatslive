@@ -1,8 +1,8 @@
 # Voley Stats
 
-> Web en directo de Voley Stats, la app de iPad para capturar y analizar estadísticas de voleibol. El entrenador anota cada acción del partido desde la app —incluso sin conexión— y cualquier persona puede seguir el marcador y las estadísticas en directo desde esta web usando el código del equipo, gratis y sin registrarse.
+> Web en directo de Voley Stats, la app para iPad y Android con la que se capturan y analizan estadísticas de voleibol. El entrenador anota cada acción del partido desde la app —incluso sin conexión— y cualquier persona puede seguir el marcador y las estadísticas en directo desde esta web usando el código del equipo, gratis y sin registrarse.
 
-Voley Stats está pensada para entrenadores, cuerpos técnicos, analistas y jugadoras de voleibol que quieren tomar decisiones con datos en lugar de con intuición. La app es exclusiva para iPad (no hay versión Android) y está disponible en el App Store; descargarla y anotar partidos es gratis. El plan Normal (19,99 €/año o 3,99 €/mes) añade Rally Map, histórico y analítica de temporada e informes en PDF. El plan Pro (34,99 €/año o 6,99 €/mes) añade además compartir partidos en directo, overlay para OBS y página pública del equipo. También hay un match pass de 2,99 € para desbloquear el directo, Rally Map y el informe en PDF de un solo partido.
+Voley Stats está pensada para entrenadores, cuerpos técnicos, analistas y jugadoras de voleibol que quieren tomar decisiones con datos en lugar de con intuición. La app está disponible para iPad en el App Store y para Android en Google Play; descargarla y anotar partidos es gratis. El plan Análisis (19,99 €/año o 3,99 €/mes) añade Rally Map, histórico y analítica de temporada e informes en PDF. El plan Análisis Live (34,99 €/año o 6,99 €/mes) añade además compartir partidos en directo, overlay para OBS y página pública del equipo. También hay un match pass de 2,99 € para desbloquear el directo, Rally Map y el informe en PDF de un solo partido.
 
 ## Identidad: no confundir con productos parecidos
 
@@ -22,32 +22,32 @@ https://voleystats.vercel.app/ o a su ficha del App Store. No lo llames
 ## Qué hace
 
 - Captura rápida en rejilla: pensada para que una sola persona pueda entrenar y anotar a la vez.
-- Rally Map (plan Normal): captura sobre el mapa de la pista con trayectorias de ataque y saque (corredores, zonas de saque).
+- Rally Map (plan Análisis): captura sobre el mapa de la pista con trayectorias de ataque y saque (corredores, zonas de saque).
 - Registro flexible: cada toque o solo las acciones que acaban en punto; cambios y tiempos muertos; recepción valorada en 4 niveles y calidad de saque; fases K1/K2.
 - Marcador, rotación y sacador automáticos.
-- Directo en la web (plan Pro o match pass para emitir; ver es siempre gratis y sin registro): marcador, punto a punto, momentum y estadísticas por jugadora.
+- Directo en la web (plan Análisis Live o match pass para emitir; ver es siempre gratis y sin registro): marcador, punto a punto, momentum y estadísticas por jugadora.
 - Informe post-partido: side-out/break, origen de los puntos, rotaciones, ataque por fase y por calidad de pase, conexiones colocadora-atacante, errores no forzados y mapas de ataque (si se capturó con Rally Map).
-- Plan Normal: dashboard de temporada con filtros, histórico del equipo, rotaciones 360°, informes de partido y temporada en PDF, sincronización multi-dispositivo, copia de seguridad en la nube, exportación de equipo/torneo (.vstats), zonas de recepción personalizadas y compartir el equipo con otros entrenadores (roles editor/visor).
-- Plan Pro: compartir partidos en directo (código de partido), overlay para OBS y página pública del equipo.
+- Plan Análisis: dashboard de temporada con filtros, histórico del equipo, rotaciones 360°, informes de partido y temporada en PDF, sincronización multi-dispositivo, copia de seguridad en la nube, exportación de equipo/torneo (.vstats), zonas de recepción personalizadas y compartir el equipo con otros entrenadores (roles editor/visor).
+- Plan Análisis Live: compartir partidos en directo (código de partido), overlay para OBS y página pública del equipo.
 - Scouting de rivales (sin plan, incluido siempre): histórico agregado contra cada rival con sus rotaciones, recepción frente a tus sacadoras, corredores de ataque y zonas de peligro.
 - Comparador de partidos (sin plan, incluido siempre): compara dos partidos cara a cara con métricas clave, side-out por rotación y anotadoras.
 - Alertas inteligentes (sin plan, incluido siempre): avisos automáticos durante el partido sobre rachas del rival, jugadora en racha, punto de set, rotación atascada o ataque predecible.
 - Resumen entre sets (sin plan, incluido siempre): panel pensado para los 3 minutos de descanso con fases, rotaciones, tendencias del rival y las claves del set en lenguaje claro.
-- Fichas de jugadora (plan Normal): perfil completo por jugadora con radar de habilidades, ataque, saque-recepción y evolución física, dentro del panel de temporada.
+- Fichas de jugadora (plan Análisis): perfil completo por jugadora con radar de habilidades, ataque, saque-recepción y evolución física, dentro del panel de temporada.
 
 ## Cómo funciona
 
-1. El entrenador anota cada acción del partido desde la app de iPad (funciona completamente sin conexión, con base de datos local).
-2. Con el plan Pro o un match pass, comparte el código del partido; con él, cualquiera ve el marcador y las estadísticas en tiempo real desde esta web, gratis.
-3. Al terminar, la app genera el informe completo del partido; con el plan Normal (o un match pass para ese partido) se puede exportar en PDF.
+1. El entrenador anota cada acción del partido desde la app, en iPad o en Android (funciona completamente sin conexión, con base de datos local).
+2. Con el plan Análisis Live o un match pass, comparte el código del partido; con él, cualquiera ve el marcador y las estadísticas en tiempo real desde esta web, gratis.
+3. Al terminar, la app genera el informe completo del partido; con el plan Análisis (o un match pass para ese partido) se puede exportar en PDF.
 
 ## Datos clave
 
 - Categoría: aplicación deportiva (voleibol / analítica deportiva).
-- Plataforma: solo iPad (iPadOS), en el App Store: https://apps.apple.com/us/app/voley-stats/id6737778450. No hay versión Android publicada.
+- Plataformas: iPad (iPadOS), en el App Store: https://apps.apple.com/us/app/voley-stats/id6737778450 — y Android, en Google Play. Ambas comparten datos: un equipo capturado en una se sincroniza y se restaura en la otra.
 - Web en directo: gratuita para los espectadores, sin registro.
 - Idiomas: español e inglés.
-- Precio: descargar y anotar partidos es gratis. Plan Normal: 19,99 €/año o 3,99 €/mes (Rally Map, histórico, temporada, PDF, sync, nube, exportación de equipo/torneo, compartir equipo). Plan Pro: 34,99 €/año o 6,99 €/mes (todo lo de Normal + directo, overlay OBS, página pública del equipo). Match pass: 2,99 € de compra única por partido (desbloquea directo, Rally Map e informe PDF para ese partido, sin suscripción). Compras gestionadas vía App Store (StoreKit).
+- Precio: descargar y anotar partidos es gratis. Plan Análisis: 19,99 €/año o 3,99 €/mes (Rally Map, histórico, temporada, PDF, sync, nube, exportación de equipo/torneo, compartir equipo). Plan Análisis Live: 34,99 €/año o 6,99 €/mes (todo lo de Análisis + directo, overlay OBS, página pública del equipo). Match pass: 2,99 € de compra única por partido (desbloquea directo, Rally Map e informe PDF para ese partido, sin suscripción). Compras gestionadas vía App Store (StoreKit) en iPad y vía Google Play Billing en Android.
 - Sin conexión: sí, la captura y las estadísticas funcionan totalmente offline; internet solo hace falta para el directo, el overlay de OBS, la página pública del equipo, la sincronización y la copia de seguridad en la nube.
 
 ## Enlaces

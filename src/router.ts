@@ -1,6 +1,7 @@
 import { createWebHistory, createRouter, RouteRecordRaw } from 'vue-router'
 
 import Home from './pages/Home.vue'
+import { i18n, setLocale, type AppLocale } from './i18n'
 
 const routes = [
   {
@@ -88,14 +89,41 @@ const routes = [
   },
 ] as RouteRecordRaw[]
 
+// SEO multi-idioma: hasta ahora las dos traducciones compartian URL y el
+// idioma se elegia en el cliente con `navigator.language`, asi que para un
+// buscador la version inglesa sencillamente no existia — media traduccion
+// invisible. Cada ruta indexable gana un gemelo bajo `/en`, que ademas fija
+// el idioma en `meta.locale`; el prerender emite su HTML con el `hreflang`
+// reciproco y el `lang` correcto (scripts/prerender-head.mjs).
+//
+// El overlay queda fuera: es una fuente de video para OBS, no una pagina que
+// nadie vaya a buscar en Google.
+const englishRoutes = routes
+  .filter((r) => !r.meta?.bare && r.path !== '/:code([A-Za-z0-9]{15,})')
+  .map((r) => ({
+    ...r,
+    path: r.path === '/' ? '/en' : `/en${r.path}`,
+    name: r.name ? `${String(r.name)}-en` : undefined,
+    meta: { ...(r.meta ?? {}), locale: 'en' },
+  })) as RouteRecordRaw[]
+
+const allRoutes = [...routes, ...englishRoutes]
+
 const router = createRouter({
   history: createWebHistory(),
-  routes,
+  routes: allRoutes,
   scrollBehavior(to, _from, savedPosition) {
     if (savedPosition) return savedPosition
     if (to.hash) return { el: to.hash, top: 80, behavior: 'smooth' }
     return { top: 0 }
   },
+})
+
+// Una ruta `/en` manda sobre lo que hubiera guardado o detectado el
+// navegador: si alguien llega por un enlace en ingles, ve la pagina en ingles.
+router.beforeEach((to) => {
+  const locale = (to.meta?.locale as AppLocale | undefined) ?? null
+  if (locale && i18n.global.locale.value !== locale) setLocale(locale)
 })
 
 export default router

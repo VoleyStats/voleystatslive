@@ -1,8 +1,8 @@
 {
   "seo": {
     "home": {
-      "title": "Voley Stats — Live volleyball stats app for iPad",
-      "description": "Volleyball statistics app for iPad. Track the match while you coach —even offline—, share live stats on the web and break down every set with scouting reports."
+      "title": "Voley Stats — Live volleyball stats app for iPad and Android",
+      "description": "Volleyball statistics app for iPad and Android. Track the match even offline, share live statistics and analyse every set. Free to start."
     },
     "teamCode": {
       "title": "Live volleyball stats by match code — Voley Stats",
@@ -65,7 +65,7 @@
       "eyebrow": "Volleyball · Real-time analytics",
       "titleStart": "Your team's stats,",
       "titleHighlight": "live",
-      "subtitle": "Log the match from your iPad while you coach — even with no connection —, share the score and stats live and break down every set when it's over. Say goodbye to paper scoresheets.",
+      "subtitle": "Track the match from your tablet while you coach —even offline—, share the score and statistics live, and analyse every set in depth afterwards. No more paper sheets.",
       "download": "Download app",
       "watchLive": "Watch live stats",
       "stat1Value": "6",
@@ -85,7 +85,7 @@
     "product": {
       "eyebrow": "The product",
       "title": "Take control of the whole match",
-      "text": "Log every action with the quick grid — designed so one person can coach and record at the same time — or straight on the court map with Rally Map (available on the Normal plan), with attack and serve trajectories. You choose the detail: every touch or just the actions that end the rally. And you make your substitutions with data, not gut feeling.",
+      "text": "Log every action with the quick grid — designed so one person can coach and record at the same time — or straight on the court map with Rally Map (available on the Analysis plan), with attack and serve trajectories. You choose the detail: every touch or just the actions that end the rally. And you make your substitutions with data, not gut feeling.",
       "point1": "Score, rotation and server update on their own.",
       "point2": "Automatic detection of scoring and error runs.",
       "point3": "Breakdown per player and per court area.",
@@ -101,18 +101,18 @@
       "title": "From the court to the report in three steps",
       "subtitle": "No learning curve. Start logging in your very first match.",
       "step1Title": "Log the actions",
-      "step1Text": "Record every play from your iPad with the quick grid or on the court map, with substitutions, timeouts and graded reception. Works offline, in any gym.",
+      "step1Text": "Track every play from the tablet with the quick grid or on the court map, with substitutions, timeouts and graded reception. Works offline, in any gym.",
       "step2Title": "Follow it live",
-      "step2Text": "With the Pro plan or a match pass, share the match code and broadcast the score and stats live. Watching it from the web is always free for whoever gets the code.",
+      "step2Text": "With the Analysis Live plan or a match pass, share the match code and broadcast the score and stats live. Watching it from the web is always free for whoever gets the code.",
       "step3Title": "Break down the report",
-      "step3Text": "When it's over, you get the full match report: side-out and break, rotations, attack maps (if you captured with Rally Map) and much more. With the Normal plan, export it as a PDF to review with the team."
+      "step3Text": "When it's over, you get the full match report: side-out and break, rotations, attack maps (if you captured with Rally Map) and much more. With the Analysis plan, export it as a PDF to review with the team."
     },
     "features": {
       "eyebrow": "Features",
       "title": "Everything your coaching staff needs",
       "subtitle": "Tools built for coaches, analysts and players.",
       "f1Title": "Live scoreboard",
-      "f1Text": "Follow the result set by set and how the match unfolds in real time from any device. Broadcasting the live feed is a Pro plan feature (or a match pass); watching it is always free.",
+      "f1Text": "Follow the result set by set and how the match unfolds in real time from any device. Broadcasting the live feed is a Analysis Live plan feature (or a match pass); watching it is always free.",
       "f2Title": "Per-player stats",
       "f2Text": "Evaluate individual performance in every area and find your roster's strengths.",
       "f3Title": "Analysis by phase",
@@ -120,7 +120,7 @@
       "f4Title": "Momentum curve",
       "f4Text": "Visualize point and error runs to understand the key moments of every set.",
       "f5Title": "PDF reports",
-      "f5Text": "With the Normal plan, export match and season reports as PDFs to share with your coaching staff and players.",
+      "f5Text": "With the Analysis plan, export match and season reports as PDFs to share with your coaching staff and players.",
       "f6Title": "Code-based access",
       "f6Text": "Share a simple code and the whole team can check the stats online, no complicated sign-ups.",
       "f7Title": "Opponent scouting",
@@ -132,11 +132,23 @@
       "f10Title": "Between-sets summary",
       "f10Text": "A panel built for the 3-minute break: phases, rotations, opponent trends and the next set's key points in plain language.",
       "f11Title": "Player profiles",
-      "f11Text": "With the Normal plan, every player gets a full profile: skill radar, attack, serve-reception and physical evolution, inside the season dashboard."
+      "f11Text": "With the Analysis plan, every player gets a full profile: skill radar, attack, serve-reception and physical evolution, inside the season dashboard.",
+      "f12Title": "Rally Map",
+      "f12Text": "Log every ball by tapping the court: origin, landing, block and faults. Reception and dig quality follow from where it drops. Available with the Analysis plan.",
+      "f13Title": "Broadcast overlay",
+      "f13Text": "Overlay the live score on your YouTube or Twitch stream with OBS, in your team's colours and with your own banners. An Analysis Live feature.",
+      "f14Title": "Shared team",
+      "f14Text": "Invite your staff with a QR code and set permissions: who can track, who can only view. The squad and its photos are shared across every account.",
+      "f15Title": "Sync and cloud backup",
+      "f15Text": "Your teams and matches travel between your devices and stay backed up in the cloud. You can restore them at any time, including across iPad and Android.",
+      "f16Title": "Shortcuts your way",
+      "f16Text": "Swipe or double-tap a player's card to log your most frequent actions in a single gesture, and choose what each one does.",
+      "f17Title": "Squad and call-ups",
+      "f17Text": "A card for every player with photo, number, position and measurements, per-match call-ups and a season calendar view."
     },
     "download": {
       "title": "Take your team to the next level",
-      "text": "Download Voley Stats for iPad and log your next match for free. Go Normal whenever you want the season history, PDF reports and cloud backup, or Pro to share your matches live.",
+      "text": "Download Voley Stats for iPad or Android and track your next match for free. Move to the Analysis plan when you want season history, PDF reports and cloud backup, or to Analysis Live to share your matches live.",
       "appStore": "App Store",
       "web": "Check it on the web"
     },
@@ -145,17 +157,17 @@
       "title": "Questions?",
       "subtitle": "And if you can't find your answer, write to us at voleystats{'@'}gmail.com and we'll help.",
       "q1": "What is Voley Stats Live?",
-      "a1": "It's the live web companion of Voley Stats, the iPad app for capturing and analyzing volleyball statistics. You record every action of the match from the app, and anyone can follow the score and stats live on this web, free and with no sign-up.",
+      "a1": "It is the live website of Voley Stats, the iPad and Android app used to capture and analyse volleyball statistics. You track every action of the match from the app and anyone can follow the score and statistics live from this website, free and without signing up.",
       "q2": "How do I check my team's stats online?",
       "a2": "Go to the 'Watch live' section, enter your team code and access the live score and match stats, with a breakdown per set and per player.",
       "q3": "Which statistics can I record?",
       "a3": "Everything that happens on the court: every touch or just the rally-ending actions, attack and serve trajectories on the court map, reception graded on 4 levels, serve quality, K1/K2 phase tracking, substitutions and timeouts. The score, rotation and server update on their own.",
       "q4": "Can I download a match report?",
-      "a4": "Yes. When the match ends the app builds a full report: side-out and break, where the points came from, rotations, attack by phase and by pass quality, setter-attacker connections, unforced errors and attack maps (if you captured that match with Rally Map). Exporting it as a PDF is available with the Normal plan or with a match pass for that match.",
+      "a4": "Yes. When the match ends the app builds a full report: side-out and break, where the points came from, rotations, attack by phase and by pass quality, setter-attacker connections, unforced errors and attack maps (if you captured that match with Rally Map). Exporting it as a PDF is available with the Analysis plan or with a match pass for that match.",
       "q5": "Do I need an internet connection?",
-      "a5": "Not for logging: the app works fully offline, so you can capture and check stats in any gym. You only need internet to share the live feed on this web, and for the OBS overlay or the public team page (both Pro plan features), or for cloud backup (Normal plan).",
+      "a5": "Not for logging: the app works fully offline, so you can capture and check stats in any gym. You only need internet to share the live feed on this web, and for the OBS overlay or the public team page (both Analysis Live plan features), or for cloud backup (Analysis plan).",
       "q6": "How much does it cost?",
-      "a6": "Downloading the app and logging your matches — full capture and stats for every match and set — is free. The Normal plan (€19.99/year or €3.99/month) adds Rally Map, the team history and season stats with filters, PDF reports, multi-device sync, cloud backup, team/tournament export and sharing the team with other coaches. The Pro plan (€34.99/year or €6.99/month) adds sharing matches live, the OBS overlay and the public team page. There's also a €2.99 match pass to unlock the live feed, Rally Map and the PDF report for a single match, no subscription needed. Watching the live feeds on the web is always free for whoever gets the code."
+      "a6": "Downloading the app and logging your matches — full capture and stats for every match and set — is free. The Analysis plan (€19.99/year or €3.99/month) adds Rally Map, the team history and season stats with filters, PDF reports, multi-device sync, cloud backup, team/tournament export and sharing the team with other coaches. The Analysis Live plan (€34.99/year or €6.99/month) adds sharing matches live, the OBS overlay and the public team page. There's also a €2.99 match pass to unlock the live feed, Rally Map and the PDF report for a single match, no subscription needed. Watching the live feeds on the web is always free for whoever gets the code."
     }
   },
   "overlay": {
@@ -196,7 +208,7 @@
     "back": "Back to home",
     "explain": {
       "title": "What is the match code?",
-      "intro": "Every match shared live from the iPad app generates a unique code. Whoever is tracking the match —usually the coach or someone on the staff— shares it over WhatsApp, shows it as a QR code, or passes on the team page link. Any of the three gets you to the live scoreboard and statistics, with no account and nothing to install.",
+      "intro": "Every match shared live from the app generates a unique code. Whoever is tracking it —usually the coach or someone on the staff— shares it over WhatsApp, shows it as a QR code or passes the team page link. Any of the three gets you into the live score and statistics, with no account and nothing to install.",
       "steps": [
         {
           "title": "Ask your team for the code",
@@ -212,8 +224,8 @@
         }
       ],
       "freeTitle": "Free, no sign-up",
-      "freeText": "Watching live statistics costs nothing and needs no account. Only the person tracking the match needs the iPad app and a plan that includes live sharing.",
-      "appCta": "Are you the one tracking the matches? Get Voley Stats for iPad"
+      "freeText": "Watching the live statistics costs nothing and needs no account. Only the person capturing the match needs the app —on iPad or Android— and a plan that includes live sharing.",
+      "appCta": "Are you the one tracking the matches? Download Voley Stats"
     }
   },
   "stats": {
@@ -476,13 +488,13 @@
     "sections": [
       {
         "paragraphs": [
-          "This policy explains what data the Voley Stats app for iPad and this website (voleystats.vercel.app) process, and how we protect it."
+          "This policy explains what data the Voley Stats app for iPad and Android and this website (voleystats.vercel.app) process, and how we protect it."
         ]
       },
       {
         "heading": "Data controller",
         "paragraphs": [
-          "Voley Stats is developed by Pau Hermosilla, an individual developer. For any privacy questions, write to voleystats{'@'}gmail.com."
+          "Voley Stats is developed by Pau Hermosilla. For any privacy questions, write to voleystats{'@'}gmail.com."
         ]
       },
       {
@@ -515,9 +527,17 @@
         ]
       },
       {
+        "heading": "Cookies and local storage",
+        "paragraphs": [
+          "This website uses no cookies. We also use no analytics, no advertising and no third-party service that tracks your browsing, so there is nothing to consent to and you will not see a cookie banner.",
+          "The only thing we store in your browser is local storage, with a strictly technical purpose: remembering the language you chose and caching the statistics of the matches you look at, so the page does not have to download them again. That data never leaves your device, cannot identify you, and you can remove it by clearing the site data in your browser."
+        ]
+      },
+      {
         "heading": "Retention and deletion",
         "paragraphs": [
-          "We keep your account data for as long as the account exists. You can delete it, along with your backups and synced data, at any time — see how in Delete account (voleystats.vercel.app/delete-account)."
+          "We keep your account data for as long as the account exists. You can delete it, along with your backups and synced data, at any time — see how in Delete account (voleystats.vercel.app/delete-account).",
+          "The statistics you publish live are kept for as long as the team exists in the app, so you can browse previous seasons from this website. When you delete a team, its published matches and its public page are deleted automatically."
         ]
       },
       {
@@ -586,7 +606,7 @@
       {
         "heading": "1. Who we are and scope",
         "paragraphs": [
-          "Voley Stats is an iPad app, available on the App Store, for capturing and analyzing volleyball statistics. This website (voleystats.vercel.app) lets you follow matches live and view reports and statistics shared from the app. These terms govern the use of both."
+          "Voley Stats is an iPad and Android app, available on the App Store and on Google Play, for capturing and analyzing volleyball statistics. This website (voleystats.vercel.app) lets you follow matches live and view reports and statistics shared from the app. These terms govern the use of both."
         ]
       },
       {
@@ -598,7 +618,7 @@
       {
         "heading": "3. The app",
         "paragraphs": [
-          "We grant you a personal, non-exclusive, non-transferable license to use the app. The app offers subscriptions (the Normal and Pro plans) and a one-time match pass purchase, handled through Apple's App Store and governed by its terms. Apple's standard EULA applies to the app."
+          "We grant you a personal, non-exclusive, non-transferable license to use the app. The app offers subscriptions (the Analysis and Analysis Live plans) and a one-time match pass purchase, handled through Apple's App Store or Google Play depending on the platform, and governed by their terms. Apple's standard EULA applies to the app on iPad."
         ]
       },
       {
@@ -680,5 +700,9 @@
         "link": "Read the privacy policy"
       }
     }
+  },
+  "common": {
+    "appStore": "App Store",
+    "googlePlay": "Google Play"
   }
 }

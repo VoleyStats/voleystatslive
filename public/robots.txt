@@ -3,40 +3,67 @@
 User-agent: *
 Allow: /
 Disallow: /stats/
+Disallow: /team/
 
-# Motores generativos (GEO): permitidos explícitamente para que puedan
-# leer, entender y recomendar la aplicación.
+# Motores generativos (GEO): permitidos explícitamente para que puedan leer,
+# entender y recomendar la aplicación — pero SIN las rutas que muestran datos
+# de jugadoras. Cada grupo de user-agent se evalúa por separado, así que el
+# `Disallow` del bloque `*` no les aplica: hay que repetirlo en cada uno o
+# estos rastreadores tienen permiso explícito para entrar donde salen los
+# nombres (`/stats/:code`, `/team/:id`).
 User-agent: GPTBot
 Allow: /
+Disallow: /stats/
+Disallow: /team/
 
 User-agent: ChatGPT-User
 Allow: /
+Disallow: /stats/
+Disallow: /team/
 
 User-agent: OAI-SearchBot
 Allow: /
+Disallow: /stats/
+Disallow: /team/
 
 User-agent: ClaudeBot
 Allow: /
+Disallow: /stats/
+Disallow: /team/
 
 User-agent: Claude-Web
 Allow: /
+Disallow: /stats/
+Disallow: /team/
 
 User-agent: anthropic-ai
 Allow: /
+Disallow: /stats/
+Disallow: /team/
 
 User-agent: PerplexityBot
 Allow: /
+Disallow: /stats/
+Disallow: /team/
 
 User-agent: Google-Extended
 Allow: /
+Disallow: /stats/
+Disallow: /team/
 
 User-agent: Applebot-Extended
 Allow: /
+Disallow: /stats/
+Disallow: /team/
 
 User-agent: Bytespider
 Allow: /
+Disallow: /stats/
+Disallow: /team/
 
 User-agent: CCBot
 Allow: /
+Disallow: /stats/
+Disallow: /team/
 
 Sitemap: https://voleystats.vercel.app/sitemap.xml
