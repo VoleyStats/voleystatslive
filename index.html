@@ -64,7 +64,14 @@
       rel="stylesheet"
     />
 
-    <!-- Structured data: SoftwareApplication -->
+    <!-- Structured data: SoftwareApplication.
+         El array de ofertas se deja VACÍO a propósito: `scripts/prerender-head.mjs`
+         lo rellena en el build desde `src/data/plans.json`, la misma fuente que
+         pinta /pricing. (Este comentario no puede escribir el ancla literal: el
+         script busca la primera aparición y la reemplazaría aquí.) Los precios escritos a mano aquí son los que nadie
+         recuerda actualizar el día que cambia una tarifa.
+         `featureList` sí es manual — al tocarla, usa los nombres comerciales
+         de STORE.md (Análisis / Análisis Live), nunca los tiers técnicos. -->
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
@@ -78,86 +85,23 @@
         "downloadUrl": "https://apps.apple.com/us/app/voley-stats/id6737778450",
         "sameAs": ["https://apps.apple.com/us/app/voley-stats/id6737778450"],
         "inLanguage": ["es", "en"],
-        "offers": [
-          {
-            "@type": "Offer",
-            "name": "Gratis",
-            "price": "0",
-            "priceCurrency": "EUR",
-            "description": "Descarga y captura completa de partidos y estadísticas, gratis."
-          },
-          {
-            "@type": "Offer",
-            "name": "Análisis (anual)",
-            "price": "19.99",
-            "priceCurrency": "EUR",
-            "priceSpecification": {
-              "@type": "UnitPriceSpecification",
-              "price": "19.99",
-              "priceCurrency": "EUR",
-              "billingDuration": "P1Y"
-            }
-          },
-          {
-            "@type": "Offer",
-            "name": "Análisis (mensual)",
-            "price": "3.99",
-            "priceCurrency": "EUR",
-            "priceSpecification": {
-              "@type": "UnitPriceSpecification",
-              "price": "3.99",
-              "priceCurrency": "EUR",
-              "billingDuration": "P1M"
-            }
-          },
-          {
-            "@type": "Offer",
-            "name": "Análisis Live (anual)",
-            "price": "34.99",
-            "priceCurrency": "EUR",
-            "priceSpecification": {
-              "@type": "UnitPriceSpecification",
-              "price": "34.99",
-              "priceCurrency": "EUR",
-              "billingDuration": "P1Y"
-            }
-          },
-          {
-            "@type": "Offer",
-            "name": "Análisis Live (mensual)",
-            "price": "6.99",
-            "priceCurrency": "EUR",
-            "priceSpecification": {
-              "@type": "UnitPriceSpecification",
-              "price": "6.99",
-              "priceCurrency": "EUR",
-              "billingDuration": "P1M"
-            }
-          },
-          {
-            "@type": "Offer",
-            "name": "Match pass (compra única)",
-            "price": "2.99",
-            "priceCurrency": "EUR",
-            "description": "Compra única por partido: desbloquea el directo, Rally Map y el informe en PDF para ese partido."
-          }
-        ],
+        "offers": [],
         "featureList": [
           "Captura rápida en rejilla pensada para entrenar y anotar a la vez",
-          "Rally Map: captura sobre el mapa de la pista con trayectorias de ataque y saque (plan Normal)",
+          "Rally Map: captura sobre el mapa de la pista con trayectorias de ataque y saque (plan Análisis)",
           "Marcador, rotación y sacador automáticos",
           "Recepción valorada en 4 niveles y calidad de saque",
           "Seguimiento por fases K1/K2",
           "Funciona sin conexión (base de datos local)",
           "Estadísticas en directo en la web, gratis para cualquiera con el código",
-          "Compartir partidos en directo, overlay para OBS y página pública del equipo (plan Pro)",
+          "Compartir partidos en directo, overlay para OBS y página pública del equipo (plan Análisis Live)",
           "Informe post-partido: side-out/break, rotaciones, mapas de ataque, conexiones colocadora-atacante",
-          "Histórico de equipo, estadísticas de temporada e informes en PDF (plan Normal)",
-          "Scouting de rivales: histórico agregado por rival con sus rotaciones, recepción, corredores de ataque y zonas de peligro",
+          "Histórico de equipo, estadísticas de temporada e informes en PDF (plan Análisis)",
+          "Scouting de rivales: histórico agregado por rival con sus rotaciones, recepción, corredores de ataque y zonas de peligro; capturar los partidos del rival contra terceros requiere el plan Análisis",
           "Comparador de partidos cara a cara: métricas clave, side-out por rotación y anotadoras",
           "Alertas inteligentes durante el partido: rachas, punto de set, rotación atascada, ataque predecible",
           "Resumen entre sets pensado para los 3 minutos de descanso",
-          "Fichas de jugadora con radar de habilidades, ataque, saque-recepción y evolución física (plan Normal)"
+          "Fichas de jugadora con radar de habilidades, ataque, saque-recepción y evolución física (plan Análisis)"
         ]
       }
     </script>
@@ -200,63 +144,16 @@
       }
     </script>
 
-    <!-- Structured data: FAQ (mantener sincronizado con src/i18n/es.json → home.faq) -->
-    <script type="application/ld+json">
-      {
-        "@context": "https://schema.org",
-        "@type": "FAQPage",
-        "mainEntity": [
-          {
-            "@type": "Question",
-            "name": "¿Qué es Voley Stats Live?",
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": "Es la web en directo de Voley Stats, la app para iPad y Android con la que se capturan y analizan estadísticas de voleibol. Anotas cada acción del partido desde la app y cualquiera puede seguir el marcador y las estadísticas en vivo desde esta web, gratis y sin registrarse."
-            }
-          },
-          {
-            "@type": "Question",
-            "name": "¿Cómo consulto las estadísticas de mi equipo online?",
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": "Entra en la sección 'Ver en vivo', introduce el código de tu equipo y accede al marcador y a las estadísticas del partido en directo, con desglose por set y por jugador."
-            }
-          },
-          {
-            "@type": "Question",
-            "name": "¿Qué estadísticas puedo registrar?",
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": "Todo lo que pasa en la pista: cada toque o solo las acciones que acaban en punto, trayectorias de ataque y saque sobre el mapa de la pista, recepción valorada en 4 niveles, calidad de saque, juego por fases K1/K2, cambios y tiempos muertos. El marcador, la rotación y el sacador se actualizan solos."
-            }
-          },
-          {
-            "@type": "Question",
-            "name": "¿Puedo descargar un informe del partido?",
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": "Sí. Al terminar el partido la app genera un informe completo: side-out y break, origen de los puntos, rotaciones, ataque por fase y por calidad de pase, conexiones colocadora-atacante, errores no forzados y mapas de ataque (si capturaste ese partido con Rally Map). Exportarlo en PDF está disponible con el plan Normal o con un match pass para ese partido."
-            }
-          },
-          {
-            "@type": "Question",
-            "name": "¿Necesito conexión a internet?",
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": "No para anotar: la app funciona completamente sin conexión, así que puedes capturar y consultar estadísticas en cualquier pabellón. Solo necesitas internet para compartir el directo en esta web, y para el overlay para OBS o la página pública del equipo (ambos del plan Pro), o para la copia de seguridad en la nube (plan Normal)."
-            }
-          },
-          {
-            "@type": "Question",
-            "name": "¿Cuánto cuesta?",
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": "Descargar la app y anotar tus partidos —captura completa y estadísticas de cada partido y set— es gratis. El plan Normal (19,99 €/año o 3,99 €/mes) añade Rally Map, el histórico del equipo y las estadísticas de temporada con filtros, informes en PDF, sincronización multi-dispositivo, copia de seguridad en la nube, exportación de equipo/torneo y compartir el equipo con otros entrenadores. El plan Pro (34,99 €/año o 6,99 €/mes) suma compartir partidos en directo, el overlay para OBS y la página pública del equipo. También hay un match pass de 2,99 € para desbloquear el directo, el Rally Map y el informe en PDF de un solo partido, sin suscripción. Ver los directos desde la web es siempre gratis para quien recibe el código."
-            }
-          }
-        ]
-      }
-    </script>
+    <!-- Structured data: FAQPage.
+         NO se escribe a mano: lo inyecta `scripts/prerender-head.mjs` (post-build)
+         a partir de `home.faq` de `src/i18n/{es,en}.json`, que es la misma fuente
+         que pinta el acordeón de la portada. Antes vivía aquí copiado a mano y se
+         quedó desincronizado (seguía diciendo "plan Normal"/"plan Pro" meses
+         después del rename a Análisis/Análisis Live), y además el propio script lo
+         BORRABA de todas las páginas —portada incluida—, así que el marcado no
+         llegaba a publicarse nunca. Este comentario es el ancla que busca el
+         script: si desaparece, el build falla. -->
+    <!-- @faq-jsonld -->
   </head>
   <body>
     <div id="app"></div>
@@ -289,6 +186,7 @@
           <ul>
             <li><a href="/" style="color:#7dd3fc">Inicio: qué es Voley Stats</a></li>
             <li><a href="/team-code" style="color:#7dd3fc">Ver estadísticas en directo con el código del equipo</a></li>
+            <li><a href="/pricing" style="color:#7dd3fc">Precios y planes: gratis, Análisis y Análisis Live</a></li>
             <li><a href="/contact" style="color:#7dd3fc">Contacto</a></li>
             <li><a href="/privacy" style="color:#7dd3fc">Política de privacidad</a></li>
             <li><a href="/terms" style="color:#7dd3fc">Condiciones de uso</a></li>

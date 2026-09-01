@@ -1,0 +1,50 @@
+{
+  "_comment": [
+    "Fuente ÚNICA de la matriz planes × funciones de la web. La autoridad real",
+    "es `../VoleyStatsApp/STORE.md` (matriz de gating) + `Entitlements.swift`:",
+    "esto es una COPIA para marketing, nunca al revés. Al tocar un gate en la",
+    "app, actualiza este fichero.",
+    "",
+    "Se lee desde dos sitios que no comparten runtime: `src/data/plans.ts` (la",
+    "web: insignias de la home y tabla de /pricing) y `scripts/prerender-head.mjs`",
+    "(los `Offer` del JSON-LD, post-build). Por eso es JSON y no TS — un .mjs de",
+    "Node no puede importar TypeScript sin transpilar.",
+    "",
+    "`plan` es el tier MÍNIMO que desbloquea la función. `matchPass` marca las",
+    "que además desbloquea el pase de partido (2,99 €) para ESE partido: live,",
+    "Rally Map e informes, según STORE.md."
+  ],
+  "currency": "EUR",
+  "matchPass": { "price": 2.99 },
+  "plans": [
+    { "id": "free" },
+    { "id": "analysis", "year": 19.99, "month": 3.99 },
+    { "id": "analysisLive", "year": 34.99, "month": 6.99 }
+  ],
+  "features": [
+    { "key": "f1", "icon": "bi-trophy", "plan": "analysisLive", "matchPass": true },
+    { "key": "f2", "icon": "bi-person-badge", "plan": "free" },
+    { "key": "f3", "icon": "bi-bar-chart-line", "plan": "free" },
+    { "key": "f4", "icon": "bi-activity", "plan": "free" },
+    { "key": "f5", "icon": "bi-filetype-pdf", "plan": "analysis", "matchPass": true },
+    { "key": "f6", "icon": "bi-key", "plan": "analysisLive", "matchPass": true },
+    { "key": "f7", "icon": "bi-binoculars", "plan": "free", "note": "scouting" },
+    { "key": "f8", "icon": "bi-arrow-left-right", "plan": "free" },
+    { "key": "f9", "icon": "bi-bell", "plan": "free" },
+    { "key": "f10", "icon": "bi-hourglass-split", "plan": "free" },
+    { "key": "f11", "icon": "bi-person-vcard", "plan": "analysis" },
+    { "key": "f12", "icon": "bi-grid-3x3", "plan": "analysis", "matchPass": true },
+    { "key": "f13", "icon": "bi-broadcast", "plan": "analysisLive", "matchPass": true },
+    { "key": "f14", "icon": "bi-people", "plan": "analysis" },
+    { "key": "f15", "icon": "bi-cloud-arrow-up", "plan": "analysis" },
+    { "key": "f16", "icon": "bi-hand-index", "plan": "free" },
+    { "key": "f17", "icon": "bi-calendar-check", "plan": "free" }
+  ],
+  "extras": [
+    { "key": "x1", "plan": "analysis" },
+    { "key": "x2", "plan": "analysis" },
+    { "key": "x3", "plan": "analysis" },
+    { "key": "x4", "plan": "analysisLive" },
+    { "key": "x5", "plan": "analysisLive" }
+  ]
+}

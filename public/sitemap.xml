@@ -33,6 +33,20 @@
     <xhtml:link rel="alternate" hreflang="x-default" href="https://voleystats.vercel.app/team-code"/>
   </url>
   <url>
+    <loc>https://voleystats.vercel.app/pricing</loc>
+    <lastmod>2026-09-01</lastmod>
+    <xhtml:link rel="alternate" hreflang="es" href="https://voleystats.vercel.app/pricing"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://voleystats.vercel.app/en/pricing"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://voleystats.vercel.app/pricing"/>
+  </url>
+  <url>
+    <loc>https://voleystats.vercel.app/en/pricing</loc>
+    <lastmod>2026-09-01</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://voleystats.vercel.app/en/pricing"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://voleystats.vercel.app/pricing"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://voleystats.vercel.app/pricing"/>
+  </url>
+  <url>
     <loc>https://voleystats.vercel.app/contact</loc>
     <lastmod>2026-08-28</lastmod>
     <xhtml:link rel="alternate" hreflang="es" href="https://voleystats.vercel.app/contact"/>

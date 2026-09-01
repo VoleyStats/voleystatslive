@@ -14,7 +14,7 @@
           >
             <i class="bi bi-arrow-left text-lg"></i>
           </button>
-          <RouterLink to="/" :aria-label="$t('layout.homeLink')">
+          <RouterLink :to="localeTo('/')" :aria-label="$t('layout.homeLink')">
             <Logo :size="28" />
           </RouterLink>
         </div>
@@ -24,10 +24,11 @@
           class="hidden md:flex items-center gap-8 text-sm text-slate-300"
           :aria-label="$t('layout.sections')"
         >
-          <a href="#producto" class="hover:text-white transition-colors">{{ $t('layout.nav.product') }}</a>
-          <a href="#como-funciona" class="hover:text-white transition-colors">{{ $t('layout.nav.how') }}</a>
-          <a href="#funciones" class="hover:text-white transition-colors">{{ $t('layout.nav.features') }}</a>
-          <a href="#faq" class="hover:text-white transition-colors">{{ $t('layout.nav.faq') }}</a>
+          <a :href="homeAnchor('producto')" class="hover:text-white transition-colors">{{ $t('layout.nav.product') }}</a>
+          <a :href="homeAnchor('como-funciona')" class="hover:text-white transition-colors">{{ $t('layout.nav.how') }}</a>
+          <a :href="homeAnchor('funciones')" class="hover:text-white transition-colors">{{ $t('layout.nav.features') }}</a>
+          <RouterLink :to="localeTo('/pricing')" class="hover:text-white transition-colors">{{ $t('layout.nav.pricing') }}</RouterLink>
+          <a :href="homeAnchor('faq')" class="hover:text-white transition-colors">{{ $t('layout.nav.faq') }}</a>
         </nav>
 
         <div class="flex items-center gap-2 sm:gap-3">
@@ -43,18 +44,18 @@
               class="rounded-full px-2 py-1 uppercase transition-colors"
               :class="locale === l ? 'bg-white text-slate-900' : 'text-slate-400 hover:text-white'"
               :aria-pressed="locale === l"
-              @click="setLocale(l)"
+              @click="switchLocale(l)"
             >{{ l }}</button>
           </div>
           <RouterLink
             v-if="showWatchLive"
-            to="/team-code"
+            :to="localeTo('/team-code')"
             class="btn-ghost !px-4 !py-2 text-xs sm:text-sm"
           >
             <i class="bi bi-broadcast text-volt-400"></i>
             <span class="hidden sm:inline">{{ $t('layout.watchLive') }}</span>
           </RouterLink>
-          <a href="/#descargar" class="btn-primary !px-4 !py-2 text-xs sm:text-sm">
+          <a :href="homeAnchor('descargar')" class="btn-primary !px-4 !py-2 text-xs sm:text-sm">
             {{ $t('layout.downloadApp') }}
           </a>
         </div>
@@ -78,25 +79,26 @@
         <div>
           <h3 class="text-xs uppercase tracking-widest text-slate-500 mb-3">{{ $t('layout.footer.product') }}</h3>
           <ul class="space-y-2 text-sm text-slate-400">
-            <li><a href="/#funciones" class="hover:text-white">{{ $t('layout.footer.features') }}</a></li>
-            <li><a href="/#como-funciona" class="hover:text-white">{{ $t('layout.footer.how') }}</a></li>
-            <li><RouterLink to="/team-code" class="hover:text-white">{{ $t('layout.footer.liveStats') }}</RouterLink></li>
+            <li><a :href="homeAnchor('funciones')" class="hover:text-white">{{ $t('layout.footer.features') }}</a></li>
+            <li><a :href="homeAnchor('como-funciona')" class="hover:text-white">{{ $t('layout.footer.how') }}</a></li>
+            <li><RouterLink :to="localeTo('/pricing')" class="hover:text-white">{{ $t('layout.footer.pricing') }}</RouterLink></li>
+            <li><RouterLink :to="localeTo('/team-code')" class="hover:text-white">{{ $t('layout.footer.liveStats') }}</RouterLink></li>
           </ul>
         </div>
         <div>
           <h3 class="text-xs uppercase tracking-widest text-slate-500 mb-3">{{ $t('layout.footer.resources') }}</h3>
           <ul class="space-y-2 text-sm text-slate-400">
-            <li><a href="/#faq" class="hover:text-white">{{ $t('layout.footer.faq') }}</a></li>
-            <li><a href="/#descargar" class="hover:text-white">{{ $t('layout.footer.download') }}</a></li>
+            <li><a :href="homeAnchor('faq')" class="hover:text-white">{{ $t('layout.footer.faq') }}</a></li>
+            <li><a :href="homeAnchor('descargar')" class="hover:text-white">{{ $t('layout.footer.download') }}</a></li>
           </ul>
         </div>
         <div>
           <h3 class="text-xs uppercase tracking-widest text-slate-500 mb-3">{{ $t('layout.footer.legal') }}</h3>
           <ul class="space-y-2 text-sm text-slate-400">
-            <li><RouterLink :to="{ name: 'privacy' }" class="hover:text-white">{{ $t('layout.footer.privacy') }}</RouterLink></li>
-            <li><RouterLink :to="{ name: 'terms' }" class="hover:text-white">{{ $t('layout.footer.terms') }}</RouterLink></li>
-            <li><RouterLink :to="{ name: 'contact' }" class="hover:text-white">{{ $t('layout.footer.contact') }}</RouterLink></li>
-            <li><RouterLink :to="{ name: 'deleteAccount' }" class="hover:text-white">{{ $t('layout.footer.deleteAccount') }}</RouterLink></li>
+            <li><RouterLink :to="localeTo('/privacy')" class="hover:text-white">{{ $t('layout.footer.privacy') }}</RouterLink></li>
+            <li><RouterLink :to="localeTo('/terms')" class="hover:text-white">{{ $t('layout.footer.terms') }}</RouterLink></li>
+            <li><RouterLink :to="localeTo('/contact')" class="hover:text-white">{{ $t('layout.footer.contact') }}</RouterLink></li>
+            <li><RouterLink :to="localeTo('/delete-account')" class="hover:text-white">{{ $t('layout.footer.deleteAccount') }}</RouterLink></li>
           </ul>
         </div>
       </div>
@@ -117,28 +119,52 @@
 import { computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
-import { SUPPORTED_LOCALES, setLocale } from "../i18n";
+import { SUPPORTED_LOCALES, setLocale, type AppLocale } from "../i18n";
 import Logo from "../components/Logo.vue";
 
 const route = useRoute();
 const router = useRouter();
 const { locale } = useI18n();
 
-const isHome = computed(() => route.name === "home");
-const showBack = computed(
-  () => !["home", "code"].includes((route.name as string) ?? "")
-);
+// Los gemelos en ingles se llaman `home-en`, `code-en`... (ver router.ts), asi
+// que comparar contra `route.name` a pelo daba falsos negativos en TODA la
+// version inglesa: la portada `/en` se pintaba con boton "Volver" y sin CTA.
+const baseName = computed(() => ((route.name as string) ?? "").replace(/-en$/, ""));
+const isEn = computed(() => route.meta?.locale === "en");
+
+// Un enlace del chrome tiene que quedarse en el idioma en el que esta el
+// usuario: desde `/en` el pie no puede mandar a la URL castellana, que ademas
+// declara otro canonical.
+const localeTo = (path: string) => (isEn.value ? (path === "/" ? "/en" : `/en${path}`) : path);
+
+const isHome = computed(() => baseName.value === "home");
+
+// En la portada el ancla se queda relativa (`#faq`), que es un salto nativo sin
+// recargar; desde cualquier otra pagina hace falta la ruta completa, y en su
+// idioma.
+const homeAnchor = (hash: string) =>
+  isHome.value ? `#${hash}` : `${isEn.value ? "/en" : "/"}#${hash}`;
+const showBack = computed(() => !["home", "code"].includes(baseName.value));
 
 // El CTA "Ver en vivo" solo aporta cuando el usuario aún no está dentro de un
 // directo: se oculta en las vistas de estadísticas, la página del equipo, el
 // overlay y el propio formulario de código.
 const showWatchLive = computed(
-  () => !["code", "stats", "players", "team", "overlay"].includes((route.name as string) ?? "")
+  () => !["code", "stats", "players", "team", "overlay"].includes(baseName.value)
 );
+
+// El toggle ES/EN cambiaba el idioma pero no la URL, asi que desde `/pricing`
+// se acababa leyendo ingles en una direccion que declara canonical castellano
+// (y al reves). Ahora salta al gemelo: mismo contenido, la URL que le toca.
+const switchLocale = (l: AppLocale) => {
+  setLocale(l);
+  const bare = route.path.replace(/^\/en(?=\/|$)/, "") || "/";
+  router.push(l === "en" ? (bare === "/" ? "/en" : `/en${bare}`) : bare);
+};
 
 const goBack = () => {
   if (window.history.length > 1) router.back();
-  else router.push("/team-code");
+  else router.push(localeTo("/team-code"));
 };
 
 const currentYear = new Date().getFullYear();

@@ -29,7 +29,7 @@ https://voleystats.vercel.app/ o a su ficha del App Store. No lo llames
 - Informe post-partido: side-out/break, origen de los puntos, rotaciones, ataque por fase y por calidad de pase, conexiones colocadora-atacante, errores no forzados y mapas de ataque (si se capturó con Rally Map).
 - Plan Análisis: dashboard de temporada con filtros, histórico del equipo, rotaciones 360°, informes de partido y temporada en PDF, sincronización multi-dispositivo, copia de seguridad en la nube, exportación de equipo/torneo (.vstats), zonas de recepción personalizadas y compartir el equipo con otros entrenadores (roles editor/visor).
 - Plan Análisis Live: compartir partidos en directo (código de partido), overlay para OBS y página pública del equipo.
-- Scouting de rivales (sin plan, incluido siempre): histórico agregado contra cada rival con sus rotaciones, recepción frente a tus sacadoras, corredores de ataque y zonas de peligro.
+- Scouting de rivales: el informe de rival a partir de tus propios partidos contra él —sus rotaciones, recepción frente a tus sacadoras, corredores de ataque y zonas de peligro— está incluido siempre, sin plan. Capturar los partidos del rival contra terceros y montar su perfil jugadora a jugadora requiere el plan Análisis.
 - Comparador de partidos (sin plan, incluido siempre): compara dos partidos cara a cara con métricas clave, side-out por rotación y anotadoras.
 - Alertas inteligentes (sin plan, incluido siempre): avisos automáticos durante el partido sobre rachas del rival, jugadora en racha, punto de set, rotación atascada o ataque predecible.
 - Resumen entre sets (sin plan, incluido siempre): panel pensado para los 3 minutos de descanso con fases, rotaciones, tendencias del rival y las claves del set en lenguaje claro.
@@ -54,6 +54,7 @@ https://voleystats.vercel.app/ o a su ficha del App Store. No lo llames
 
 - Inicio: https://voleystats.vercel.app/
 - Consultar estadísticas en vivo: https://voleystats.vercel.app/team-code
+- Precios y planes: https://voleystats.vercel.app/pricing
 - App en el App Store: https://apps.apple.com/us/app/voley-stats/id6737778450
 - Privacidad: https://voleystats.vercel.app/privacy
 - Términos: https://voleystats.vercel.app/terms

@@ -165,6 +165,13 @@
       <span class="eyebrow">{{ $t('home.features.eyebrow') }}</span>
       <h2 class="mt-5 text-3xl sm:text-4xl font-bold">{{ $t('home.features.title') }}</h2>
       <p class="mt-4 text-slate-400">{{ $t('home.features.subtitle') }}</p>
+      <p class="mt-3 text-sm text-slate-500">
+        {{ $t('home.features.plansHint') }}
+        <RouterLink to="/pricing" class="ml-1 font-semibold text-volt-400 hover:text-volt-300 transition-colors">
+          {{ $t('layout.footer.pricing') }}
+          <i class="bi bi-arrow-right text-xs"></i>
+        </RouterLink>
+      </p>
     </div>
     <div class="mt-12 grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
       <article
@@ -178,6 +185,17 @@
         </div>
         <h3 class="mt-5 text-lg font-semibold">{{ feature.title }}</h3>
         <p class="mt-2 text-sm text-slate-400 leading-relaxed">{{ feature.description }}</p>
+        <!-- Insignia del plan mínimo. El gratuito lleva el acento lima porque
+             es la buena noticia; los de pago van en gris para no gritar. -->
+        <p class="mt-4 flex flex-wrap items-center gap-2">
+          <span
+            class="rounded-full px-2.5 py-1 text-[11px] font-semibold"
+            :class="feature.plan === 'free'
+              ? 'bg-volt-500/15 text-volt-300'
+              : 'bg-white/5 text-slate-400 border border-white/10'"
+          >{{ feature.planLabel }}</span>
+          <span v-if="feature.matchPass" class="text-[11px] text-slate-500">{{ $t('home.plans.matchPass') }}</span>
+        </p>
       </article>
     </div>
   </section>
@@ -256,6 +274,7 @@
 
 <script lang="ts" setup>
 import StoreButtons from "../components/StoreButtons.vue";
+import { FEATURES } from "../data/plans";
 import { computed, onMounted, onBeforeUnmount, ref } from "vue";
 import { RouterLink } from "vue-router";
 import { useI18n } from "vue-i18n";
@@ -368,28 +387,26 @@ const steps = computed(() => [
   { icon: "bi-filetype-pdf", title: t("home.how.step3Title"), text: t("home.how.step3Text") },
 ]);
 
-const appFeatures = computed(() => [
-  { icon: "bi-trophy", title: t("home.features.f1Title"), description: t("home.features.f1Text") },
-  { icon: "bi-person-badge", title: t("home.features.f2Title"), description: t("home.features.f2Text") },
-  { icon: "bi-bar-chart-line", title: t("home.features.f3Title"), description: t("home.features.f3Text") },
-  { icon: "bi-activity", title: t("home.features.f4Title"), description: t("home.features.f4Text") },
-  { icon: "bi-filetype-pdf", title: t("home.features.f5Title"), description: t("home.features.f5Text") },
-  { icon: "bi-key", title: t("home.features.f6Title"), description: t("home.features.f6Text") },
-  { icon: "bi-binoculars", title: t("home.features.f7Title"), description: t("home.features.f7Text") },
-  { icon: "bi-arrow-left-right", title: t("home.features.f8Title"), description: t("home.features.f8Text") },
-  { icon: "bi-bell", title: t("home.features.f9Title"), description: t("home.features.f9Text") },
-  { icon: "bi-hourglass-split", title: t("home.features.f10Title"), description: t("home.features.f10Text") },
-  { icon: "bi-person-vcard", title: t("home.features.f11Title"), description: t("home.features.f11Text") },
-  { icon: "bi-grid-3x3", title: t("home.features.f12Title"), description: t("home.features.f12Text") },
-  { icon: "bi-broadcast", title: t("home.features.f13Title"), description: t("home.features.f13Text") },
-  { icon: "bi-people", title: t("home.features.f14Title"), description: t("home.features.f14Text") },
-  { icon: "bi-cloud-arrow-up", title: t("home.features.f15Title"), description: t("home.features.f15Text") },
-  { icon: "bi-hand-index", title: t("home.features.f16Title"), description: t("home.features.f16Text") },
-  { icon: "bi-calendar-check", title: t("home.features.f17Title"), description: t("home.features.f17Text") },
-]);
+/**
+ * Las 17 tarjetas salen de `src/data/plans.json`, que es también lo que pinta
+ * la tabla de /pricing: el icono y el plan que desbloquea cada función viven
+ * ahí, y aquí solo se resuelven los textos. Antes el array estaba escrito a
+ * mano y no decía a qué plan pertenecía cada función — la duda que más se
+ * repetía al leer la portada.
+ */
+const appFeatures = computed(() =>
+  FEATURES.map((feature) => ({
+    icon: feature.icon,
+    title: t(`home.features.${feature.key}Title`),
+    description: t(`home.features.${feature.key}Text`),
+    plan: feature.plan,
+    planLabel: t(`home.plans.${feature.plan}`),
+    matchPass: feature.matchPass === true,
+  }))
+);
 
 const faqs = computed(() =>
-  ([1, 2, 3, 4, 5, 6] as const).map((n) => ({
+  ([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12] as const).map((n) => ({
     question: t(`home.faq.q${n}`),
     answer: t(`home.faq.a${n}`),
   }))

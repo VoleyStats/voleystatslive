@@ -8,6 +8,10 @@
       "title": "Live volleyball stats by match code — Voley Stats",
       "description": "Enter the match code or your team link and follow the scoreboard and live volleyball statistics — free, no sign-up needed."
     },
+    "pricing": {
+      "title": "Voley Stats pricing and plans — free, Analysis and Analysis Live",
+      "description": "What each Voley Stats plan includes: capture and stats for free, the Analysis plan from €3.99/month and Analysis Live from €6.99/month. Plus a €2.99 match pass."
+    },
     "team": {
       "title": "Team shared matches — Voley Stats",
       "description": "Every match this team has shared: set-by-set score, statistics and live tracking while the match is being played."
@@ -38,7 +42,8 @@
       "product": "Product",
       "how": "How it works",
       "features": "Features",
-      "faq": "FAQ"
+      "faq": "FAQ",
+      "pricing": "Plans"
     },
     "watchLive": "Watch live",
     "downloadApp": "Download app",
@@ -57,7 +62,8 @@
       "contact": "Contact",
       "deleteAccount": "Delete account",
       "rights": "© {year} Voley Stats. All rights reserved.",
-      "madeFor": "Built for teams that compete"
+      "madeFor": "Built for teams that compete",
+      "pricing": "Pricing and plans"
     }
   },
   "home": {
@@ -144,31 +150,95 @@
       "f16Title": "Shortcuts your way",
       "f16Text": "Swipe or double-tap a player's card to log your most frequent actions in a single gesture, and choose what each one does.",
       "f17Title": "Squad and call-ups",
-      "f17Text": "A card for every player with photo, number, position and measurements, per-match call-ups and a season calendar view."
+      "f17Text": "A card for every player with photo, number, position and measurements, per-match call-ups and a season calendar view.",
+      "plansHint": "Each card carries the plan that unlocks it. Prices and the full table live on the plans page."
     },
     "download": {
       "title": "Take your team to the next level",
-      "text": "Download Voley Stats for iPad or Android and track your next match for free. Move to the Analysis plan when you want season history, PDF reports and cloud backup, or to Analysis Live to share your matches live.",
+      "text": "Download Voley Stats for iPad or Android and log your next match for free. When you want season analysis, PDF reports or live match sharing, that's what the Analysis and Analysis Live plans are for.",
       "appStore": "App Store",
       "web": "Check it on the web"
     },
     "faq": {
-      "eyebrow": "FAQ",
-      "title": "Questions?",
-      "subtitle": "And if you can't find your answer, write to us at voleystats{'@'}gmail.com and we'll help.",
-      "q1": "What is Voley Stats Live?",
-      "a1": "It is the live website of Voley Stats, the iPad and Android app used to capture and analyse volleyball statistics. You track every action of the match from the app and anyone can follow the score and statistics live from this website, free and without signing up.",
-      "q2": "How do I check my team's stats online?",
-      "a2": "Go to the 'Watch live' section, enter your team code and access the live score and match stats, with a breakdown per set and per player.",
-      "q3": "Which statistics can I record?",
-      "a3": "Everything that happens on the court: every touch or just the rally-ending actions, attack and serve trajectories on the court map, reception graded on 4 levels, serve quality, K1/K2 phase tracking, substitutions and timeouts. The score, rotation and server update on their own.",
-      "q4": "Can I download a match report?",
-      "a4": "Yes. When the match ends the app builds a full report: side-out and break, where the points came from, rotations, attack by phase and by pass quality, setter-attacker connections, unforced errors and attack maps (if you captured that match with Rally Map). Exporting it as a PDF is available with the Analysis plan or with a match pass for that match.",
-      "q5": "Do I need an internet connection?",
-      "a5": "Not for logging: the app works fully offline, so you can capture and check stats in any gym. You only need internet to share the live feed on this web, and for the OBS overlay or the public team page (both Analysis Live plan features), or for cloud backup (Analysis plan).",
-      "q6": "How much does it cost?",
-      "a6": "Downloading the app and logging your matches — full capture and stats for every match and set — is free. The Analysis plan (€19.99/year or €3.99/month) adds Rally Map, the team history and season stats with filters, PDF reports, multi-device sync, cloud backup, team/tournament export and sharing the team with other coaches. The Analysis Live plan (€34.99/year or €6.99/month) adds sharing matches live, the OBS overlay and the public team page. There's also a €2.99 match pass to unlock the live feed, Rally Map and the PDF report for a single match, no subscription needed. Watching the live feeds on the web is always free for whoever gets the code."
+      "eyebrow": "Quick answers",
+      "title": "Frequently asked questions about Voley Stats",
+      "subtitle": "What the app records, what people see live on this site and what each plan includes. If you can't find your answer, write to us at voleystats{'@'}gmail.com and we'll help.",
+      "q1": "What is Voley Stats?",
+      "a1": "Voley Stats is a volleyball statistics app for iPad and Android. The coach logs every action of the match from the tablet —score, rotation and server update on their own— and, when it ends, the app builds the full report. If you want to, the match can be followed live on this website with a code. Downloading the app and logging matches is free.",
+      "q2": "How do you keep volleyball stats with the app?",
+      "a2": "With the quick grid: tap the player, tap the action, done. It is designed so that a single person can coach and log at the same time. If you want more detail, Rally Map (Analysis plan) lets you log on the court map, with attack and serve trajectories. You choose the level: every touch, or only the rally-ending actions.",
+      "q3": "Which volleyball statistics does it record and analyse?",
+      "a3": "Everything that happens on court: reception graded on 4 levels, serve quality, attack by K1/K2 phase and by pass quality, block, defence, substitutions and timeouts. When the match ends you get the report with side-out and break, where the points came from, rotations, setter-attacker connections, unforced errors and the attack maps if you captured with Rally Map.",
+      "q4": "Does it work without an internet connection?",
+      "a4": "Yes. Capture and statistics work fully offline, with the database on the device itself, so you can log in any gym. You only need internet to share the match live, for the OBS overlay and the public team page (Analysis Live plan), and for multi-device sync and cloud backup (Analysis plan).",
+      "q5": "How much does Voley Stats cost? Is there a free version?",
+      "a5": "Downloading the app and logging your matches —full capture and stats for every match and set— is free, with no limit on matches or teams. The Analysis plan (€19.99/year or €3.99/month) adds Rally Map, season analysis, PDF reports and cloud backup. The Analysis Live plan (€34.99/year or €6.99/month) adds the live feed, the OBS overlay and the public team page. And there is a €2.99 match pass to unlock a single match, with no subscription. The feature-by-feature breakdown is on the plans page.",
+      "q6": "Which devices does it work on? Is there an Android app?",
+      "a6": "Yes: Voley Stats is on the App Store for iPad and on Google Play for Android. Both versions share the same features and the same data —a team captured on one syncs and restores on the other—. It is built for tablets, which is where the capture grid really pays off.",
+      "q7": "How do I share the match live, and how do others watch it?",
+      "a7": "You turn the live feed on in the app and share the match code, its link or its QR. With that, anyone opens this website and follows the score, the point-by-point and the statistics in real time, free and without signing up. Broadcasting is an Analysis Live plan feature, or a match pass for that match; watching never costs anything.",
+      "q8": "Can I put the scoreboard on my YouTube or Twitch stream?",
+      "a8": "Yes. The Voley Stats overlay is a URL you paste into OBS as a Browser Source: the scoreboard sits on top of your stream with your team's colours, crests and banners, and updates point by point. Position and size are adjusted from the app, without touching OBS. It is an Analysis Live plan feature.",
+      "q9": "Can I export the match report as a PDF?",
+      "a9": "Yes. With the Analysis plan you export the match report, the season report and the player profiles as PDFs, to review with your staff or hand out to the squad. If you only want the report for one specific match, the €2.99 match pass unlocks it too.",
+      "q10": "Can I share the team with my coaching staff?",
+      "a10": "Yes, with the Analysis plan. You invite your staff with a QR and hand out permissions: who can log and who only reads. Squad, photos and matches are shared across every account, and multi-device sync keeps it all up to date on each iPad or Android in the team.",
+      "q11": "Is it useful for scouting opponents?",
+      "a11": "Yes. The rival report —the one built from your own matches against them— is included for free: their rotations, how they receive against your servers, their attack corridors and their danger zones. With the Analysis plan you can also scout their matches against third parties and build their profile player by player. And during the match you get the smart alerts and the between-sets summary, a panel for the 3-minute break with the keys to the next set in plain language.",
+      "q12": "Which player data is published on the website?",
+      "a12": "Only the minimum needed to follow the match: name, number and their actions. Player photos and birth dates never leave the device and never reach the public site —squads include minors and the viewer is an open URL, with no sign-up—. The only image published next to the scoreboard is the team crest, if you uploaded one."
+    },
+    "plans": {
+      "free": "Free",
+      "analysis": "Analysis",
+      "analysisLive": "Analysis Live",
+      "matchPass": "or match pass"
     }
+  },
+  "pricing": {
+    "eyebrow": "Plans",
+    "title": "Voley Stats pricing and plans",
+    "subtitle": "Logging matches and reading their stats is free, forever and with no match limit. The plans add season analysis, reports and the live feed.",
+    "perYear": "/year",
+    "yearly": "yearly",
+    "monthly": "monthly",
+    "orMonth": "or {price}/month",
+    "free": "Free",
+    "ctaNote": "Plans are purchased inside the app, through the App Store or Google Play.",
+    "featured": "Everything included",
+    "plansFreeName": "Free",
+    "plansFreeTagline": "Everything you need to drop the paper sheet",
+    "plansFreeText": "Full match capture with the quick grid and the stats for every match and set: phases, rotations, points curve, in-game alerts and the between-sets summary. No limit on matches or teams.",
+    "plansAnalysisName": "Analysis",
+    "plansAnalysisTagline": "The whole season, not just today's match",
+    "plansAnalysisText": "Everything in Free, plus Rally Map, team history and season stats, player profiles, PDF reports, multi-device sync, cloud backup and sharing the team with your coaching staff.",
+    "plansAnalysisLiveName": "Analysis Live",
+    "plansAnalysisLiveTagline": "For teams that broadcast",
+    "plansAnalysisLiveText": "Everything in Analysis, plus sharing the match live with a code, the OBS overlay that puts the scoreboard on top of your YouTube or Twitch stream, and the public team page.",
+    "matchPassName": "Match pass",
+    "matchPassPrice": "{price} · one-off",
+    "matchPassText": "Only want to unlock one specific match? The match pass turns on the live feed, Rally Map and the PDF report for THAT match, with no subscription and no renewal.",
+    "tableTitle": "What each plan includes",
+    "tableSubtitle": "The same matrix the app enforces. If something is not listed here, it ships in the free plan.",
+    "tableFeature": "Feature",
+    "tableIncluded": "Included",
+    "tableNotIncluded": "Not included",
+    "tableMatchPass": "Also with a match pass",
+    "x1Title": "Season panel and team history",
+    "x2Title": "Team and tournament export (.vstats)",
+    "x3Title": "Custom reception zones",
+    "x4Title": "Public team page",
+    "x5Title": "Follow another team's match",
+    "noteScouting": "The rival report built from your own matches against them ships in the free plan. Capturing the matches the rival plays against third parties —and with them their player-by-player profile— needs the Analysis plan.",
+    "faqTitle": "About billing",
+    "q1": "Can I change plan or cancel whenever I want?",
+    "a1": "Yes. Subscriptions are managed from your App Store or Google Play account, and you can upgrade, downgrade or cancel there whenever it suits you. Moving from Analysis to Analysis Live is prorated by the store.",
+    "q2": "What happens to my data if I cancel?",
+    "a2": "Nothing is deleted. Your matches stay on the device and the free features keep working exactly the same; what closes are the paid ones. Subscribe again and you get it all back as it was.",
+    "q3": "If I share the team, does my plan cover my whole staff?",
+    "a3": "No. Sharing a team hands out access to the data according to each person's role, but the plan always belongs to the account: every member needs their own for the paid features. Joining a shared team requires the Analysis plan.",
+    "q4": "Is it billed per team or per account?",
+    "a4": "Per account. One plan covers every team and every season you want, with no per-team or per-player cost."
   },
   "overlay": {
     "timeout": "Timeout",

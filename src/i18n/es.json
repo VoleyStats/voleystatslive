@@ -8,6 +8,10 @@
       "title": "Estadísticas de voleibol en directo por código — Voley Stats",
       "description": "Introduce el código del partido o el enlace del equipo y sigue el marcador y las estadísticas de voleibol en directo, gratis y sin registrarte."
     },
+    "pricing": {
+      "title": "Precios y planes de Voley Stats — gratis, Análisis y Análisis Live",
+      "description": "Qué incluye cada plan de Voley Stats: captura y estadísticas gratis, plan Análisis desde 3,99 €/mes y plan Análisis Live desde 6,99 €/mes. También match pass de 2,99 € por partido."
+    },
     "team": {
       "title": "Partidos compartidos del equipo — Voley Stats",
       "description": "Todos los partidos que este equipo ha compartido: marcador por set, estadísticas y seguimiento en directo mientras se juega."
@@ -38,7 +42,8 @@
       "product": "Producto",
       "how": "Cómo funciona",
       "features": "Funciones",
-      "faq": "Preguntas"
+      "faq": "Preguntas",
+      "pricing": "Planes"
     },
     "watchLive": "Ver en vivo",
     "downloadApp": "Descargar app",
@@ -57,7 +62,8 @@
       "contact": "Contacto",
       "deleteAccount": "Eliminar cuenta",
       "rights": "© {year} Voley Stats. Todos los derechos reservados.",
-      "madeFor": "Hecho para equipos que compiten"
+      "madeFor": "Hecho para equipos que compiten",
+      "pricing": "Precios y planes"
     }
   },
   "home": {
@@ -144,31 +150,95 @@
       "f16Title": "Atajos a tu medida",
       "f16Text": "Desliza o haz doble toque sobre la tarjeta de una jugadora para anotar tus acciones más frecuentes de un solo gesto, y elige qué hace cada uno.",
       "f17Title": "Plantilla y convocatorias",
-      "f17Text": "Ficha de cada jugadora con foto, dorsal, posición y medidas, convocatoria por partido y vista de calendario para toda la temporada."
+      "f17Text": "Ficha de cada jugadora con foto, dorsal, posición y medidas, convocatoria por partido y vista de calendario para toda la temporada.",
+      "plansHint": "Cada tarjeta lleva el plan que la desbloquea. Los precios y la tabla completa están en la página de planes."
     },
     "download": {
       "title": "Lleva a tu equipo al siguiente nivel",
-      "text": "Descarga Voley Stats para iPad o Android y anota tu próximo partido gratis. Pásate al plan Análisis cuando quieras el histórico de temporada, los informes en PDF y la copia en la nube, o al plan Análisis Live para compartir tus partidos en directo.",
+      "text": "Descarga Voley Stats para iPad o Android y anota tu próximo partido gratis. Cuando quieras el análisis de temporada, los informes en PDF o compartir el partido en directo, ahí están los planes Análisis y Análisis Live.",
       "appStore": "App Store",
       "web": "Consultar en la web"
     },
     "faq": {
-      "eyebrow": "Preguntas frecuentes",
-      "title": "¿Tienes dudas?",
-      "subtitle": "Y si no encuentras tu respuesta, escríbenos a voleystats{'@'}gmail.com y te ayudamos.",
-      "q1": "¿Qué es Voley Stats Live?",
-      "a1": "Es la web en directo de Voley Stats, la app para iPad y Android con la que se capturan y analizan estadísticas de voleibol. Anotas cada acción del partido desde la app y cualquiera puede seguir el marcador y las estadísticas en vivo desde esta web, gratis y sin registrarse.",
-      "q2": "¿Cómo consulto las estadísticas de mi equipo online?",
-      "a2": "Entra en la sección 'Ver en vivo', introduce el código de tu equipo y accede al marcador y a las estadísticas del partido en directo, con desglose por set y por jugador.",
-      "q3": "¿Qué estadísticas puedo registrar?",
-      "a3": "Todo lo que pasa en la pista: cada toque o solo las acciones que acaban en punto, trayectorias de ataque y saque sobre el mapa de la pista, recepción valorada en 4 niveles, calidad de saque, juego por fases K1/K2, cambios y tiempos muertos. El marcador, la rotación y el sacador se actualizan solos.",
-      "q4": "¿Puedo descargar un informe del partido?",
-      "a4": "Sí. Al terminar el partido la app genera un informe completo: side-out y break, origen de los puntos, rotaciones, ataque por fase y por calidad de pase, conexiones colocadora-atacante, errores no forzados y mapas de ataque (si capturaste ese partido con Rally Map). Exportarlo en PDF está disponible con el plan Análisis o con un match pass para ese partido.",
-      "q5": "¿Necesito conexión a internet?",
-      "a5": "No para anotar: la app funciona completamente sin conexión, así que puedes capturar y consultar estadísticas en cualquier pabellón. Solo necesitas internet para compartir el directo en esta web, y para el overlay para OBS o la página pública del equipo (ambos del plan Análisis Live), o para la copia de seguridad en la nube (plan Análisis).",
-      "q6": "¿Cuánto cuesta?",
-      "a6": "Descargar la app y anotar tus partidos —captura completa y estadísticas de cada partido y set— es gratis. El plan Análisis (19,99 €/año o 3,99 €/mes) añade Rally Map, el histórico del equipo y las estadísticas de temporada con filtros, informes en PDF, sincronización multi-dispositivo, copia de seguridad en la nube, exportación de equipo/torneo y compartir el equipo con otros entrenadores. El plan Análisis Live (34,99 €/año o 6,99 €/mes) suma compartir partidos en directo, el overlay para OBS y la página pública del equipo. También hay un match pass de 2,99 € para desbloquear el directo, el Rally Map y el informe en PDF de un solo partido, sin suscripción. Ver los directos desde la web es siempre gratis para quien recibe el código."
+      "eyebrow": "Dudas rápidas",
+      "title": "Preguntas frecuentes sobre Voley Stats",
+      "subtitle": "Qué registra la app, qué se ve en directo desde esta web y qué incluye cada plan. Si no encuentras tu respuesta, escríbenos a voleystats{'@'}gmail.com y te ayudamos.",
+      "q1": "¿Qué es Voley Stats?",
+      "a1": "Voley Stats es una app de estadísticas de voleibol para iPad y Android. El entrenador anota cada acción del partido desde la tablet —el marcador, la rotación y el sacador se actualizan solos—, y al terminar la app genera el informe completo. Si quieres, el partido se puede seguir en directo desde esta web con un código. Descargar la app y anotar partidos es gratis.",
+      "q2": "¿Cómo se llevan las estadísticas de un partido de voleibol con la app?",
+      "a2": "Con la rejilla rápida: tocas la jugadora y la acción, y listo. Está pensada para que una sola persona pueda dirigir y anotar a la vez. Si quieres más detalle, el Rally Map (plan Análisis) te deja anotar sobre el mapa de la pista, con las trayectorias de ataque y saque. Tú eliges el nivel: cada toque o solo las acciones que acaban en punto.",
+      "q3": "¿Qué estadísticas de voleibol registra y analiza?",
+      "a3": "Todo lo que pasa en la pista: recepción valorada en 4 niveles, calidad de saque, ataque por fase K1/K2 y por calidad de pase, bloqueo, defensa, cambios y tiempos muertos. Al terminar tienes el informe del partido con side-out y break, origen de los puntos, rotaciones, conexiones colocadora-atacante, errores no forzados y los mapas de ataque si capturaste con Rally Map.",
+      "q4": "¿Funciona sin conexión a internet?",
+      "a4": "Sí. La captura y las estadísticas funcionan completamente sin conexión, con la base de datos en el propio dispositivo, así que puedes anotar en cualquier pabellón. Internet solo hace falta para compartir el partido en directo, el overlay para OBS y la página pública del equipo (plan Análisis Live), y para la sincronización y la copia de seguridad en la nube (plan Análisis).",
+      "q5": "¿Cuánto cuesta Voley Stats? ¿Hay versión gratis?",
+      "a5": "Descargar la app y anotar tus partidos —captura completa y estadísticas de cada partido y set— es gratis, sin límite de partidos ni de equipos. El plan Análisis (19,99 €/año o 3,99 €/mes) añade el Rally Map, el análisis de temporada, los informes en PDF y la copia en la nube. El plan Análisis Live (34,99 €/año o 6,99 €/mes) suma el directo, el overlay para OBS y la página pública del equipo. Y hay un match pass de 2,99 € para desbloquear un solo partido, sin suscripción. Tienes el desglose función a función en la página de planes.",
+      "q6": "¿En qué dispositivos funciona? ¿Hay app para Android?",
+      "a6": "Sí: Voley Stats está en el App Store para iPad y en Google Play para Android. Las dos versiones comparten las mismas funciones y los mismos datos —un equipo capturado en una se sincroniza y se restaura en la otra—. Está pensada para tablet, que es donde la rejilla de captura se aprovecha de verdad.",
+      "q7": "¿Cómo comparto el partido en directo y cómo lo ven los demás?",
+      "a7": "Activas el directo en la app y compartes el código del partido, su enlace o su QR. Con eso, cualquiera abre esta web y sigue el marcador, el punto a punto y las estadísticas en tiempo real, gratis y sin registrarse. Emitir el directo es una función del plan Análisis Live, o de un match pass para ese partido; verlo no cuesta nada.",
+      "q8": "¿Puedo poner el marcador en mi retransmisión de YouTube o Twitch?",
+      "a8": "Sí. El overlay de Voley Stats es una URL que pegas en OBS como Browser Source: el marcador se superpone a tu emisión con los colores, los escudos y los rótulos de tu equipo, y se actualiza punto a punto. La posición y el tamaño se ajustan desde la app, sin tocar OBS. Es una función del plan Análisis Live.",
+      "q9": "¿Puedo exportar el informe del partido en PDF?",
+      "a9": "Sí. Con el plan Análisis exportas en PDF el informe de partido, el de temporada y las fichas de jugadora, para revisarlos con el cuerpo técnico o repartirlos a la plantilla. Si solo quieres el informe de un partido concreto, el match pass de 2,99 € también lo desbloquea.",
+      "q10": "¿Puedo compartir el equipo con mi cuerpo técnico?",
+      "a10": "Sí, con el plan Análisis. Invitas a tu cuerpo técnico con un QR y repartes permisos: quién puede anotar y quién solo consulta. La plantilla, las fotos y los partidos se comparten entre todas las cuentas, y la sincronización multi-dispositivo mantiene todo al día en cada iPad o Android del equipo.",
+      "q11": "¿Sirve para hacer scouting del rival?",
+      "a11": "Sí. El informe de rival —el que sale de tus propios partidos contra él— está incluido gratis: sus rotaciones, cómo recibe frente a tus sacadoras, sus corredores de ataque y sus zonas de peligro. Con el plan Análisis puedes además scoutear sus partidos contra terceros y montar su perfil jugadora a jugadora. Y durante el partido tienes las alertas inteligentes y el resumen entre sets, un panel para los 3 minutos de descanso con las claves del siguiente set en lenguaje claro.",
+      "q12": "¿Qué datos de las jugadoras se publican en la web?",
+      "a12": "Solo lo mínimo para seguir el partido: nombre, dorsal y sus acciones. Las fotos de jugadora y la fecha de nacimiento nunca salen del dispositivo ni llegan a la web pública —en las plantillas hay menores y el visor es una URL abierta, sin registro—. La única imagen que se publica junto al marcador es el escudo del equipo, si lo has subido."
+    },
+    "plans": {
+      "free": "Gratis",
+      "analysis": "Análisis",
+      "analysisLive": "Análisis Live",
+      "matchPass": "o match pass"
     }
+  },
+  "pricing": {
+    "eyebrow": "Planes",
+    "title": "Precios y planes de Voley Stats",
+    "subtitle": "Anotar partidos y ver sus estadísticas es gratis, para siempre y sin límite de partidos. Los planes añaden el análisis de temporada, los informes y el directo.",
+    "perYear": "/año",
+    "yearly": "anual",
+    "monthly": "mensual",
+    "orMonth": "o {price}/mes",
+    "free": "Gratis",
+    "ctaNote": "Los planes se contratan dentro de la app, en el App Store o en Google Play.",
+    "featured": "Todo incluido",
+    "plansFreeName": "Gratis",
+    "plansFreeTagline": "Todo lo que necesitas para dejar el papel",
+    "plansFreeText": "Captura completa del partido con la rejilla rápida y las estadísticas de cada partido y set: fases, rotaciones, curva de puntos, alertas durante el juego y resumen entre sets. Sin límite de partidos ni de equipos.",
+    "plansAnalysisName": "Análisis",
+    "plansAnalysisTagline": "La temporada entera, no solo el partido de hoy",
+    "plansAnalysisText": "Todo lo gratuito, más Rally Map, el histórico y las estadísticas de temporada, las fichas de jugadora, los informes en PDF, la sincronización entre dispositivos, la copia de seguridad en la nube y compartir el equipo con tu cuerpo técnico.",
+    "plansAnalysisLiveName": "Análisis Live",
+    "plansAnalysisLiveTagline": "Para equipos que retransmiten",
+    "plansAnalysisLiveText": "Todo lo del plan Análisis, más compartir el partido en directo con un código, el overlay para OBS con el que superpones el marcador a tu emisión de YouTube o Twitch, y la página pública del equipo.",
+    "matchPassName": "Match pass",
+    "matchPassPrice": "{price} · pago único",
+    "matchPassText": "¿Solo quieres desbloquear un partido concreto? El match pass le activa el directo, el Rally Map y el informe en PDF a ESE partido, sin suscripción y sin renovación.",
+    "tableTitle": "Qué incluye cada plan",
+    "tableSubtitle": "La misma matriz que aplica la app. Si algo no está aquí, es que viene en el plan gratuito.",
+    "tableFeature": "Función",
+    "tableIncluded": "Incluido",
+    "tableNotIncluded": "No incluido",
+    "tableMatchPass": "También con match pass",
+    "x1Title": "Panel de temporada e histórico",
+    "x2Title": "Exportar equipo y torneo (.vstats)",
+    "x3Title": "Zonas de recepción personalizadas",
+    "x4Title": "Página pública del equipo",
+    "x5Title": "Seguir el partido de otro equipo",
+    "noteScouting": "El informe de rival que sale de tus propios partidos contra él está en el plan gratuito. Capturar los partidos que el rival juega contra terceros, y con ellos su perfil jugadora a jugadora, necesita el plan Análisis.",
+    "faqTitle": "Sobre la facturación",
+    "q1": "¿Puedo cambiar de plan o cancelar cuando quiera?",
+    "a1": "Sí. Las suscripciones se gestionan desde tu cuenta de App Store o de Google Play, y ahí puedes subir, bajar o cancelar cuando te venga bien. Al pasar de Análisis a Análisis Live, la tienda te prorratea lo que ya habías pagado.",
+    "q2": "¿Qué pasa con mis datos si cancelo?",
+    "a2": "No se borra nada. Tus partidos siguen en el dispositivo y las funciones gratuitas siguen funcionando igual; lo que se cierra son las de pago. Si vuelves a suscribirte, lo recuperas todo tal y como estaba.",
+    "q3": "Si comparto el equipo, ¿mi plan cubre a todo el cuerpo técnico?",
+    "a3": "No. Compartir un equipo reparte el acceso a los datos según el rol de cada persona, pero el plan es siempre de la cuenta: cada miembro necesita el suyo para usar las funciones de pago. Unirse a un equipo compartido requiere plan Análisis.",
+    "q4": "¿Se paga por equipo o por cuenta?",
+    "a4": "Por cuenta. Con un solo plan gestionas todos los equipos y todas las temporadas que quieras, sin coste por equipo ni por jugadora."
   },
   "overlay": {
     "timeout": "Tiempo muerto",

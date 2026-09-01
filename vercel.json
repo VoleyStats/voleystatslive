@@ -1,7 +1,7 @@
 {
   "redirects": [
     {
-      "source": "/(team-code|privacy|terms|delete-account|contact).html",
+      "source": "/(team-code|pricing|privacy|terms|delete-account|contact).html",
       "destination": "/$1",
       "permanent": true
     }
@@ -14,6 +14,10 @@
     {
       "source": "/en/team-code",
       "destination": "/en/team-code.html"
+    },
+    {
+      "source": "/en/pricing",
+      "destination": "/en/pricing.html"
     },
     {
       "source": "/en/privacy",
@@ -34,6 +38,10 @@
     {
       "source": "/team-code",
       "destination": "/team-code.html"
+    },
+    {
+      "source": "/pricing",
+      "destination": "/pricing.html"
     },
     {
       "source": "/privacy",

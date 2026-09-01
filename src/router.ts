@@ -25,6 +25,12 @@ const routes = [
     meta: { seo: 'teamCode' },
   },
   {
+    path: '/pricing',
+    name: 'pricing',
+    component: () => import('./pages/Pricing.vue'),
+    meta: { seo: 'pricing' },
+  },
+  {
     path: '/privacy',
     name: 'privacy',
     component: () => import('./pages/Privacy.vue'),
