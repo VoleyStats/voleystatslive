@@ -104,12 +104,41 @@ const routes = [
 //
 // El overlay queda fuera: es una fuente de video para OBS, no una pagina que
 // nadie vaya a buscar en Google.
+// Los hijos hay que CLONARLOS, no compartirlos: si el gemelo `/en` reutiliza
+// los mismos objetos hijo (y por tanto sus mismos `name`), vue-router registra
+// dos veces cada nombre y el ultimo gana, asi que `/stats/:id` en castellano se
+// quedaba sin componente hijo y renderizaba una pagina en blanco (el padre no
+// tiene componente propio). Solo `/en/stats/:id` funcionaba.
+const cloneChildren = (children: RouteRecordRaw[] | undefined): RouteRecordRaw[] | undefined =>
+  children?.map((c) => {
+    const cloned = {
+      ...c,
+      name: c.name ? `${String(c.name)}-en` : undefined,
+      children: cloneChildren(c.children),
+      meta: { ...(c.meta ?? {}), locale: 'en' },
+    } as any
+    // Las redirecciones de compatibilidad (`players`, `areas`) apuntan por
+    // nombre a `stats`; en el gemelo tienen que apuntar a `stats-en` o un
+    // enlace antiguo en ingles acabaria saltando a la version castellana.
+    if (typeof c.redirect === 'function') {
+      const original = c.redirect as (to: any) => any
+      cloned.redirect = (to: any) => {
+        const target = original(to)
+        return target && typeof target === 'object' && typeof target.name === 'string'
+          ? { ...target, name: `${target.name}-en` }
+          : target
+      }
+    }
+    return cloned
+  }) as RouteRecordRaw[] | undefined
+
 const englishRoutes = routes
   .filter((r) => !r.meta?.bare && r.path !== '/:code([A-Za-z0-9]{15,})')
   .map((r) => ({
     ...r,
     path: r.path === '/' ? '/en' : `/en${r.path}`,
     name: r.name ? `${String(r.name)}-en` : undefined,
+    children: cloneChildren((r as RouteRecordRaw).children),
     meta: { ...(r.meta ?? {}), locale: 'en' },
   })) as RouteRecordRaw[]
 
