@@ -53,8 +53,8 @@ const demoData = computed<LiveMatch | null>(() => {
         // Crests: the app's own icon from `public/` (same-origin, so it passes
         // `safeLogoUrl`) stands in for both teams — placement in OBS has to be
         // decided against the WIDEST layout, which is the one with two crests.
-        team: { name: "C.V. Valencia", color: "1e90ff", logo_url: "/icon-192.png" },
-        opponent: "Barça",
+        team: { name: "Demo team", color: "1e90ff", logo_url: "/icon-192.png" },
+        opponent: "Demo opponent",
         opponent_logo_url: "/icon-192.png",
         n_sets: 5,
         sets_us: 1,
