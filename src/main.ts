@@ -1,4 +1,8 @@
 import { createApp } from "vue";
+// Antes que style.css: las @font-face deben estar declaradas cuando Tailwind
+// resuelve font-sans/font-display. Auto-hospedadas en /fonts a proposito
+// (ver el comentario de index.html): la CSP de vercel.json es 'self'.
+import "./styles/fonts.css";
 import "./style.css";
 import App from "./App.vue";
 import router from "./router.ts";
