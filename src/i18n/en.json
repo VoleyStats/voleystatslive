@@ -38,6 +38,8 @@
     "homeLink": "Voley Stats - home",
     "sections": "Sections",
     "langSelector": "Language",
+    "menu": "Menu",
+    "closeMenu": "Close menu",
     "nav": {
       "product": "Product",
       "how": "How it works",
@@ -542,7 +544,7 @@
     "attackUpUs": "Your players attack upward",
     "attackUpRival": "The opponent attacks upward",
     "noDirections": "No directions logged",
-    "summary": "{n} attacks with direction · green arrow = effective corridor, red = failed corridor"
+    "summary": "Green arrow = effective route · yellow = even · red = failed route · thickness = how often it was used"
   },
   "empty": {
     "title": "No data yet",

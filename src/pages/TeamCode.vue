@@ -38,7 +38,7 @@
         </button>
       </form>
 
-      <RouterLink to="/" class="mt-6 flex items-center justify-center gap-1.5 text-xs text-slate-500 hover:text-slate-300 transition">
+      <RouterLink :to="localeTo('/')" class="mt-6 flex items-center justify-center gap-1.5 text-xs text-slate-500 hover:text-slate-300 transition">
         <i class="bi bi-arrow-left"></i>
         {{ $t('teamCode.back') }}
       </RouterLink>
@@ -89,8 +89,10 @@
 import StoreButtons from "../components/StoreButtons.vue";
 import { ref } from "vue";
 import { RouterLink, useRouter } from "vue-router";
+import { useLocalePath } from "../composables/useLocalePath";
 
 const router = useRouter();
+const { isEn, localeTo } = useLocalePath();
 const codeTeam = ref("");
 
 const goToStats = () => {
@@ -103,6 +105,7 @@ const goToStats = () => {
   // Los enlaces de equipo llevan un UUID (36 caracteres con guiones); los de
   // partido son IDs de Firestore (20 alfanuméricos).
   const isTeam = /^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}$/.test(value);
-  router.push(isTeam ? `/team/${value}` : `/stats/${value}`);
+  const prefix = isEn.value ? "/en" : "";
+  router.push(isTeam ? `${prefix}/team/${value}` : `${prefix}/stats/${value}`);
 };
 </script>

@@ -25,20 +25,23 @@
           {{ $t('home.hero.subtitle') }}
         </p>
 
-        <div class="mt-8 flex flex-wrap items-center gap-3">
-          <a href="#descargar" class="btn-primary text-base">
+        <!-- En movil los dos CTA van apilados y a lo ancho: con `flex-wrap` a
+             350px el segundo caia solo debajo y a media anchura, que se leia
+             como un error de maquetacion. -->
+        <div class="mt-8 flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center gap-3">
+          <a :href="homeAnchor('descargar')" class="btn-primary text-base">
             <i class="bi bi-download"></i>
             {{ $t('home.hero.download') }}
           </a>
-          <RouterLink to="/team-code" class="btn-ghost text-base">
+          <RouterLink :to="localeTo('/team-code')" class="btn-ghost text-base">
             <i class="bi bi-broadcast text-volt-400"></i>
             {{ $t('home.hero.watchLive') }}
           </RouterLink>
         </div>
 
-        <dl class="mt-12 grid grid-cols-3 gap-6 max-w-md">
+        <dl class="mt-12 grid grid-cols-3 gap-4 sm:gap-6 max-w-md">
           <div v-for="s in heroStats" :key="s.label">
-            <dt class="text-2xl font-display font-bold text-white">{{ s.value }}</dt>
+            <dt class="text-xl sm:text-2xl font-display font-bold text-white">{{ s.value }}</dt>
             <dd class="text-xs text-slate-400 mt-1">{{ s.label }}</dd>
           </div>
         </dl>
@@ -167,7 +170,7 @@
       <p class="mt-4 text-slate-400">{{ $t('home.features.subtitle') }}</p>
       <p class="mt-3 text-sm text-slate-500">
         {{ $t('home.features.plansHint') }}
-        <RouterLink to="/pricing" class="ml-1 font-semibold text-volt-400 hover:text-volt-300 transition-colors">
+        <RouterLink :to="localeTo('/pricing')" class="ml-1 font-semibold text-volt-400 hover:text-volt-300 transition-colors">
           {{ $t('layout.footer.pricing') }}
           <i class="bi bi-arrow-right text-xs"></i>
         </RouterLink>
@@ -212,7 +215,7 @@
         </p>
         <div class="mt-8 flex flex-wrap justify-center gap-3">
           <StoreButtons />
-          <RouterLink to="/team-code" class="btn-ghost text-base">
+          <RouterLink :to="localeTo('/team-code')" class="btn-ghost text-base">
             {{ $t('home.download.web') }}
           </RouterLink>
         </div>
@@ -278,8 +281,11 @@ import { FEATURES } from "../data/plans";
 import { computed, onMounted, onBeforeUnmount, ref } from "vue";
 import { RouterLink } from "vue-router";
 import { useI18n } from "vue-i18n";
+import { useLocalePath } from "../composables/useLocalePath";
 
 const { t } = useI18n();
+// Los CTA de la portada mandaban a la URL castellana tambien desde `/en`.
+const { localeTo, homeAnchor } = useLocalePath();
 
 /* -------- Reveal on scroll (progressive enhancement, SEO-safe) -------- */
 // Duración de `.js .reveal` en style.css. Se repite aquí solo para saber

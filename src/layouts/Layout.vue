@@ -8,7 +8,7 @@
         <div class="flex items-center gap-3">
           <button
             v-if="showBack"
-            class="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/[0.04] text-slate-300 hover:text-white transition-colors"
+            class="pressable flex h-10 w-10 md:h-9 md:w-9 items-center justify-center rounded-full border border-white/10 bg-white/[0.04] text-slate-300 hover:text-white"
             :aria-label="$t('layout.back')"
             @click="goBack"
           >
@@ -32,35 +32,105 @@
         </nav>
 
         <div class="flex items-center gap-2 sm:gap-3">
-          <!-- Selector de idioma ES/EN (persistido en localStorage) -->
-          <div
-            class="flex rounded-full border border-white/10 bg-white/[0.04] p-0.5 text-[11px] font-semibold"
-            role="group"
-            :aria-label="$t('layout.langSelector')"
-          >
-            <button
-              v-for="l in SUPPORTED_LOCALES"
-              :key="l"
-              class="rounded-full px-2 py-1 uppercase transition-colors"
-              :class="locale === l ? 'bg-white text-slate-900' : 'text-slate-400 hover:text-white'"
-              :aria-pressed="locale === l"
-              @click="switchLocale(l)"
-            >{{ l }}</button>
-          </div>
+          <!-- "Ver en vivo" desaparece en movil: ahi era un icono suelto sin
+               etiqueta compitiendo por el ancho con el otro CTA. Vive en el
+               panel del menu, con su nombre completo. -->
           <RouterLink
             v-if="showWatchLive"
             :to="localeTo('/team-code')"
-            class="btn-ghost !px-4 !py-2 text-xs sm:text-sm"
+            class="btn-ghost hidden sm:inline-flex !px-4 !py-2.5 text-sm"
           >
             <i class="bi bi-broadcast text-volt-400"></i>
-            <span class="hidden sm:inline">{{ $t('layout.watchLive') }}</span>
+            {{ $t('layout.watchLive') }}
           </RouterLink>
-          <a :href="homeAnchor('descargar')" class="btn-primary !px-4 !py-2 text-xs sm:text-sm">
+          <a :href="homeAnchor('descargar')" class="btn-primary !px-4 !py-2.5 text-xs sm:text-sm">
             {{ $t('layout.downloadApp') }}
           </a>
+          <!-- Hasta ahora en movil NO habia navegacion: el <nav> de arriba es
+               `md:flex` y ademas solo en la portada, asi que las secciones,
+               Planes y Preguntas solo se alcanzaban bajando hasta el pie. -->
+          <button
+            class="pressable md:hidden flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/[0.04] text-slate-200 hover:text-white"
+            :aria-label="$t('layout.menu')"
+            :aria-expanded="menuOpen"
+            aria-controls="mobile-menu"
+            @click="menuOpen = true"
+          >
+            <i class="bi bi-list text-xl"></i>
+          </button>
         </div>
       </div>
     </header>
+
+    <!-- MENU MOVIL (panel a pantalla completa) -->
+    <Transition name="menu">
+      <div
+        v-if="menuOpen"
+        id="mobile-menu"
+        ref="menuEl"
+        role="dialog"
+        aria-modal="true"
+        :aria-label="$t('layout.sections')"
+        class="fixed inset-0 z-50 md:hidden bg-ink-950/95 backdrop-blur-2xl"
+        @keydown.esc="menuOpen = false"
+        @keydown.tab="trapTab"
+      >
+        <div class="menu-panel flex h-full flex-col overflow-y-auto px-5 pt-4 pb-[calc(2rem+env(safe-area-inset-bottom))]">
+          <div class="flex h-12 items-center justify-between">
+            <Logo :size="28" />
+            <button
+              ref="closeEl"
+              class="pressable flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/[0.04] text-slate-300 hover:text-white"
+              :aria-label="$t('layout.closeMenu')"
+              @click="menuOpen = false"
+            >
+              <i class="bi bi-x-lg"></i>
+            </button>
+          </div>
+
+          <nav class="mt-6 flex flex-col" :aria-label="$t('layout.sections')">
+            <a
+              v-for="item in menuSections"
+              :key="item.hash"
+              :href="homeAnchor(item.hash)"
+              class="pressable flex items-center justify-between border-b border-white/5 py-4 text-lg font-display text-slate-200 hover:text-white"
+              @click="menuOpen = false"
+            >
+              {{ item.label }}
+              <i class="bi bi-chevron-right text-sm text-slate-600"></i>
+            </a>
+            <RouterLink
+              :to="localeTo('/pricing')"
+              class="pressable flex items-center justify-between border-b border-white/5 py-4 text-lg font-display text-slate-200 hover:text-white"
+              @click="menuOpen = false"
+            >
+              {{ $t('layout.nav.pricing') }}
+              <i class="bi bi-chevron-right text-sm text-slate-600"></i>
+            </RouterLink>
+          </nav>
+
+          <!-- Los CTA al final y a lo ancho: es donde llega el pulgar. -->
+          <div class="mt-auto flex flex-col gap-3 pt-8">
+            <RouterLink
+              :to="localeTo('/team-code')"
+              class="btn-ghost w-full text-base"
+              @click="menuOpen = false"
+            >
+              <i class="bi bi-broadcast text-volt-400"></i>
+              {{ $t('layout.watchLive') }}
+            </RouterLink>
+            <a
+              :href="homeAnchor('descargar')"
+              class="btn-primary w-full text-base"
+              @click="menuOpen = false"
+            >
+              <i class="bi bi-download"></i>
+              {{ $t('layout.downloadApp') }}
+            </a>
+          </div>
+        </div>
+      </div>
+    </Transition>
 
     <!-- MAIN -->
     <main class="flex-1">
@@ -103,12 +173,31 @@
         </div>
       </div>
       <div class="border-t border-white/5">
-        <div class="container-x py-5 text-xs text-slate-500 flex flex-col sm:flex-row items-center justify-between gap-2">
+        <div class="container-x py-5 flex flex-col-reverse sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
           <span>{{ $t('layout.footer.rights', { year: currentYear }) }}</span>
-          <span class="flex items-center gap-1.5">
-            {{ $t('layout.footer.madeFor') }}
-            <i class="bi bi-suit-heart-fill text-volt-500"></i>
-          </span>
+          <div class="flex items-center gap-4">
+            <span class="flex items-center gap-1.5">
+              {{ $t('layout.footer.madeFor') }}
+              <i class="bi bi-suit-heart-fill text-volt-500"></i>
+            </span>
+            <!-- Selector de idioma ES/EN (persistido en localStorage). Vive en
+                 el pie, no en la cabecera: es una decision que se toma una vez,
+                 y en movil competia por el ancho con los dos CTA. -->
+            <div
+              class="flex rounded-full border border-white/10 bg-white/[0.04] p-0.5 font-semibold"
+              role="group"
+              :aria-label="$t('layout.langSelector')"
+            >
+              <button
+                v-for="l in SUPPORTED_LOCALES"
+                :key="l"
+                class="pressable rounded-full px-3 py-1.5 uppercase"
+                :class="locale === l ? 'bg-white text-slate-900' : 'text-slate-400 hover:text-white'"
+                :aria-pressed="locale === l"
+                @click="switchLocale(l)"
+              >{{ l }}</button>
+            </div>
+          </div>
         </div>
       </div>
     </footer>
@@ -116,34 +205,83 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, nextTick, ref, watch, onBeforeUnmount } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
 import { SUPPORTED_LOCALES, setLocale, type AppLocale } from "../i18n";
+import { useLocalePath } from "../composables/useLocalePath";
 import Logo from "../components/Logo.vue";
 
 const route = useRoute();
 const router = useRouter();
-const { locale } = useI18n();
+const { locale, t } = useI18n();
 
-// Los gemelos en ingles se llaman `home-en`, `code-en`... (ver router.ts), asi
-// que comparar contra `route.name` a pelo daba falsos negativos en TODA la
-// version inglesa: la portada `/en` se pintaba con boton "Volver" y sin CTA.
-const baseName = computed(() => ((route.name as string) ?? "").replace(/-en$/, ""));
-const isEn = computed(() => route.meta?.locale === "en");
-
-// Un enlace del chrome tiene que quedarse en el idioma en el que esta el
-// usuario: desde `/en` el pie no puede mandar a la URL castellana, que ademas
-// declara otro canonical.
-const localeTo = (path: string) => (isEn.value ? (path === "/" ? "/en" : `/en${path}`) : path);
+// `baseName`/`localeTo`/`homeAnchor` viven en el composable porque las paginas
+// de contenido (Home, TeamCode) tienen exactamente el mismo problema con los
+// gemelos `/en` y lo estaban resolviendo... no resolviendolo.
+const { baseName, localeTo, homeAnchor } = useLocalePath();
 
 const isHome = computed(() => baseName.value === "home");
 
-// En la portada el ancla se queda relativa (`#faq`), que es un salto nativo sin
-// recargar; desde cualquier otra pagina hace falta la ruta completa, y en su
-// idioma.
-const homeAnchor = (hash: string) =>
-  isHome.value ? `#${hash}` : `${isEn.value ? "/en" : "/"}#${hash}`;
+/* ---------------------------- Menu movil ---------------------------- */
+const menuOpen = ref(false);
+const menuEl = ref<HTMLElement | null>(null);
+const closeEl = ref<HTMLElement | null>(null);
+// El que abrio el panel, para devolverle el foco al cerrarlo.
+let opener: HTMLElement | null = null;
+
+// Las mismas secciones que el <nav> de escritorio. `homeAnchor` ya convierte
+// `#faq` en `/#faq` cuando no estamos en la portada, asi que el menu sirve
+// tambien desde /stats o /pricing — que es justo donde en movil no habia
+// ninguna navegacion.
+const menuSections = computed(() => [
+  { hash: "producto", label: t("layout.nav.product") },
+  { hash: "como-funciona", label: t("layout.nav.how") },
+  { hash: "funciones", label: t("layout.nav.features") },
+  { hash: "faq", label: t("layout.nav.faq") },
+]);
+
+const FOCUSABLE = 'a[href], button:not([disabled])';
+
+// Trampa de foco minima: con `aria-modal` los lectores de pantalla ya ignoran
+// lo de detras, pero el tabulador no, y detras hay una pagina entera.
+const trapTab = (e: KeyboardEvent) => {
+  const nodes = menuEl.value?.querySelectorAll<HTMLElement>(FOCUSABLE);
+  if (!nodes || nodes.length === 0) return;
+  const first = nodes[0];
+  const last = nodes[nodes.length - 1];
+  const active = document.activeElement;
+  if (e.shiftKey && active === first) {
+    e.preventDefault();
+    last.focus();
+  } else if (!e.shiftKey && active === last) {
+    e.preventDefault();
+    first.focus();
+  }
+};
+
+watch(menuOpen, async (open) => {
+  if (open) {
+    opener = document.activeElement as HTMLElement | null;
+    // La pagina de detras no puede seguir scrolleando bajo el panel.
+    document.body.style.overflow = "hidden";
+    await nextTick();
+    closeEl.value?.focus();
+  } else {
+    document.body.style.overflow = "";
+    opener?.focus();
+    opener = null;
+  }
+});
+
+// Navegar cierra el panel. Cubre tambien el boton "atras" del navegador, que
+// no pasa por ningun @click.
+watch(() => route.fullPath, () => { menuOpen.value = false; });
+
+// Si el componente muere con el panel abierto (no deberia, pero el estilo se
+// queda en <body> y no en su plantilla), el scroll se quedaria bloqueado.
+onBeforeUnmount(() => { document.body.style.overflow = ""; });
+
 const showBack = computed(() => !["home", "code"].includes(baseName.value));
 
 // El CTA "Ver en vivo" solo aporta cuando el usuario aún no está dentro de un

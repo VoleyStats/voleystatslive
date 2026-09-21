@@ -46,15 +46,26 @@ Requiere `.env` (copiar `.env.example`) con las claves `VITE_*` de Firebase, apu
 - `/team/:id` → `TeamMatches.vue` — página pública de un equipo (`teams/{id}`). Dos pestañas de alto nivel: **Partidos** (lista de partidos compartidos, con selector de temporada si el equipo publica `current_season`) y **Estadísticas** (agregado multi-partido), con 7 sub-pestañas propias (`STATS_TABS`): general, rotaciones, absolutas, histórico, direcciones, por jugadora, tablas.
 - `/:code([A-Za-z0-9]{15,})` → enlace corto (`voleystats.vercel.app/<código>`); redirige a `stats`. El patrón (15+ alfanuméricos) evita capturar otras rutas — los códigos son IDs de Firestore.
 
-`Layout.vue` envuelve todas las rutas salvo las `bare`: nav superior con botón "atrás" (oculto en `home`/`code`) y CTA "Ver en vivo" (oculto en `code`/`stats`/`players`/`team`/`overlay`, donde no aporta), más footer con enlaces legales. No hay barra inferior de navegación (toolbar) actualmente.
+`Layout.vue` envuelve todas las rutas salvo las `bare`: nav superior con botón "atrás" (oculto en `home`/`code`) y CTA "Ver en vivo" (oculto en `code`/`stats`/`players`/`team`/`overlay`, donde no aporta, y en móvil siempre — ahí era un icono sin etiqueta compitiendo por el ancho, y vive en el menú), más footer con enlaces legales. No hay barra inferior de navegación (toolbar) actualmente.
+
+**El `<nav>` de escritorio es `hidden md:flex` y además `v-if="isHome"`**, así que en móvil no había NINGUNA navegación: las secciones, `/pricing` y la FAQ solo se alcanzaban bajando hasta el pie. Lo cubre el **menú móvil** (`md:hidden`): botón en la cabecera → panel a pantalla completa (`<Transition name="menu">`, ver `.menu-*` en `style.css`) con las cuatro secciones + Planes y los dos CTA abajo, donde llega el pulgar. Los enlaces salen de `homeAnchor`, así que el menú funciona igual desde `/stats` o `/pricing` (`#faq` → `/#faq`). Cierra con Escape, al navegar (incluido el botón "atrás" del navegador, vía `watch` sobre `route.fullPath`), y bloquea el scroll de `<body>` mientras está abierto; `trapTab` es una trampa de foco mínima porque `aria-modal` calla a los lectores de pantalla pero no al tabulador.
+
+**El selector de idioma ES/EN vive en la barra inferior del footer**, no en la cabecera: es una decisión que se toma una vez y en móvil competía por el ancho con los dos CTA.
 
 **Trampa de los gemelos `/en`:** sus rutas se llaman `home-en`, `code-en`… (el
 sufijo lo pone `router.ts`), así que comparar `route.name === 'home'` a pelo da
 falso en TODA la versión inglesa — es lo que dejaba la portada `/en` con botón
-"Volver" y sin CTA. `Layout.vue` normaliza con `baseName` (quita el sufijo) y
-enruta sus enlaces por `localeTo(path)` / `homeAnchor(hash)`, que mantienen al
-usuario en su idioma en vez de saltar a la URL castellana (que además declara
+"Volver" y sin CTA. La normalización vive en **`src/composables/useLocalePath.ts`**
+(`baseName` quita el sufijo; `localeTo(path)` / `homeAnchor(hash)` mantienen al
+usuario en su idioma en vez de saltar a la URL castellana, que además declara
 otro canonical). El toggle ES/EN navega al gemelo, no solo cambia el locale.
+
+**Esto NO es solo del chrome.** Estaba resuelto en `Layout.vue` y sin resolver en
+las páginas: los CTA del hero, el enlace a Planes de "Funciones", el "volver" de
+`/team-code` y el propio `router.push` de su formulario eran rutas castellanas
+literales, así que un lector de `/en` salía de su versión del sitio al primer
+clic. Por eso la lógica está en un composable: **cualquier enlace interno nuevo
+va por `localeTo`/`homeAnchor`**, esté en el layout o en una página.
 
 ## Patrón de datos
 
@@ -73,6 +84,8 @@ Toda la agregación (marcador, rachas, eficiencias, kills/aces derivados, rotaci
 
 - `src/utils/volleyStats.ts` — el núcleo: constantes de `action.id` por área (`KILL_IDS`, `ATTACK_IDS`, `SERVE_IDS`, `RECEPTION_IDS`...), `AREA_LABEL_KEYS` (10 áreas, 0–9), derivación de kills/aces reales (`deriveCredits`/`mergeCredits`, re-atribuyendo errores rivales de recepción/defensa como punto nuestro), eficiencias, side-out/break, `isMatchFinished`/`isMatchCacheable`, radar, rotaciones, ataque por técnica/dirección. Punto de entrada obligado para tocar cualquier métrica.
 - `src/utils/teamTables.ts` — tablas agregadas multi-partido para `/team/:id`.
+- `src/composables/useLocalePath.ts` — `localeTo`/`homeAnchor`/`baseName` para que todo enlace interno respete el gemelo `/en` (ver la trampa arriba).
+- `src/utils/edgeFade.ts` — directivo `v-edge-fade` para las tiras de pestañas con scroll horizontal (`.tabstrip`): mide y escribe `data-edge="start end"`, y el CSS enciende el degradado del lado que corresponda. Se mide en vez de poner un degradado fijo porque uno fijo a la izquierda apaga la primera pestaña —normalmente la activa— sin que haya nada oculto detrás.
 - `src/composables/useTeamStats.ts` — composable que orquesta la lista de partidos de un equipo: caché `localStorage` (ver arriba), resolución cache-first/one-shot/`onSnapshot` por partido, y merge de stats entre partidos.
 - `src/components/stats/*.vue` (`SkillTablesSection`, `DirectionsSection`, `Rotations360Section`, `PlayerDetailSection`) — secciones de pestañas reutilizadas entre `GeneralStats.vue` (un partido) y `TeamMatches.vue` (agregado de equipo).
 
@@ -124,7 +137,15 @@ Si algo sale mal o vacío en la UI, comprueba primero si la app está escribiend
 
 ## Diseño
 
-Dark-only (no hay light theme real; `ToggleTheme` no está enganchado). Tokens en `tailwind.config.js`: `ink` (fondos), `brand` (azul, primario), `volt` (lima, acento/CTA); fuentes `font-display` (Space Grotesk) y `font-sans` (Inter). Clases reutilizables en `src/style.css` bajo `@layer components` (`.btn-primary`, `.btn-ghost`, `.card`, `.eyebrow`, `.text-gradient`, `.container-x`, `.reveal`) — prefiérelas a recomponer utilidades sueltas. `src/components/Logo.vue` es la marca en SVG inline.
+Dark-only (no hay light theme real; `ToggleTheme` no está enganchado). Tokens en `tailwind.config.js`: `ink` (fondos), `brand` (azul, primario), `volt` (lima, acento/CTA); fuentes `font-display` (Space Grotesk) y `font-sans` (Inter). Clases reutilizables en `src/style.css` bajo `@layer components` (`.btn-primary`, `.btn-ghost`, `.card`, `.eyebrow`, `.text-gradient`, `.container-x`, `.reveal`, `.pressable`, `.tabstrip`) — prefiérelas a recomponer utilidades sueltas. `src/components/Logo.vue` es la marca en SVG inline.
+
+**Movimiento.** Toda curva sale de los tokens `--ease-out` / `--ease-in-out` / `--ease-drawer` de `:root` (con sus presupuestos documentados ahí mismo: nada de UI por encima de 300ms). Las piezas con nombre:
+- `.page-*` — cambio de página, montado en `App.vue`. Lo que se anima es un `<div>` envoltorio y NO el componente de la página: la mitad de las páginas (Home, TeamCode, TeamMatches) tienen varias `<section>` hermanas como raíz, y `<Transition>` sobre un fragmento no anima nada, solo avisa por consola. La `key` es el **nombre** de la ruta, no el path, para que `/stats/A` → `/stats/B` no vuelva a montar el componente. `mode="out-in"` obliga además a que `scrollBehavior` (en `router.ts`) espere 130ms antes de subir arriba — sin eso el scroll saltaba en la página que todavía se estaba yendo; el salto de ancla dentro de la misma página se exime porque ahí no hay transición que esperar.
+- `.tab-swap` — cambio de pestaña en `/stats/:id` y `/team/:id`, con un `<div :key="activeTab">` envolviendo el bloque de pestañas. Solo anima la **entrada**: dos pestañas no miden lo mismo, y un cruce de verdad exigiría posicionarlas en absoluto y congelar la altura.
+- `.menu-*` — panel del menú móvil.
+- `.tabstrip` + `v-edge-fade`, `.tl-*` (timeline punto a punto), `.vsl-fade-in` (relevo de skeleton), `.faq-answer` (`grid-template-rows` 0fr↔1fr, interrumpible), `.reveal` (portada, progressive enhancement).
+
+`prefers-reduced-motion` está resuelto **caso a caso, no con un `*` global**: los pulsos de estado (indicador "en vivo", skeletons) se cambian por un fundido de una pasada en vez de congelarse, la decoración pura se apaga, y las entradas conservan el fundido pero pierden el desplazamiento. Al añadir movimiento nuevo, añade también su caso ahí.
 
 ## Deuda conocida
 

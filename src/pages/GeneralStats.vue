@@ -42,11 +42,11 @@
 
             <!-- Pestañas (ya se pueden pulsar mientras carga; cada una tiene su
                  propio skeleton, a la altura del contenido real). -->
-            <div class="w-full flex items-center gap-1.5 overflow-x-auto pb-1">
+            <div v-edge-fade class="tabstrip w-full flex items-center gap-1.5 pb-1">
                 <button
                     v-for="tab in visibleTabs"
                     :key="tab.key"
-                    class="shrink-0 rounded-full px-3 py-1.5 text-xs border pressable"
+                    class="shrink-0 rounded-full px-3.5 py-2 text-xs border pressable"
                     :class="activeTab === tab.key
                         ? 'bg-white text-slate-900 border-white font-semibold'
                         : 'border-white/10 bg-white/[0.04] text-slate-300 hover:border-white/30'"
@@ -172,10 +172,10 @@
                 </div>
 
                 <!-- Selector de sets (con "Partido" completo en el informe) -->
-                <div class="mt-4 flex items-center gap-2 overflow-x-auto">
+                <div v-edge-fade class="tabstrip mt-4 flex items-center gap-2">
                     <button
                         v-if="matchOver"
-                        class="shrink-0 rounded-full px-3 py-1.5 text-sm border pressable"
+                        class="shrink-0 rounded-full px-3.5 py-2 text-sm border pressable"
                         :class="set === 0
                             ? 'bg-white text-slate-900 border-white font-semibold'
                             : 'border-white/10 bg-white/[0.04] text-slate-300 hover:border-white/30'"
@@ -186,7 +186,7 @@
                     <button
                         v-for="n in nSets"
                         :key="n"
-                        class="shrink-0 rounded-full px-3 py-1.5 text-sm border pressable"
+                        class="shrink-0 rounded-full px-3.5 py-2 text-sm border pressable"
                         :class="set === n
                             ? 'bg-white text-slate-900 border-white font-semibold'
                             : 'border-white/10 bg-white/[0.04] text-slate-300 hover:border-white/30'"
@@ -213,11 +213,11 @@
 
             <template v-else>
             <!-- ============ PESTAÑAS (espejo de la app) ============ -->
-            <div class="w-full flex items-center gap-1.5 overflow-x-auto pb-1">
+            <div v-edge-fade class="tabstrip w-full flex items-center gap-1.5 pb-1">
                 <button
                     v-for="tab in visibleTabs"
                     :key="tab.key"
-                    class="shrink-0 rounded-full px-3 py-1.5 text-xs border pressable"
+                    class="shrink-0 rounded-full px-3.5 py-2 text-xs border pressable"
                     :class="activeTab === tab.key
                         ? 'bg-white text-slate-900 border-white font-semibold'
                         : 'border-white/10 bg-white/[0.04] text-slate-300 hover:border-white/30'"
@@ -226,6 +226,13 @@
                     {{ $t(tab.labelKey) }}
                 </button>
             </div>
+
+            <!-- El envoltorio existe SOLO para animar el cambio de pestaña: con
+                 `:key` se vuelve a montar al cambiar y `.tab-swap` lo hace
+                 entrar con el mismo fundido que un cambio de página. Repite el
+                 `flex flex-col gap-4 items-center` de la <section> de arriba
+                 porque se mete en medio de esa columna. -->
+            <div :key="activeTab" class="tab-swap w-full flex flex-col items-center gap-4">
 
             <!-- ============ 1. GENERAL ============ -->
             <template v-if="activeTab === 'general'">
@@ -388,6 +395,7 @@
                     <VueApexCharts type="bar" height="220" :options="momentum.chartOptions" :series="momentum.series" />
                 </article>
             </template>
+            </div>
         </template>
         </template>
     </section>
@@ -398,6 +406,7 @@ import { computed, onUnmounted, reactive, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 import { useI18n } from "vue-i18n";
 import { useDocument } from "vuefire";
+import { vEdgeFade } from "../utils/edgeFade";
 // Registro local (no global en main.ts): solo esta página paga por ApexCharts.
 import VueApexCharts from "vue3-apexcharts";
 import type { ApexOptions } from "apexcharts";

@@ -147,10 +147,17 @@ const allRoutes = [...routes, ...englishRoutes]
 const router = createRouter({
   history: createWebHistory(),
   routes: allRoutes,
-  scrollBehavior(to, _from, savedPosition) {
-    if (savedPosition) return savedPosition
-    if (to.hash) return { el: to.hash, top: 80, behavior: 'smooth' }
-    return { top: 0 }
+  scrollBehavior(to, from, savedPosition) {
+    const position = savedPosition
+      ?? (to.hash ? { el: to.hash, top: 80, behavior: 'smooth' as const } : { top: 0 })
+    // Un salto de ancla dentro de la MISMA pagina (`/` -> `/#faq`) no cambia de
+    // componente, asi que no hay transicion que esperar: retrasarlo solo se
+    // notaria como lag.
+    if (to.path === from.path) return position
+    // Con `mode="out-in"` (ver App.vue) la pagina saliente sigue en pantalla
+    // 120ms: sin esperar, el scroll subia a arriba del todo la pagina que
+    // todavia se esta yendo.
+    return new Promise((resolve) => setTimeout(() => resolve(position), 130))
   },
 })
 

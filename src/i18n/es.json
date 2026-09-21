@@ -38,6 +38,8 @@
     "homeLink": "Voley Stats - inicio",
     "sections": "Secciones",
     "langSelector": "Idioma",
+    "menu": "Menú",
+    "closeMenu": "Cerrar menú",
     "nav": {
       "product": "Producto",
       "how": "Cómo funciona",
@@ -542,7 +544,7 @@
     "attackUpUs": "Tus jugadoras atacan hacia arriba",
     "attackUpRival": "El rival ataca hacia arriba",
     "noDirections": "Sin direcciones registradas",
-    "summary": "{n} ataques con dirección · flecha verde = corredor efectivo, roja = corredor fallido"
+    "summary": "Flecha verde = corredor efectivo · amarilla = igualado · roja = corredor fallido · grosor = frecuencia"
   },
   "empty": {
     "title": "No hay datos todavía",

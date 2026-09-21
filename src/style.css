@@ -145,6 +145,42 @@
     opacity: 1;
   }
 
+  /* Tira de pestañas con scroll horizontal (/stats/:id, /team/:id). Seis o
+     siete píldoras no caben en 390px y hasta ahora la única pista de que
+     había más era que la última salía cortada: el degradado de los bordes lo
+     dice, y `scroll-snap` evita dejar media píldora a la vista al soltar.
+     El degradado se enciende por lado según dónde esté el scroll (lo pone
+     `v-edge-fade`, ver src/utils/edgeFade.ts): un fundido fijo a la izquierda
+     apagaría la primera pestaña —normalmente la activa— sin que haya nada
+     oculto detrás. */
+  .tabstrip {
+    @apply overflow-x-auto;
+    scroll-snap-type: x proximity;
+    /* La barra de scroll nativa parte el degradado por abajo y en táctil no
+       aporta nada; el degradado ya cumple su función. */
+    scrollbar-width: none;
+  }
+  .tabstrip::-webkit-scrollbar {
+    display: none;
+  }
+  .tabstrip > * {
+    scroll-snap-align: start;
+  }
+  .tabstrip[data-edge~="start"] {
+    -webkit-mask-image: linear-gradient(to right, transparent 0, #000 24px);
+    mask-image: linear-gradient(to right, transparent 0, #000 24px);
+  }
+  .tabstrip[data-edge~="end"] {
+    -webkit-mask-image: linear-gradient(to left, transparent 0, #000 24px);
+    mask-image: linear-gradient(to left, transparent 0, #000 24px);
+  }
+  /* Va DESPUÉS de las dos de arriba a propósito: misma especificidad, gana
+     la última, que es la que necesita el caso de scroll a media tira. */
+  .tabstrip[data-edge="start end"] {
+    -webkit-mask-image: linear-gradient(to right, transparent 0, #000 24px, #000 calc(100% - 24px), transparent 100%);
+    mask-image: linear-gradient(to right, transparent 0, #000 24px, #000 calc(100% - 24px), transparent 100%);
+  }
+
   /* Progressive-enhancement reveal: content is visible by default (no-JS
      crawlers see everything); the .js gate only hides it when JS is present.
      Los 0.7s son deliberados: esto es marketing de portada, no UI.
@@ -180,6 +216,60 @@
      queda promovido a su propia capa de composición de por vida — el mismo
      pecado que el `will-change` permanente de `.reveal`. */
   animation: vsl-fade-in 200ms var(--ease-out) backwards;
+}
+
+/* Cambio de página (`<Transition name="page">` en App.vue) y cambio de pestaña
+   (`.tab-swap` con `:key` en /stats/:id y /team/:id). Son el mismo gesto —
+   "esto que lees es otra cosa"— y por eso comparten forma: un fundido con 6px
+   de subida, dentro del presupuesto de UI (nada por encima de 300ms).
+   La salida es más corta que la entrada (`mode="out-in"` encadena las dos, así
+   que el coste real es la suma): 120 + 200 se sigue leyendo como inmediato. */
+.page-enter-active {
+  transition: opacity 200ms var(--ease-out), transform 200ms var(--ease-out);
+}
+.page-leave-active {
+  transition: opacity 120ms var(--ease-out);
+}
+.page-enter-from {
+  opacity: 0;
+  transform: translateY(6px);
+}
+.page-leave-to {
+  opacity: 0;
+}
+
+@keyframes vsl-tab-swap {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+/* Sin transición de salida a propósito: el contenido de dos pestañas no mide
+   lo mismo, así que un cruce de verdad exigiría posicionarlas en absoluto y
+   congelar la altura. Lo que se anima es la llegada, que es lo que se mira. */
+.tab-swap {
+  animation: vsl-tab-swap 200ms var(--ease-out);
+}
+
+/* Panel del menú móvil (Layout.vue). El telón se funde y el panel sube: el
+   panel es lo que hay que mirar, el telón solo apaga lo de detrás. */
+.menu-enter-active,
+.menu-leave-active {
+  transition: opacity 200ms var(--ease-out);
+}
+.menu-enter-active .menu-panel {
+  transition: transform 260ms var(--ease-drawer);
+}
+.menu-leave-active .menu-panel {
+  transition: transform 180ms var(--ease-drawer);
+}
+.menu-enter-from,
+.menu-leave-to {
+  opacity: 0;
+}
+.menu-enter-from .menu-panel,
+.menu-leave-to .menu-panel {
+  transform: translateY(12px);
 }
 
 /* Lista punto a punto de /stats/:id (`TransitionGroup name="tl"`). La fila
@@ -223,6 +313,20 @@
   .animate-float,
   .animate-shimmer {
     animation: none;
+  }
+  /* Cambio de página y de pestaña: se queda el fundido (informa de que el
+     contenido ha cambiado) y se va el desplazamiento, que es lo que marea. */
+  .page-enter-from {
+    transform: none;
+  }
+  .tab-swap {
+    animation-name: vsl-fade-in;
+  }
+  /* El panel del menú móvil entra desde el borde: sin movimiento se queda en
+     un fundido corto, no en una aparición seca. */
+  .menu-enter-from .menu-panel,
+  .menu-leave-to .menu-panel {
+    transform: none;
   }
   /* Transiciones de UI: se acortan a un cambio prácticamente instantáneo en
      lugar de desaparecer, para no perder el estado intermedio. */

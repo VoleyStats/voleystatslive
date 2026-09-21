@@ -5,9 +5,6 @@
                 <filter id="heatBlur" x="-80%" y="-80%" width="260%" height="260%">
                     <feGaussianBlur stdDeviation="10" />
                 </filter>
-                <marker id="arrowHead" viewBox="0 0 6 6" refX="5" refY="3" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
-                    <path d="M 0 0 L 6 3 L 0 6 z" fill="context-stroke" />
-                </marker>
             </defs>
 
             <!-- Fuera (banda) + suelo + líneas: mismo lenguaje visual que la app -->
@@ -37,20 +34,14 @@
                 />
             </g>
 
-            <!-- flechas de corredores (top 6 por volumen) -->
-            <line
-                v-for="(a, i) in arrows"
-                :key="'a' + i"
-                :x1="a.x1"
-                :y1="a.y1"
-                :x2="a.x2"
-                :y2="a.y2"
-                :stroke="a.color"
-                :stroke-width="1.5 + Math.min(a.count, 6)"
-                stroke-linecap="round"
-                marker-end="url(#arrowHead)"
-                opacity="0.9"
-            />
+            <!-- trayectorias: todas, con la frecuencia en el trazo. La punta
+                 es un polígono por flecha (no un <marker> compartido) para que
+                 escale con el grosor y para que la línea acabe en su BASE, no
+                 debajo de ella. -->
+            <g v-for="(a, i) in arrows" :key="'a' + i" :opacity="a.opacity">
+                <path :d="a.d" fill="none" :stroke="a.color" :stroke-width="a.width" stroke-linecap="round" />
+                <polygon :points="a.head" :fill="a.color" />
+            </g>
 
             <!-- etiqueta del atacante -->
             <text :x="W / 2" :y="H - 6" text-anchor="middle" fill="#94a3b8" font-size="11">
@@ -60,7 +51,7 @@
 
         <p v-if="total === 0" class="text-xs text-slate-500">{{ $t('courtMap.noDirections') }}</p>
         <p v-else class="text-xs text-slate-500">
-            {{ $t('courtMap.summary', { n: total }) }}
+            {{ $t('courtMap.summary') }}
         </p>
     </div>
 </template>
@@ -104,16 +95,41 @@ const aid = (s: any): string => String(s?.action?.id ?? "");
 // mitad propia (abajo, de la red hacia fuera) y mitad rival (arriba).
 const OWN_ROWS = [["4", "3", "2"], ["7", "8", "9"], ["5", "6", "1"]];
 const RIVAL_ROWS = [["2", "3", "4"], ["9", "8", "7"], ["1", "6", "5"]];
+// Cada zona se parte en 4 subzonas: mitad de red (A/B) vs mitad de fondo
+// (D/C), izquierda/derecha, SIEMPRE en el marco de visión del equipo que
+// actúa. La rejilla rival está girada 180º (crece hacia la red y el rival
+// mira al revés), así que usa la matriz rotada — mismo criterio que
+// `CourtGeometry.rivalSubzones` en iOS y `CourtRows.rivalSubzones` en Android.
+const OWN_SUBZONES = [["A", "B"], ["D", "C"]];
+const RIVAL_SUBZONES = [["C", "D"], ["B", "A"]];
 
-function zoneCenter(zone: string, top: boolean): { x: number; y: number } | null {
+// Centro de una celda: un token completo ("6B") cae en su cuarto de zona, un
+// dígito suelto ("6") en el centro de la zona. Las apps agregan las
+// trayectorias por SUBZONA, así que dos rutas distintas de la misma zona
+// tienen que salir de puntos distintos y no apilarse en el centro.
+function cellCenter(token: string, top: boolean): { x: number; y: number } | null {
     const rows = top ? RIVAL_ROWS : OWN_ROWS;
+    const zone = token[0];
     for (let r = 0; r < 3; r++) {
         const c = rows[r].indexOf(zone);
-        if (c >= 0) {
-            const x = M + c * colW + colW / 2;
-            const y = top ? netY - (r + 0.5) * rowH : netY + (r + 0.5) * rowH;
-            return { x, y };
+        if (c < 0) continue;
+        const sub = top ? RIVAL_SUBZONES : OWN_SUBZONES;
+        let dc = 0.5;
+        let dr = 0.5;
+        const letter = token[1];
+        if (letter) {
+            for (let sr = 0; sr < 2; sr++) {
+                const sc = sub[sr].indexOf(letter);
+                if (sc >= 0) {
+                    dc = sc * 0.5 + 0.25;
+                    dr = sr * 0.5 + 0.25;
+                    break;
+                }
+            }
         }
+        const x = M + (c + dc) * colW;
+        const y = top ? netY - (r + dr) * rowH : netY + (r + dr) * rowH;
+        return { x, y };
     }
     return null;
 }
@@ -126,8 +142,7 @@ function fromPoint(token: string): { x: number; y: number } | null {
         const c = cols[token.slice(1)] ?? 1;
         return { x: M + c * colW + colW / 2, y: H - M / 2 };
     }
-    const zone = token[0];
-    return zoneCenter(zone, false);
+    return cellCenter(token, false);
 }
 
 // Caída (token to): celda rival, red N*, fuera O*, bloqueo B*.
@@ -156,15 +171,31 @@ function toPoint(token: string): { x: number; y: number } | null {
         const x = token.startsWith("OL") ? M / 2 : W - M / 2;
         return { x, y: M + (r + 0.5) * ((H - 2 * M) / 6) };
     }
-    const zone = token[0];
-    return zoneCenter(zone, true);
+    return cellCenter(token, true);
 }
 
 interface Corridor {
     x1: number; y1: number; x2: number; y2: number;
     count: number; wins: number; fails: number;
     color: string;
+    // Curva cuadrática: la flecha se arquea SIEMPRE hacia el mismo lado del
+    // sentido de la marcha, así una ruta A→B y su vuelta B→A se separan en
+    // dos arcos en vez de taparse. Igual que en las apps (`flowGeometry`).
+    d: string;
+    head: string;
+    width: number;
+    opacity: number;
 }
+
+// Semiángulo de apertura de la punta, medido hacia atrás desde el sentido de
+// la marcha. HEAD_SIZE mantiene la punta claramente más ancha que el trazo
+// (si no, un trazo grueso se la come) y su longitud sale de la propia forma.
+const HEAD_SPREAD = Math.PI * 0.85;
+const HEAD_AXIAL = -Math.cos(HEAD_SPREAD);
+// Nunca dejar que la punta se coma más del 45% de una ruta corta, para que un
+// salto entre subzonas vecinas siga enseñando algo de línea.
+const headSize = (width: number, distance: number) =>
+    Math.min(1.5 + 2.5 * width, (distance * 0.45) / HEAD_AXIAL);
 
 const attacks = computed(() =>
     props.stats.filter(
@@ -195,19 +226,72 @@ const aggregated = computed(() => {
         const key = `${parts[0]}→${parts[parts.length - 1]}`;
         const win = props.rival ? s.to === 2 : s.to === 1;
         const fail = props.rival ? s.to === 1 : s.to === 2;
-        const entry = map.get(key) ?? { x1: from.x, y1: from.y, x2: to.x, y2: to.y, count: 0, wins: 0, fails: 0, color: "" };
+        const entry: Corridor = map.get(key) ??
+            { x1: from.x, y1: from.y, x2: to.x, y2: to.y, count: 0, wins: 0, fails: 0, color: "", d: "", head: "", width: 0, opacity: 0 };
         entry.count++;
         if (win) entry.wins++;
         if (fail) entry.fails++;
         map.set(key, entry);
     }
     const list = [...map.values()];
-    for (const c of list) c.color = corridorColor(c.wins, c.fails);
+    const maxC = Math.max(...list.map((c) => c.count), 1);
+    for (const c of list) {
+        c.color = corridorColor(c.wins, c.fails);
+        // Peso 0..1 dentro del rango de frecuencias de este mapa. Si todas las
+        // rutas valen lo mismo (lo habitual con subzonas) se pintan todas a
+        // peso medio en vez de todas finas o todas gruesas.
+        const t = maxC <= 1 ? 0.5 : (c.count - 1) / (maxC - 1);
+        c.width = 1 + 5 * t;
+        c.opacity = 0.35 + 0.6 * t;
+        const dx = c.x2 - c.x1;
+        const dy = c.y2 - c.y1;
+        const len = Math.max(Math.hypot(dx, dy), 0.001);
+        const bow = Math.min(len * 0.12, 22);
+        const cx = (c.x1 + c.x2) / 2 + (-dy / len) * bow;
+        const cy = (c.y1 + c.y2) / 2 + (dx / len) * bow;
+        const at = (u: number) => {
+            const v = 1 - u;
+            return {
+                x: v * v * c.x1 + 2 * v * u * cx + u * u * c.x2,
+                y: v * v * c.y1 + 2 * v * u * cy + u * u * c.y2,
+            };
+        };
+        // La línea para en la BASE de la punta: se recorre la curva hacia
+        // atrás hasta que la distancia al vértice es la longitud de la punta y
+        // se parte ahí (de Casteljau: la mitad izquierda de una cuadrática
+        // conserva p1 y toma lerp(p1, control, u) como control).
+        const size = headSize(c.width, len);
+        const hLen = HEAD_AXIAL * size;
+        // Bisección: la distancia al vértice decrece de forma monótona al
+        // crecer u. Un barrido a pasos fijos dejaba un hueco visible entre el
+        // final de la línea y la base de la punta.
+        let lo = 0;
+        let hi = 1;
+        for (let i = 0; i < 20; i++) {
+            const mid = (lo + hi) / 2;
+            const q = at(mid);
+            if (Math.hypot(c.x2 - q.x, c.y2 - q.y) > hLen) lo = mid;
+            else hi = mid;
+        }
+        const end = at(hi);
+        const qx = c.x1 + (cx - c.x1) * hi;
+        const qy = c.y1 + (cy - c.y1) * hi;
+        c.d = `M ${c.x1} ${c.y1} Q ${qx} ${qy} ${end.x} ${end.y}`;
+        // Vértice en el punto de caída real, apertura hacia atrás siguiendo la
+        // tangente de la curva en ese extremo.
+        const angle = Math.atan2(c.y2 - cy, c.x2 - cx);
+        const corner = (a: number) =>
+            `${c.x2 + Math.cos(a) * size},${c.y2 + Math.sin(a) * size}`;
+        c.head = `${c.x2},${c.y2} ${corner(angle + HEAD_SPREAD)} ${corner(angle - HEAD_SPREAD)}`;
+    }
     return list;
 });
 
+// Todas las rutas, sin tope: un `slice` oculto hacía que el dibujo no
+// cuadrara con los números. La frecuencia va en el trazo (grosor + opacidad).
+// De menor a mayor para que las rutas dominantes queden encima.
 const arrows = computed(() =>
-    [...aggregated.value].sort((a, b) => b.count - a.count).slice(0, 6)
+    [...aggregated.value].sort((a, b) => a.count - b.count)
 );
 
 const heat = computed(() =>
