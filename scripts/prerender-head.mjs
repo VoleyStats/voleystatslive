@@ -25,7 +25,9 @@ import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
-const ORIGIN = process.env.VITE_SITE_ORIGIN ?? 'https://voleystats.vercel.app'
+// Fuente única del dominio: VITE_SITE_ORIGIN (ver también src/composables/useSeo.ts).
+// El fallback es solo para builds sin ese env var.
+const ORIGIN = process.env.VITE_SITE_ORIGIN ?? 'https://clipeostats.com'
 
 // Rutas ESTÁTICAS indexables. Debe cuadrar con `src/router.ts` (`meta.seo`) y
 // con `public/sitemap.xml`. Las dinámicas (`/stats/:id`, `/team/:id`) y las

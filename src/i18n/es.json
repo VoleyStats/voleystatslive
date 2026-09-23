@@ -1,41 +1,41 @@
 {
   "seo": {
     "home": {
-      "title": "Voley Stats — App de estadísticas de voleibol en directo para iPad y Android",
+      "title": "Clipeo — App de estadísticas de voleibol en directo para iPad y Android",
       "description": "App de estadísticas de voleibol para iPad y Android. Anota el partido incluso sin conexión, comparte las estadísticas en directo y analiza cada set. Gratis para empezar."
     },
     "teamCode": {
-      "title": "Estadísticas de voleibol en directo por código — Voley Stats",
+      "title": "Estadísticas de voleibol en directo por código — Clipeo",
       "description": "Introduce el código del partido o el enlace del equipo y sigue el marcador y las estadísticas de voleibol en directo, gratis y sin registrarte."
     },
     "pricing": {
-      "title": "Precios y planes de Voley Stats — gratis, Análisis y Análisis Live",
-      "description": "Qué incluye cada plan de Voley Stats: captura y estadísticas gratis, plan Análisis desde 3,99 €/mes y plan Análisis Live desde 6,99 €/mes. También match pass de 2,99 € por partido."
+      "title": "Precios y planes de Clipeo — gratis, Análisis y Análisis Live",
+      "description": "Qué incluye cada plan de Clipeo: captura y estadísticas gratis, plan Análisis desde 3,99 €/mes y plan Análisis Live desde 6,99 €/mes. También match pass de 2,99 € por partido."
     },
     "team": {
-      "title": "Partidos compartidos del equipo — Voley Stats",
+      "title": "Partidos compartidos del equipo — Clipeo",
       "description": "Todos los partidos que este equipo ha compartido: marcador por set, estadísticas y seguimiento en directo mientras se juega."
     },
     "privacy": {
-      "title": "Política de privacidad — Voley Stats",
-      "description": "Qué datos trata Voley Stats, con qué finalidad y cómo ejercer tus derechos sobre ellos."
+      "title": "Política de privacidad — Clipeo",
+      "description": "Qué datos trata Clipeo, con qué finalidad y cómo ejercer tus derechos sobre ellos."
     },
     "terms": {
-      "title": "Condiciones de uso — Voley Stats",
-      "description": "Condiciones de uso de la app Voley Stats y de la web pública de estadísticas en directo."
+      "title": "Condiciones de uso — Clipeo",
+      "description": "Condiciones de uso de la app Clipeo y de la web pública de estadísticas en directo."
     },
     "deleteAccount": {
-      "title": "Eliminar cuenta — Voley Stats",
-      "description": "Cómo eliminar tu cuenta de Voley Stats y todos los datos asociados a ella."
+      "title": "Eliminar cuenta — Clipeo",
+      "description": "Cómo eliminar tu cuenta de Clipeo y todos los datos asociados a ella."
     },
     "contact": {
-      "title": "Contacto — Voley Stats",
+      "title": "Contacto — Clipeo",
       "description": "¿Dudas, sugerencias o un problema con la app? Escríbenos y te respondemos."
     }
   },
   "layout": {
     "back": "Volver",
-    "homeLink": "Voley Stats - inicio",
+    "homeLink": "Clipeo - inicio",
     "sections": "Secciones",
     "langSelector": "Idioma",
     "menu": "Menú",
@@ -63,7 +63,7 @@
       "terms": "Términos",
       "contact": "Contacto",
       "deleteAccount": "Eliminar cuenta",
-      "rights": "© {year} Voley Stats. Todos los derechos reservados.",
+      "rights": "© {year} Clipeo. Todos los derechos reservados.",
       "madeFor": "Hecho para equipos que compiten",
       "pricing": "Precios y planes"
     }
@@ -157,30 +157,30 @@
     },
     "download": {
       "title": "Lleva a tu equipo al siguiente nivel",
-      "text": "Descarga Voley Stats para iPad o Android y anota tu próximo partido gratis. Cuando quieras el análisis de temporada, los informes en PDF o compartir el partido en directo, ahí están los planes Análisis y Análisis Live.",
+      "text": "Descarga Clipeo para iPad o Android y anota tu próximo partido gratis. Cuando quieras el análisis de temporada, los informes en PDF o compartir el partido en directo, ahí están los planes Análisis y Análisis Live.",
       "appStore": "App Store",
       "web": "Consultar en la web"
     },
     "faq": {
       "eyebrow": "Dudas rápidas",
-      "title": "Preguntas frecuentes sobre Voley Stats",
+      "title": "Preguntas frecuentes sobre Clipeo",
       "subtitle": "Qué registra la app, qué se ve en directo desde esta web y qué incluye cada plan. Si no encuentras tu respuesta, escríbenos a voleystats{'@'}gmail.com y te ayudamos.",
-      "q1": "¿Qué es Voley Stats?",
-      "a1": "Voley Stats es una app de estadísticas de voleibol para iPad y Android. El entrenador anota cada acción del partido desde la tablet —el marcador, la rotación y el sacador se actualizan solos—, y al terminar la app genera el informe completo. Si quieres, el partido se puede seguir en directo desde esta web con un código. Descargar la app y anotar partidos es gratis.",
+      "q1": "¿Qué es Clipeo?",
+      "a1": "Clipeo es una app de estadísticas de voleibol para iPad y Android. El entrenador anota cada acción del partido desde la tablet —el marcador, la rotación y el sacador se actualizan solos—, y al terminar la app genera el informe completo. Si quieres, el partido se puede seguir en directo desde esta web con un código. Descargar la app y anotar partidos es gratis.",
       "q2": "¿Cómo se llevan las estadísticas de un partido de voleibol con la app?",
       "a2": "Con la rejilla rápida: tocas la jugadora y la acción, y listo. Está pensada para que una sola persona pueda dirigir y anotar a la vez. Si quieres más detalle, el Rally Map (plan Análisis) te deja anotar sobre el mapa de la pista, con las trayectorias de ataque y saque. Tú eliges el nivel: cada toque o solo las acciones que acaban en punto.",
       "q3": "¿Qué estadísticas de voleibol registra y analiza?",
       "a3": "Todo lo que pasa en la pista: recepción valorada en 4 niveles, calidad de saque, ataque por fase K1/K2 y por calidad de pase, bloqueo, defensa, cambios y tiempos muertos. Al terminar tienes el informe del partido con side-out y break, origen de los puntos, rotaciones, conexiones colocadora-atacante, errores no forzados y los mapas de ataque si capturaste con Rally Map.",
       "q4": "¿Funciona sin conexión a internet?",
       "a4": "Sí. La captura y las estadísticas funcionan completamente sin conexión, con la base de datos en el propio dispositivo, así que puedes anotar en cualquier pabellón. Internet solo hace falta para compartir el partido en directo, el overlay para OBS y la página pública del equipo (plan Análisis Live), y para la sincronización y la copia de seguridad en la nube (plan Análisis).",
-      "q5": "¿Cuánto cuesta Voley Stats? ¿Hay versión gratis?",
+      "q5": "¿Cuánto cuesta Clipeo? ¿Hay versión gratis?",
       "a5": "Descargar la app y anotar tus partidos —captura completa y estadísticas de cada partido y set— es gratis, sin límite de partidos ni de equipos. El plan Análisis (19,99 €/año o 3,99 €/mes) añade el Rally Map, el análisis de temporada, los informes en PDF y la copia en la nube. El plan Análisis Live (34,99 €/año o 6,99 €/mes) suma el directo, el overlay para OBS y la página pública del equipo. Y hay un match pass de 2,99 € para desbloquear un solo partido, sin suscripción. Tienes el desglose función a función en la página de planes.",
       "q6": "¿En qué dispositivos funciona? ¿Hay app para Android?",
-      "a6": "Sí: Voley Stats está en el App Store para iPad y en Google Play para Android. Las dos versiones comparten las mismas funciones y los mismos datos —un equipo capturado en una se sincroniza y se restaura en la otra—. Está pensada para tablet, que es donde la rejilla de captura se aprovecha de verdad.",
+      "a6": "Sí: Clipeo está en el App Store para iPad y en Google Play para Android. Las dos versiones comparten las mismas funciones y los mismos datos —un equipo capturado en una se sincroniza y se restaura en la otra—. Está pensada para tablet, que es donde la rejilla de captura se aprovecha de verdad.",
       "q7": "¿Cómo comparto el partido en directo y cómo lo ven los demás?",
       "a7": "Activas el directo en la app y compartes el código del partido, su enlace o su QR. Con eso, cualquiera abre esta web y sigue el marcador, el punto a punto y las estadísticas en tiempo real, gratis y sin registrarse. Emitir el directo es una función del plan Análisis Live, o de un match pass para ese partido; verlo no cuesta nada.",
       "q8": "¿Puedo poner el marcador en mi retransmisión de YouTube o Twitch?",
-      "a8": "Sí. El overlay de Voley Stats es una URL que pegas en OBS como Browser Source: el marcador se superpone a tu emisión con los colores, los escudos y los rótulos de tu equipo, y se actualiza punto a punto. La posición y el tamaño se ajustan desde la app, sin tocar OBS. Es una función del plan Análisis Live.",
+      "a8": "Sí. El overlay de Clipeo es una URL que pegas en OBS como Browser Source: el marcador se superpone a tu emisión con los colores, los escudos y los rótulos de tu equipo, y se actualiza punto a punto. La posición y el tamaño se ajustan desde la app, sin tocar OBS. Es una función del plan Análisis Live.",
       "q9": "¿Puedo exportar el informe del partido en PDF?",
       "a9": "Sí. Con el plan Análisis exportas en PDF el informe de partido, el de temporada y las fichas de jugadora, para revisarlos con el cuerpo técnico o repartirlos a la plantilla. Si solo quieres el informe de un partido concreto, el match pass de 2,99 € también lo desbloquea.",
       "q10": "¿Puedo compartir el equipo con mi cuerpo técnico?",
@@ -199,7 +199,7 @@
   },
   "pricing": {
     "eyebrow": "Planes",
-    "title": "Precios y planes de Voley Stats",
+    "title": "Precios y planes de Clipeo",
     "subtitle": "Anotar partidos y ver sus estadísticas es gratis, para siempre y sin límite de partidos. Los planes añaden el análisis de temporada, los informes y el directo.",
     "perYear": "/año",
     "yearly": "anual",
@@ -297,7 +297,7 @@
       ],
       "freeTitle": "Gratis y sin registro",
       "freeText": "Ver las estadísticas en directo no cuesta nada ni exige crear una cuenta. Solo quien captura el partido necesita la app —en iPad o en Android— y un plan que incluya el directo.",
-      "appCta": "¿Eres tú quien anota los partidos? Descarga Voley Stats"
+      "appCta": "¿Eres tú quien anota los partidos? Descarga Clipeo"
     }
   },
   "stats": {
@@ -554,25 +554,25 @@
     "eyebrow": "Legal"
   },
   "privacy": {
-    "docTitle": "Política de privacidad — Voley Stats",
+    "docTitle": "Política de privacidad — Clipeo",
     "title": "Política de privacidad",
     "lastUpdated": "Última actualización: 6 de agosto de 2026",
     "sections": [
       {
         "paragraphs": [
-          "Esta política explica qué datos trata la app Voley Stats para iPad y Android y esta web (voleystats.vercel.app), y cómo los protegemos."
+          "Esta política explica qué datos trata la app Clipeo para iPad y Android y esta web (clipeostats.com), y cómo los protegemos."
         ]
       },
       {
         "heading": "Responsable del tratamiento",
         "paragraphs": [
-          "Voley Stats está desarrollada por Pau Hermosilla. Para cualquier cuestión sobre privacidad puedes escribir a voleystats{'@'}gmail.com."
+          "Clipeo está desarrollada por Pau Hermosilla. Para cualquier cuestión sobre privacidad puedes escribir a voleystats{'@'}gmail.com."
         ]
       },
       {
         "heading": "La app funciona sin conexión y sin cuenta",
         "paragraphs": [
-          "Voley Stats funciona por completo sin conexión a internet y sin necesidad de crear una cuenta. Si no activas ninguna de las funciones que se describen a continuación, ningún dato sale de tu dispositivo."
+          "Clipeo funciona por completo sin conexión a internet y sin necesidad de crear una cuenta. Si no activas ninguna de las funciones que se describen a continuación, ningún dato sale de tu dispositivo."
         ]
       },
       {
@@ -595,7 +595,7 @@
       {
         "heading": "Publicidad, analítica y terceros",
         "paragraphs": [
-          "Voley Stats no muestra publicidad, no utiliza analítica de terceros, y no vendemos ni cedemos tus datos. Usamos Firebase (Google) y Supabase únicamente como encargados del tratamiento para prestar las funciones de directo, sincronización y copia de seguridad que actives tú; tus datos viajan cifrados (HTTPS). Los pagos de suscripciones y compras dentro de la app los procesa Apple a través del App Store: nunca vemos ni almacenamos datos de tu tarjeta. El estado de tu suscripción se verifica en nuestro servidor (Supabase), asociado a tu cuenta, para activar las funciones correspondientes."
+          "Clipeo no muestra publicidad, no utiliza analítica de terceros, y no vendemos ni cedemos tus datos. Usamos Firebase (Google) y Supabase únicamente como encargados del tratamiento para prestar las funciones de directo, sincronización y copia de seguridad que actives tú; tus datos viajan cifrados (HTTPS). Los pagos de suscripciones y compras dentro de la app los procesa Apple a través del App Store: nunca vemos ni almacenamos datos de tu tarjeta. El estado de tu suscripción se verifica en nuestro servidor (Supabase), asociado a tu cuenta, para activar las funciones correspondientes."
         ]
       },
       {
@@ -608,7 +608,7 @@
       {
         "heading": "Conservación y eliminación",
         "paragraphs": [
-          "Conservamos los datos de tu cuenta mientras esta exista. Puedes eliminarla, junto con tus copias de seguridad y datos sincronizados, en cualquier momento — consulta cómo hacerlo en Eliminar cuenta (voleystats.vercel.app/delete-account).",
+          "Conservamos los datos de tu cuenta mientras esta exista. Puedes eliminarla, junto con tus copias de seguridad y datos sincronizados, en cualquier momento — consulta cómo hacerlo en Eliminar cuenta (clipeostats.com/delete-account).",
           "Las estadísticas que publicas en directo se conservan mientras el equipo exista en la app: así puedes consultar el histórico de temporadas anteriores desde esta web. Cuando eliminas un equipo, sus partidos publicados y su página pública se borran automáticamente."
         ]
       },
@@ -627,14 +627,14 @@
     ]
   },
   "deleteAccount": {
-    "docTitle": "Eliminar cuenta — Voley Stats",
-    "title": "Eliminar tu cuenta de Voley Stats",
+    "docTitle": "Eliminar cuenta — Clipeo",
+    "title": "Eliminar tu cuenta de Clipeo",
     "lastUpdated": "Última actualización: 6 de agosto de 2026",
     "sections": [
       {
         "heading": "Opción 1: desde la app",
         "paragraphs": [
-          "Entra en Voley Stats, ve a tu Perfil y abre la pestaña de ajustes. Pulsa \"Eliminar cuenta\". Esta acción elimina tu cuenta, tus copias de seguridad en la nube y tus datos sincronizados de forma permanente."
+          "Entra en Clipeo, ve a tu Perfil y abre la pestaña de ajustes. Pulsa \"Eliminar cuenta\". Esta acción elimina tu cuenta, tus copias de seguridad en la nube y tus datos sincronizados de forma permanente."
         ]
       },
       {
@@ -670,7 +670,7 @@
     ]
   },
   "terms": {
-    "docTitle": "Condiciones de uso — Voley Stats",
+    "docTitle": "Condiciones de uso — Clipeo",
     "title": "Condiciones de uso",
     "lastUpdated": "Última actualización: 6 de agosto de 2026",
     "note": "Este documento es una plantilla informativa y no constituye asesoramiento jurídico.",
@@ -678,7 +678,7 @@
       {
         "heading": "1. Quiénes somos y objeto",
         "paragraphs": [
-          "Voley Stats es una app para iPad y Android, disponible en el App Store y en Google Play, para capturar y analizar estadísticas de voleibol. Esta web (voleystats.vercel.app) permite seguir partidos en directo y consultar informes y estadísticas compartidas desde la app. Estas condiciones regulan el uso de ambas."
+          "Clipeo es una app para iPad y Android, disponible en el App Store y en Google Play, para capturar y analizar estadísticas de voleibol. Esta web (clipeostats.com) permite seguir partidos en directo y consultar informes y estadísticas compartidas desde la app. Estas condiciones regulan el uso de ambas."
         ]
       },
       {
@@ -714,7 +714,7 @@
       {
         "heading": "7. Propiedad intelectual",
         "paragraphs": [
-          "El software, la marca, el diseño y los informes generados son propiedad de Voley Stats o de sus licenciantes. Las estadísticas son del usuario que las captura."
+          "El software, la marca, el diseño y los informes generados son propiedad de Clipeo o de sus licenciantes. Las estadísticas son del usuario que las captura."
         ]
       },
       {
@@ -750,12 +750,12 @@
     ]
   },
   "contact": {
-    "docTitle": "Contacto — Voley Stats",
+    "docTitle": "Contacto — Clipeo",
     "eyebrow": "Contacto",
     "title": "Hablemos",
     "text": "¿Dudas, sugerencias o problemas con la app o la web? Escríbenos y te responderemos lo antes posible.",
     "cta": "Enviar un email",
-    "subject": "Contacto Voley Stats",
+    "subject": "Contacto Clipeo",
     "emailIntro": "O escríbenos directamente a:",
     "cards": {
       "support": {

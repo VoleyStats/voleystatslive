@@ -21,12 +21,16 @@ import { watch } from "vue";
 import type { Router } from "vue-router";
 import { i18n } from "../i18n";
 
-// Único sitio donde vive el dominio público. `TeamCode.vue` ya avisa de que
-// "el dominio ha cambiado ya una vez y volverá a hacerlo": cuando cambie, se
-// toca aquí (y en index.html, sitemap.xml y robots.txt), no en cada página.
+// Único sitio donde vive el dominio público en runtime — la fuente real es
+// VITE_SITE_ORIGIN. `TeamCode.vue` ya avisa de que "el dominio ha cambiado ya
+// una vez y volverá a hacerlo": cuando cambie, se toca la env var en Vercel;
+// el literal de abajo es solo el fallback para dev sin `.env`. Los ficheros
+// estáticos que no pueden leer esta env var en build (index.html,
+// sitemap.xml, robots.txt, llms.txt) lo llevan a mano y con un comentario que
+// apunta aquí.
 export const SITE_ORIGIN: string =
     (import.meta.env.VITE_SITE_ORIGIN as string | undefined) ??
-    "https://voleystats.vercel.app";
+    "https://clipeostats.com";
 
 type SeoMeta = { seo?: string; noindex?: boolean };
 

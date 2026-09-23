@@ -1,6 +1,6 @@
 {
-  "name": "Voley Stats Live",
-  "short_name": "Voley Stats",
+  "name": "Clipeo",
+  "short_name": "Clipeo",
   "description": "Estadísticas de voleibol en vivo: marcador, eficiencia por jugador y por área, e informes en PDF.",
   "lang": "es",
   "start_url": "/",

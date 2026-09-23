@@ -1,6 +1,12 @@
 {
   "redirects": [
     {
+      "source": "/(.*)",
+      "has": [{ "type": "host", "value": "voleystats.vercel.app" }],
+      "destination": "https://clipeostats.com/$1",
+      "permanent": true
+    },
+    {
       "source": "/(team-code|pricing|privacy|terms|delete-account|contact).html",
       "destination": "/$1",
       "permanent": true

@@ -1,105 +1,108 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Cada ruta indexable aparece dos veces, una por idioma, y cada entrada
      declara a la otra con hreflang. Sin esto las dos traducciones comparten
-     URL y el buscador solo indexa la castellana. -->
+     URL y el buscador solo indexa la castellana.
+     Fichero estático: no puede leer VITE_SITE_ORIGIN (fuente única del
+     dominio, ver src/composables/useSeo.ts). Si el dominio vuelve a cambiar,
+     tocar aquí a mano. -->
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
         xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
-    <loc>https://voleystats.vercel.app/</loc>
+    <loc>https://clipeostats.com/</loc>
     <lastmod>2026-08-28</lastmod>
-    <xhtml:link rel="alternate" hreflang="es" href="https://voleystats.vercel.app/"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://voleystats.vercel.app/en"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://voleystats.vercel.app/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://clipeostats.com/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clipeostats.com/en"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clipeostats.com/"/>
   </url>
   <url>
-    <loc>https://voleystats.vercel.app/en</loc>
+    <loc>https://clipeostats.com/en</loc>
     <lastmod>2026-08-28</lastmod>
-    <xhtml:link rel="alternate" hreflang="en" href="https://voleystats.vercel.app/en"/>
-    <xhtml:link rel="alternate" hreflang="es" href="https://voleystats.vercel.app/"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://voleystats.vercel.app/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clipeostats.com/en"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://clipeostats.com/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clipeostats.com/"/>
   </url>
   <url>
-    <loc>https://voleystats.vercel.app/team-code</loc>
+    <loc>https://clipeostats.com/team-code</loc>
     <lastmod>2026-08-28</lastmod>
-    <xhtml:link rel="alternate" hreflang="es" href="https://voleystats.vercel.app/team-code"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://voleystats.vercel.app/en/team-code"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://voleystats.vercel.app/team-code"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://clipeostats.com/team-code"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clipeostats.com/en/team-code"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clipeostats.com/team-code"/>
   </url>
   <url>
-    <loc>https://voleystats.vercel.app/en/team-code</loc>
+    <loc>https://clipeostats.com/en/team-code</loc>
     <lastmod>2026-08-28</lastmod>
-    <xhtml:link rel="alternate" hreflang="en" href="https://voleystats.vercel.app/en/team-code"/>
-    <xhtml:link rel="alternate" hreflang="es" href="https://voleystats.vercel.app/team-code"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://voleystats.vercel.app/team-code"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clipeostats.com/en/team-code"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://clipeostats.com/team-code"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clipeostats.com/team-code"/>
   </url>
   <url>
-    <loc>https://voleystats.vercel.app/pricing</loc>
+    <loc>https://clipeostats.com/pricing</loc>
     <lastmod>2026-09-01</lastmod>
-    <xhtml:link rel="alternate" hreflang="es" href="https://voleystats.vercel.app/pricing"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://voleystats.vercel.app/en/pricing"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://voleystats.vercel.app/pricing"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://clipeostats.com/pricing"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clipeostats.com/en/pricing"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clipeostats.com/pricing"/>
   </url>
   <url>
-    <loc>https://voleystats.vercel.app/en/pricing</loc>
+    <loc>https://clipeostats.com/en/pricing</loc>
     <lastmod>2026-09-01</lastmod>
-    <xhtml:link rel="alternate" hreflang="en" href="https://voleystats.vercel.app/en/pricing"/>
-    <xhtml:link rel="alternate" hreflang="es" href="https://voleystats.vercel.app/pricing"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://voleystats.vercel.app/pricing"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clipeostats.com/en/pricing"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://clipeostats.com/pricing"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clipeostats.com/pricing"/>
   </url>
   <url>
-    <loc>https://voleystats.vercel.app/contact</loc>
+    <loc>https://clipeostats.com/contact</loc>
     <lastmod>2026-08-28</lastmod>
-    <xhtml:link rel="alternate" hreflang="es" href="https://voleystats.vercel.app/contact"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://voleystats.vercel.app/en/contact"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://voleystats.vercel.app/contact"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://clipeostats.com/contact"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clipeostats.com/en/contact"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clipeostats.com/contact"/>
   </url>
   <url>
-    <loc>https://voleystats.vercel.app/en/contact</loc>
+    <loc>https://clipeostats.com/en/contact</loc>
     <lastmod>2026-08-28</lastmod>
-    <xhtml:link rel="alternate" hreflang="en" href="https://voleystats.vercel.app/en/contact"/>
-    <xhtml:link rel="alternate" hreflang="es" href="https://voleystats.vercel.app/contact"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://voleystats.vercel.app/contact"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clipeostats.com/en/contact"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://clipeostats.com/contact"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clipeostats.com/contact"/>
   </url>
   <url>
-    <loc>https://voleystats.vercel.app/privacy</loc>
+    <loc>https://clipeostats.com/privacy</loc>
     <lastmod>2026-08-28</lastmod>
-    <xhtml:link rel="alternate" hreflang="es" href="https://voleystats.vercel.app/privacy"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://voleystats.vercel.app/en/privacy"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://voleystats.vercel.app/privacy"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://clipeostats.com/privacy"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clipeostats.com/en/privacy"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clipeostats.com/privacy"/>
   </url>
   <url>
-    <loc>https://voleystats.vercel.app/en/privacy</loc>
+    <loc>https://clipeostats.com/en/privacy</loc>
     <lastmod>2026-08-28</lastmod>
-    <xhtml:link rel="alternate" hreflang="en" href="https://voleystats.vercel.app/en/privacy"/>
-    <xhtml:link rel="alternate" hreflang="es" href="https://voleystats.vercel.app/privacy"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://voleystats.vercel.app/privacy"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clipeostats.com/en/privacy"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://clipeostats.com/privacy"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clipeostats.com/privacy"/>
   </url>
   <url>
-    <loc>https://voleystats.vercel.app/terms</loc>
+    <loc>https://clipeostats.com/terms</loc>
     <lastmod>2026-08-28</lastmod>
-    <xhtml:link rel="alternate" hreflang="es" href="https://voleystats.vercel.app/terms"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://voleystats.vercel.app/en/terms"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://voleystats.vercel.app/terms"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://clipeostats.com/terms"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clipeostats.com/en/terms"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clipeostats.com/terms"/>
   </url>
   <url>
-    <loc>https://voleystats.vercel.app/en/terms</loc>
+    <loc>https://clipeostats.com/en/terms</loc>
     <lastmod>2026-08-28</lastmod>
-    <xhtml:link rel="alternate" hreflang="en" href="https://voleystats.vercel.app/en/terms"/>
-    <xhtml:link rel="alternate" hreflang="es" href="https://voleystats.vercel.app/terms"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://voleystats.vercel.app/terms"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clipeostats.com/en/terms"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://clipeostats.com/terms"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clipeostats.com/terms"/>
   </url>
   <url>
-    <loc>https://voleystats.vercel.app/delete-account</loc>
+    <loc>https://clipeostats.com/delete-account</loc>
     <lastmod>2026-08-28</lastmod>
-    <xhtml:link rel="alternate" hreflang="es" href="https://voleystats.vercel.app/delete-account"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://voleystats.vercel.app/en/delete-account"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://voleystats.vercel.app/delete-account"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://clipeostats.com/delete-account"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clipeostats.com/en/delete-account"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clipeostats.com/delete-account"/>
   </url>
   <url>
-    <loc>https://voleystats.vercel.app/en/delete-account</loc>
+    <loc>https://clipeostats.com/en/delete-account</loc>
     <lastmod>2026-08-28</lastmod>
-    <xhtml:link rel="alternate" hreflang="en" href="https://voleystats.vercel.app/en/delete-account"/>
-    <xhtml:link rel="alternate" hreflang="es" href="https://voleystats.vercel.app/delete-account"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://voleystats.vercel.app/delete-account"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clipeostats.com/en/delete-account"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://clipeostats.com/delete-account"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clipeostats.com/delete-account"/>
   </url>
 </urlset>

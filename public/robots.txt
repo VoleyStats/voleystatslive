@@ -1,4 +1,4 @@
-# Voley Stats Live — robots.txt
+# Clipeo — robots.txt
 # Buscadores tradicionales
 User-agent: *
 Allow: /
@@ -66,4 +66,6 @@ Allow: /
 Disallow: /stats/
 Disallow: /team/
 
-Sitemap: https://voleystats.vercel.app/sitemap.xml
+# Fichero estático: el dominio no puede leer VITE_SITE_ORIGIN (fuente única,
+# ver src/composables/useSeo.ts). Si vuelve a cambiar, tocar aquí a mano.
+Sitemap: https://clipeostats.com/sitemap.xml

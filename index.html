@@ -11,17 +11,21 @@
          src/i18n/es.json, que es lo que `installSeo` escribe en caliente: si
          divergen, cada rastreador se lleva una versión distinta del sitio.
          El título anterior medía 76 caracteres y Google lo truncaba. -->
-    <title>Voley Stats — App de estadísticas de voleibol en directo para iPad y Android</title>
+    <title>Clipeo — App de estadísticas de voleibol en directo para iPad y Android</title>
     <meta
       name="description"
       content="App de estadísticas de voleibol para iPad y Android. Anota el partido incluso sin conexión, comparte las estadísticas en directo y analiza cada set. Gratis para empezar."
     />
     <meta name="keywords" content="estadísticas de voleibol, app estadísticas voleibol iPad, app estadísticas voleibol Android, scouting voleibol, análisis de partidos de voleibol, estadísticas en directo voleibol, app para entrenadores de voleibol, marcador voleibol en vivo, estadísticas voley" />
-    <meta name="author" content="Voley Stats" />
+    <meta name="author" content="Clipeo" />
     <meta name="google-site-verification" content="64DBXpmvUMBBUba4FeEOeNQjGns85ZFY_QgM_tdsntw" />
     <meta name="robots" content="index, follow, max-image-preview:large" />
     <meta name="theme-color" content="#070A12" />
-    <link rel="canonical" href="https://voleystats.vercel.app/" />
+    <!-- Dominio: sustituido de voleystats.vercel.app a clipeostats.com en el
+         rebranding a Clipeo (2026-09). Fuera de este archivo estático, la
+         fuente única del dominio es VITE_SITE_ORIGIN (ver
+         src/composables/useSeo.ts y scripts/prerender-head.mjs). -->
+    <link rel="canonical" href="https://clipeostats.com/" />
 
     <!-- Icons / PWA -->
     <link rel="icon" type="image/png" href="/favicon.png" />
@@ -35,26 +39,31 @@
          contradecían ("Voley Stats" vs "Voley Stats Live" vs "Voley stats") y
          además faltaba por completo el schema WebSite, Google se inventó la
          etiqueta del sitio y la mostraba como "volley stata" en su búsqueda
-         con IA. No introduzcas variantes nuevas. -->
-    <meta property="og:site_name" content="Voley Stats" />
+         con IA. No introduzcas variantes nuevas.
+         Rebranding a Clipeo (2026-09): el nombre canónico pasa a ser "Clipeo"
+         (sola; "Stats" es descriptivo, no parte de la marca). "Voley Stats" se
+         mantiene como alternateName en los JSON-LD de abajo para que Google
+         resuelva la entidad renombrada en vez de tratarla como una nueva;
+         retirarlo de ahí pasados ~6 meses (objetivo: marzo 2027). -->
+    <meta property="og:site_name" content="Clipeo" />
     <meta property="og:locale" content="es_ES" />
     <meta property="og:locale:alternate" content="en_US" />
-    <meta property="og:title" content="Voley Stats — App de estadísticas de voleibol para iPad y Android" />
+    <meta property="og:title" content="Clipeo — App de estadísticas de voleibol para iPad y Android" />
     <meta
       property="og:description"
       content="Anota cada acción del partido desde la tablet, incluso sin conexión, y comparte el marcador y las estadísticas en directo. Análisis por fases, mapas de ataque e informes de scouting."
     />
-    <meta property="og:url" content="https://voleystats.vercel.app/" />
-    <meta property="og:image" content="https://voleystats.vercel.app/og-image.png" />
+    <meta property="og:url" content="https://clipeostats.com/" />
+    <meta property="og:image" content="https://clipeostats.com/og-image.png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt" content="Voley Stats: estadísticas de voleibol en directo" />
+    <meta property="og:image:alt" content="Clipeo: estadísticas de voleibol en directo" />
 
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Voley Stats — App de estadísticas de voleibol para iPad y Android" />
+    <meta name="twitter:title" content="Clipeo — App de estadísticas de voleibol para iPad y Android" />
     <meta name="twitter:description" content="Estadísticas de voleibol en directo: anota el partido desde la tablet sin conexión, comparte el marcador en vivo y analiza cada set con informes de scouting." />
-    <meta name="twitter:image" content="https://voleystats.vercel.app/og-image.png" />
+    <meta name="twitter:image" content="https://clipeostats.com/og-image.png" />
 
     <!-- Fonts: auto-hospedadas en /fonts (ver src/styles/fonts.css).
          NO volver a cargarlas desde fonts.googleapis.com: la CSP de
@@ -75,11 +84,11 @@
       {
         "@context": "https://schema.org",
         "@type": "SoftwareApplication",
-        "name": "Voley Stats",
+        "name": "Clipeo",
         "applicationCategory": "SportsApplication",
         "operatingSystem": "iPadOS, Android",
         "description": "App de estadísticas de voleibol para iPad y Android. Captura cada acción del partido con la rejilla rápida o sobre el mapa de la pista con Rally Map (trayectorias de ataque y saque), con marcador, rotación y sacador automáticos. Funciona completamente sin conexión; internet solo hace falta para el directo en la web, el overlay para OBS, la página pública del equipo y la copia en la nube. Descargar y anotar partidos es gratis; el plan Análisis añade Rally Map, histórico y estadísticas de temporada e informes en PDF; el plan Análisis Live añade compartir partidos en directo, overlay para OBS y página pública del equipo.",
-        "url": "https://voleystats.vercel.app/",
+        "url": "https://clipeostats.com/",
         "installUrl": "https://apps.apple.com/us/app/voley-stats/id6737778450",
         "downloadUrl": "https://apps.apple.com/us/app/voley-stats/id6737778450",
         "sameAs": ["https://apps.apple.com/us/app/voley-stats/id6737778450"],
@@ -116,9 +125,9 @@
       {
         "@context": "https://schema.org",
         "@type": "WebSite",
-        "name": "Voley Stats",
-        "alternateName": ["VoleyStats", "Voley Stats Live", "Voley stats"],
-        "url": "https://voleystats.vercel.app/",
+        "name": "Clipeo",
+        "alternateName": ["Clipeo Stats", "Voley Stats"],
+        "url": "https://clipeostats.com/",
         "inLanguage": ["es", "en"]
       }
     </script>
@@ -128,16 +137,16 @@
       {
         "@context": "https://schema.org",
         "@type": "Organization",
-        "name": "Voley Stats",
-        "alternateName": "Voley Stats Live",
-        "url": "https://voleystats.vercel.app/",
-        "logo": "https://voleystats.vercel.app/logo.png",
+        "name": "Clipeo",
+        "alternateName": ["Clipeo Stats", "Voley Stats"],
+        "url": "https://clipeostats.com/",
+        "logo": "https://clipeostats.com/logo.png",
         "email": "voleystats@gmail.com",
         "contactPoint": {
           "@type": "ContactPoint",
           "email": "voleystats@gmail.com",
           "contactType": "customer support",
-          "url": "https://voleystats.vercel.app/contact",
+          "url": "https://clipeostats.com/contact",
           "availableLanguage": ["es", "en"]
         }
       }
@@ -158,16 +167,16 @@
     <div id="app"></div>
     <noscript>
       <div style="max-width:640px;margin:40px auto;padding:0 20px;font-family:system-ui,sans-serif;color:#e2e8f0;background:#070A12">
-        <h1>Voley Stats — Estadísticas de voleibol en directo</h1>
+        <h1>Clipeo — Estadísticas de voleibol en directo</h1>
         <p>
-          Voley Stats es una app para iPad y Android para capturar y analizar estadísticas
+          Clipeo es una app para iPad y Android para capturar y analizar estadísticas
           de voleibol. Anota cada acción del partido —incluso sin conexión—,
           sigue el marcador y las estadísticas en directo desde esta web,
           analiza cada set por fases y jugadoras y genera informes de scouting.
           Activa JavaScript para usar la web.
         </p>
         <p>
-          <a href="https://apps.apple.com/us/app/voley-stats/id6737778450" style="color:#7dd3fc">Descargar Voley Stats en el App Store</a>
+          <a href="https://apps.apple.com/us/app/voley-stats/id6737778450" style="color:#7dd3fc">Descargar Clipeo en el App Store</a>
         </p>
         <!-- Grafo de enlaces para rastreadores. TODOS los enlaces internos del
              sitio viven dentro de componentes Vue (`RouterLink`), así que el
@@ -183,7 +192,7 @@
         <nav>
           <h2>Secciones</h2>
           <ul>
-            <li><a href="/" style="color:#7dd3fc">Inicio: qué es Voley Stats</a></li>
+            <li><a href="/" style="color:#7dd3fc">Inicio: qué es Clipeo</a></li>
             <li><a href="/team-code" style="color:#7dd3fc">Ver estadísticas en directo con el código del equipo</a></li>
             <li><a href="/pricing" style="color:#7dd3fc">Precios y planes: gratis, Análisis y Análisis Live</a></li>
             <li><a href="/contact" style="color:#7dd3fc">Contacto</a></li>

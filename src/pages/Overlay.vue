@@ -218,7 +218,7 @@ const usName = computed(() => match.value?.team?.name || "Local")
 const themName = computed(() => match.value?.opponent || "Visitante")
 // Fallback is brand-400 (#6E93FF, see tailwind.config.js) — the site's own
 // blue — instead of an arbitrary sky tone, so an unbranded match still reads
-// as "Voley Stats" rather than a generic color.
+// as "Clipeo" rather than a generic color.
 const usColor = computed(() => cssColor(match.value?.team?.color, "#6E93FF"))
 const themColor = "#F87171"
 // Crests. `""` (no logo published, or crests switched off) falls back to the

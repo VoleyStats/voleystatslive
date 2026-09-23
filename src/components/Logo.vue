@@ -11,10 +11,10 @@
     />
     <span
       v-if="showWordmark"
-      class="font-display font-bold tracking-tight text-white leading-none"
+      class="font-display font-bold tracking-tight leading-none"
       :class="wordmarkClass"
     >
-      Voley<span class="text-brand-400">Stats</span>
+      <span class="text-brand-400">Clipeo</span> <span class="text-ink-950 dark:text-white">Stats</span>
     </span>
   </span>
 </template>
