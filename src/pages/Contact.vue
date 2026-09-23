@@ -63,7 +63,7 @@ import { useI18n } from "vue-i18n";
 const { t } = useI18n();
 
 // Sin backend: el contacto es solo por correo (mailto con asunto prellenado).
-const CONTACT_EMAIL = "voleystats@gmail.com";
+const CONTACT_EMAIL = "hola@clipeostats.com";
 
 const mailtoHref = computed(
   () => `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(t("contact.subject"))}`
