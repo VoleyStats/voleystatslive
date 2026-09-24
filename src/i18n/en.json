@@ -31,6 +31,10 @@
     "contact": {
       "title": "Contact — Clipeo",
       "description": "Questions, suggestions or a problem with the app? Write to us and we'll reply."
+    },
+    "authAction": {
+      "title": "Manage account — Clipeo",
+      "description": "Reset your password, verify your email or confirm an account change for Clipeo."
     }
   },
   "layout": {
@@ -771,6 +775,44 @@
         "text": "Questions about your data, your team's data or how to disable a live share.",
         "link": "Read the privacy policy"
       }
+    }
+  },
+  "authAction": {
+    "loading": "Checking the link…",
+    "errorTitle": "We couldn't continue",
+    "backToSite": "Back to the homepage",
+    "modes": {
+      "resetPassword": {
+        "title": "Create a new password",
+        "subtitle": "For the account {email}",
+        "newPassword": "New password",
+        "confirmPassword": "Repeat the password",
+        "showPassword": "Show password",
+        "hidePassword": "Hide password",
+        "submit": "Save password",
+        "submitting": "Saving…",
+        "successTitle": "Password updated",
+        "success": "You can now go back to the Clipeo app and sign in with your new password."
+      },
+      "verifyEmail": {
+        "successTitle": "Email verified",
+        "success": "Your email has been verified. You can now go back to the Clipeo app."
+      },
+      "recoverEmail": {
+        "successTitle": "Email restored",
+        "success": "Your email has been restored to {email}. If you did not request this change, change your password as soon as possible from the app."
+      }
+    },
+    "errors": {
+      "invalidLink": "This link isn't valid or is missing information. Request it again from the app.",
+      "expired-action-code": "This link has expired. Go back to the app and request a new one.",
+      "invalid-action-code": "This link is no longer valid — it may have already been used. If you still need it, request a new one from the app.",
+      "user-disabled": "This account has been disabled. Write to us if you think this is a mistake.",
+      "user-not-found": "We couldn't find an account for this link. It may have already been deleted.",
+      "weak-password": "That password is too weak. Use at least 6 characters.",
+      "tooShort": "The password must be at least 6 characters long.",
+      "mismatch": "The two passwords don't match.",
+      "generic": "Something went wrong while processing the link. Try again from the app."
     }
   },
   "common": {

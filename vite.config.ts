@@ -17,6 +17,13 @@ export default defineConfig({
         //    que el entry lo importe estáticamente).
         codeSplitting: {
           groups: [
+            // firebase/auth solo lo importa /auth/action (la página de acción
+            // de Firebase Auth): un chunk propio evita que las páginas de
+            // stats/overlay, que solo leen Firestore, arrastren el SDK de
+            // Auth cada vez que crece el grupo 'firebase' genérico. Va ANTES
+            // que el grupo genérico (misma técnica que apexcharts-ssr más
+            // abajo): mayor prioridad = se evalúa primero.
+            { name: 'firebase-auth', test: /node_modules[\\/]@?firebase[\\/]auth/, priority: 20 },
             { name: 'firebase', test: /node_modules[\\/]@?firebase[\\/]/, priority: 10 },
             // vue3-apexcharts trae su propia copia SSR de apexcharts que solo
             // importa dinámicamente en servidor: la aislamos en su chunk para

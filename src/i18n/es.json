@@ -31,6 +31,10 @@
     "contact": {
       "title": "Contacto — Clipeo",
       "description": "¿Dudas, sugerencias o un problema con la app? Escríbenos y te respondemos."
+    },
+    "authAction": {
+      "title": "Gestionar cuenta — Clipeo",
+      "description": "Restablece tu contraseña, verifica tu correo o confirma un cambio de cuenta de Clipeo."
     }
   },
   "layout": {
@@ -771,6 +775,44 @@
         "text": "Consultas sobre tus datos, los de tu equipo o cómo desactivar un directo.",
         "link": "Leer la política de privacidad"
       }
+    }
+  },
+  "authAction": {
+    "loading": "Comprobando el enlace…",
+    "errorTitle": "No hemos podido continuar",
+    "backToSite": "Volver al inicio",
+    "modes": {
+      "resetPassword": {
+        "title": "Crea una nueva contraseña",
+        "subtitle": "Para la cuenta {email}",
+        "newPassword": "Nueva contraseña",
+        "confirmPassword": "Repite la contraseña",
+        "showPassword": "Mostrar contraseña",
+        "hidePassword": "Ocultar contraseña",
+        "submit": "Guardar contraseña",
+        "submitting": "Guardando…",
+        "successTitle": "Contraseña actualizada",
+        "success": "Ya puedes volver a la app de Clipeo e iniciar sesión con tu nueva contraseña."
+      },
+      "verifyEmail": {
+        "successTitle": "Correo verificado",
+        "success": "Tu correo ha quedado verificado. Ya puedes volver a la app de Clipeo."
+      },
+      "recoverEmail": {
+        "successTitle": "Correo restaurado",
+        "success": "Tu correo se ha restaurado a {email}. Si no has sido tú quien pidió este cambio, cambia tu contraseña cuanto antes desde la app."
+      }
+    },
+    "errors": {
+      "invalidLink": "Este enlace no es válido o le falta información. Vuelve a solicitarlo desde la app.",
+      "expired-action-code": "Este enlace ha caducado. Vuelve a la app y pide uno nuevo.",
+      "invalid-action-code": "Este enlace ya no es válido, puede que ya se haya usado. Si lo sigues necesitando, pide uno nuevo desde la app.",
+      "user-disabled": "Esta cuenta está deshabilitada. Escríbenos si crees que es un error.",
+      "user-not-found": "No encontramos ninguna cuenta asociada a este enlace. Puede que la cuenta ya se haya eliminado.",
+      "weak-password": "Esa contraseña es demasiado débil. Usa al menos 6 caracteres.",
+      "tooShort": "La contraseña debe tener al menos 6 caracteres.",
+      "mismatch": "Las dos contraseñas no coinciden.",
+      "generic": "Algo ha fallado al procesar el enlace. Inténtalo de nuevo desde la app."
     }
   },
   "common": {
