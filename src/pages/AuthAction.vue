@@ -100,7 +100,7 @@
         </form>
       </template>
 
-      <!-- Éxito: resetPassword (tras enviar), verifyEmail o recoverEmail (tras applyActionCode). -->
+      <!-- Éxito: resetPassword (tras enviar), verifyEmail, recoverEmail o verifyAndChangeEmail (tras applyActionCode). -->
       <template v-else-if="status === 'success'">
         <h1 class="text-xl font-bold text-center">{{ successTitle }}</h1>
         <p class="mt-3 text-sm text-slate-400 text-center leading-relaxed">{{ successMessage }}</p>
@@ -156,8 +156,8 @@ const route = useRoute();
 const { t } = useI18n();
 const { localeTo } = useLocalePath();
 
-type Mode = "resetPassword" | "verifyEmail" | "recoverEmail";
-const KNOWN_MODES: Mode[] = ["resetPassword", "verifyEmail", "recoverEmail"];
+type Mode = "resetPassword" | "verifyEmail" | "recoverEmail" | "verifyAndChangeEmail";
+const KNOWN_MODES: Mode[] = ["resetPassword", "verifyEmail", "recoverEmail", "verifyAndChangeEmail"];
 
 function firstQueryValue(value: unknown): string {
   const v = Array.isArray(value) ? value[0] : value;
@@ -175,6 +175,7 @@ const status = ref<Status>("loading");
 const errorMessage = ref("");
 const accountEmail = ref("");
 const restoredEmail = ref("");
+const newEmail = ref("");
 
 const password = ref("");
 const password2 = ref("");
@@ -194,6 +195,7 @@ const successTitle = computed(() => {
   if (mode.value === "resetPassword") return t("authAction.modes.resetPassword.successTitle");
   if (mode.value === "verifyEmail") return t("authAction.modes.verifyEmail.successTitle");
   if (mode.value === "recoverEmail") return t("authAction.modes.recoverEmail.successTitle");
+  if (mode.value === "verifyAndChangeEmail") return t("authAction.modes.verifyAndChangeEmail.successTitle");
   return "";
 });
 
@@ -202,6 +204,10 @@ const successMessage = computed(() => {
   if (mode.value === "verifyEmail") return t("authAction.modes.verifyEmail.success");
   if (mode.value === "recoverEmail")
     return t("authAction.modes.recoverEmail.success", { email: restoredEmail.value });
+  if (mode.value === "verifyAndChangeEmail")
+    return newEmail.value
+      ? t("authAction.modes.verifyAndChangeEmail.success", { email: newEmail.value })
+      : t("authAction.modes.verifyAndChangeEmail.successNoEmail");
   return "";
 });
 
@@ -215,9 +221,18 @@ const KNOWN_ERROR_CODES = [
   "auth/user-not-found",
   "auth/weak-password",
 ];
+// Con verifyAndChangeEmail el mensaje genérico de "enlace caducado" no basta:
+// aquí el usuario sigue entrando con su correo de siempre y tiene que saberlo.
+const CHANGE_EMAIL_ERROR_CODES = [
+  "auth/expired-action-code",
+  "auth/invalid-action-code",
+  "auth/email-already-in-use",
+];
 function mapAuthError(err: unknown): string {
   const code =
     err && typeof err === "object" && "code" in err ? String((err as { code?: unknown }).code) : "";
+  if (mode.value === "verifyAndChangeEmail" && CHANGE_EMAIL_ERROR_CODES.includes(code))
+    return t(`authAction.errors.changeEmail.${code.replace("auth/", "")}`);
   const key = KNOWN_ERROR_CODES.includes(code) ? code.replace("auth/", "") : "generic";
   return t(`authAction.errors.${key}`);
 }
@@ -242,6 +257,13 @@ onMounted(async () => {
       accountEmail.value = await verifyPasswordResetCode(auth, oobCode.value);
       status.value = "ready";
     } else if (mode.value === "verifyEmail") {
+      await applyActionCode(auth, oobCode.value);
+      status.value = "success";
+    } else if (mode.value === "verifyAndChangeEmail") {
+      // En este modo `data.email` es la dirección NUEVA (la anterior va en
+      // `previousEmail`); se lee antes de aplicar porque el código se consume.
+      const info = await checkActionCode(auth, oobCode.value);
+      newEmail.value = info.data.email ?? "";
       await applyActionCode(auth, oobCode.value);
       status.value = "success";
     } else if (mode.value === "recoverEmail") {

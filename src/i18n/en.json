@@ -809,9 +809,19 @@
       "recoverEmail": {
         "successTitle": "Email restored",
         "success": "Your email has been restored to {email}. If you did not request this change, change your password as soon as possible from the app."
+      },
+      "verifyAndChangeEmail": {
+        "successTitle": "Email changed",
+        "success": "You have confirmed the change: from now on your Clipeo sign-in email is {email}. Use this address to sign in; the previous one no longer works. Go back to the app to continue.",
+        "successNoEmail": "You have confirmed the change: from now on your Clipeo sign-in email is the new address. Use that address to sign in; the previous one no longer works. Go back to the app to continue."
       }
     },
     "errors": {
+      "changeEmail": {
+        "expired-action-code": "This confirmation link has expired and your email has NOT changed: you still sign in with your usual address. Go back to the app and request the email change again.",
+        "invalid-action-code": "This link is no longer valid, most likely because you already used it (in that case your email is already changed and you sign in with the new address) or because you requested another change afterwards. If it has not changed, request it again from the app.",
+        "email-already-in-use": "That address is already in use by another account, so your email has NOT changed. Go back to the app and choose a different address."
+      },
       "invalidLink": "This link isn't valid or is missing information. Request it again from the app.",
       "expired-action-code": "This link has expired. Go back to the app and request a new one.",
       "invalid-action-code": "This link is no longer valid — it may have already been used. If you still need it, request a new one from the app.",

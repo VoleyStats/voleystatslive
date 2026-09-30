@@ -57,7 +57,7 @@ const routes = [
   {
     // Página de acción de Firebase Auth en nuestro propio dominio (en vez de
     // voleystats.firebaseapp.com/__/auth/action): resetPassword/verifyEmail/
-    // recoverEmail. Nunca indexable ni parte del grafo de marketing (sin
+    // recoverEmail/verifyAndChangeEmail. Nunca indexable ni parte del grafo de marketing (sin
     // sitemap, sin <noscript>, sin prerender del head): no es contenido, solo
     // un destino técnico al que Firebase manda los correos.
     path: '/auth/action',
