@@ -560,7 +560,7 @@
   "privacy": {
     "docTitle": "Política de privacidad — Clipeo",
     "title": "Política de privacidad",
-    "lastUpdated": "Última actualización: 6 de agosto de 2026",
+    "lastUpdated": "Última actualización: 30 de septiembre de 2026",
     "sections": [
       {
         "paragraphs": [
@@ -570,7 +570,8 @@
       {
         "heading": "Responsable del tratamiento",
         "paragraphs": [
-          "Clipeo está desarrollada por Pau Hermosilla. Para cualquier cuestión sobre privacidad puedes escribir a hola{'@'}clipeostats.com."
+          "Clipeo está desarrollada por Pau Hermosilla. Para cualquier cuestión sobre privacidad puedes escribir a hola{'@'}clipeostats.com.",
+          "Distinguimos dos casos. De los datos de tu cuenta (correo electrónico y contraseña, si decides crear una) el responsable del tratamiento es Pau Hermosilla, como titular de Clipeo. De los datos que capturas sobre jugadoras —nombre, dorsal, fecha de nacimiento, medidas físicas, fotos y estadísticas de partido— el responsable es tu club o tu entrenador, que decide qué se registra y con quién se comparte; Clipeo actúa como encargado del tratamiento, prestando el servicio técnico de almacenamiento y, si tú lo activas, de directo, sincronización y copia de seguridad de esos datos."
         ]
       },
       {
@@ -591,6 +592,13 @@
         ]
       },
       {
+        "heading": "Menores de edad",
+        "paragraphs": [
+          "Las plantillas que se capturan con Clipeo suelen incluir jugadoras menores de edad, y eso condiciona cómo tratamos sus datos. Guardamos la fecha de nacimiento de una jugadora porque la app la usa para calcular categorías y evolución física, pero es uno de los datos con más cuidado: se queda en el dispositivo de quien la introduce y, como se explica en «Estadísticas publicadas en directo», se elimina de cualquier dato que se transmita al directo o a esta web. Por la misma razón, las fotos de jugadora no comparten canal con el resto del contenido del partido: se alojan en un espacio privado aparte, accesible solo con enlaces temporales y solo para las cuentas del equipo al que pertenecen, y nunca llegan a esta web pública ni a ningún visor sin registro.",
+          "Registrar los datos de una jugadora menor de edad y contar con el consentimiento de sus madres, padres o tutores legales para tratarlos es responsabilidad de quien captura el partido —normalmente el club o el entrenador—, tal y como recogen nuestras condiciones de uso."
+        ]
+      },
+      {
         "heading": "Estadísticas publicadas en directo",
         "paragraphs": [
           "Cuando activas el directo desde la app, el marcador y las estadísticas del partido se publican en tiempo real en esta web y son visibles para cualquier persona que tenga el código del partido. La fecha de nacimiento de las jugadoras nunca se incluye en las estadísticas publicadas en directo. El entrenador decide qué comparte en cada partido y puede desactivar el directo en cualquier momento desde la app."
@@ -599,7 +607,7 @@
       {
         "heading": "Publicidad, analítica y terceros",
         "paragraphs": [
-          "Clipeo no muestra publicidad, no utiliza analítica de terceros, y no vendemos ni cedemos tus datos. Usamos Firebase (Google) y Supabase únicamente como encargados del tratamiento para prestar las funciones de directo, sincronización y copia de seguridad que actives tú; tus datos viajan cifrados (HTTPS). Los pagos de suscripciones y compras dentro de la app los procesa Apple a través del App Store: nunca vemos ni almacenamos datos de tu tarjeta. El estado de tu suscripción se verifica en nuestro servidor (Supabase), asociado a tu cuenta, para activar las funciones correspondientes."
+          "Clipeo no muestra publicidad, no utiliza analítica de terceros, y no vendemos ni cedemos tus datos. Usamos Firebase (Google) y Supabase únicamente como encargados del tratamiento para prestar las funciones de directo, sincronización y copia de seguridad que actives tú; tus datos viajan cifrados (HTTPS). Los pagos de suscripciones y compras dentro de la app los procesa Apple a través del App Store, o Google a través de Google Play, según la plataforma desde la que instales Clipeo: nunca vemos ni almacenamos datos de tu tarjeta. El estado de tu suscripción se verifica en nuestro servidor (Supabase), asociado a tu cuenta, para activar las funciones correspondientes."
         ]
       },
       {

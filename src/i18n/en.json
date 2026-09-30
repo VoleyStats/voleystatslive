@@ -560,7 +560,7 @@
   "privacy": {
     "docTitle": "Privacy Policy — Clipeo",
     "title": "Privacy Policy",
-    "lastUpdated": "Last updated: August 6, 2026",
+    "lastUpdated": "Last updated: September 30, 2026",
     "sections": [
       {
         "paragraphs": [
@@ -570,7 +570,8 @@
       {
         "heading": "Data controller",
         "paragraphs": [
-          "Clipeo is developed by Pau Hermosilla. For any privacy questions, write to hola{'@'}clipeostats.com."
+          "Clipeo is developed by Pau Hermosilla. For any privacy questions, write to hola{'@'}clipeostats.com.",
+          "We distinguish two cases. For your account data (email and password, if you choose to create one), the data controller is Pau Hermosilla, as the owner of Clipeo. For the data you capture about players — name, jersey number, birth date, physical measurements, photos and match statistics — the controller is your club or your coach, who decides what gets recorded and who it's shared with; Clipeo acts as a data processor, providing the technical service to store, and if you enable it, to live-share, sync and back up that data."
         ]
       },
       {
@@ -591,6 +592,13 @@
         ]
       },
       {
+        "heading": "Minors",
+        "paragraphs": [
+          "Squads captured with Clipeo often include players who are minors, and that shapes how we handle their data. We store a player's birth date because the app uses it to work out categories and physical progress, but it's one of the fields we handle most carefully: it stays on the device of whoever entered it and, as explained under \"Statistics published live\", it is stripped from anything transmitted to the live feed or to this website. For the same reason, player photos don't share a channel with the rest of the match content: they are held in a separate private space, reachable only through short-lived links and only for the accounts on the team they belong to, and never reach this public website or any unregistered viewer.",
+          "Recording a minor player's data, and obtaining consent from her parents or legal guardians to process it, is the responsibility of whoever captures the match — normally the club or the coach — as set out in our terms of use."
+        ]
+      },
+      {
         "heading": "Statistics published live",
         "paragraphs": [
           "When you enable live sharing from the app, the scoreboard and match statistics are published in real time on this website and are visible to anyone who has the match code. Players' birth dates are never included in statistics published live. The coach decides what to share for each match and can turn off live sharing at any time from the app."
@@ -599,7 +607,7 @@
       {
         "heading": "Advertising, analytics and third parties",
         "paragraphs": [
-          "Clipeo shows no ads, uses no third-party analytics, and we never sell or share your data. We use Firebase (Google) and Supabase solely as data processors to provide the live sharing, sync and backup features you enable; your data travels encrypted (HTTPS). Payments for subscriptions and in-app purchases are processed by Apple through the App Store: we never see or store your card details. Your subscription status is verified on our server (Supabase), tied to your account, to enable the corresponding features."
+          "Clipeo shows no ads, uses no third-party analytics, and we never sell or share your data. We use Firebase (Google) and Supabase solely as data processors to provide the live sharing, sync and backup features you enable; your data travels encrypted (HTTPS). Payments for subscriptions and in-app purchases are processed by Apple through the App Store, or by Google through Google Play, depending on which platform you installed Clipeo from: we never see or store your card details. Your subscription status is verified on our server (Supabase), tied to your account, to enable the corresponding features."
         ]
       },
       {
