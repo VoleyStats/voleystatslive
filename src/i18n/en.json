@@ -560,7 +560,7 @@
   "privacy": {
     "docTitle": "Privacy Policy — Clipeo",
     "title": "Privacy Policy",
-    "lastUpdated": "Last updated: September 30, 2026",
+    "lastUpdated": "Last updated: October 13, 2026",
     "sections": [
       {
         "paragraphs": [
@@ -607,7 +607,8 @@
       {
         "heading": "Advertising, analytics and third parties",
         "paragraphs": [
-          "Clipeo shows no ads, uses no third-party analytics, and we never sell or share your data. We use Firebase (Google) and Supabase solely as data processors to provide the live sharing, sync and backup features you enable; your data travels encrypted (HTTPS). Payments for subscriptions and in-app purchases are processed by Apple through the App Store, or by Google through Google Play, depending on which platform you installed Clipeo from: we never see or store your card details. Your subscription status is verified on our server (Supabase), tied to your account, to enable the corresponding features."
+          "Clipeo shows no ads, uses no third-party analytics, and we never sell or share your data. We use Firebase (Google) and Supabase solely as data processors to provide the live sharing, sync and backup features you enable; your data travels encrypted (HTTPS). Payments for subscriptions and in-app purchases are processed by Apple through the App Store, or by Google through Google Play, depending on which platform you installed Clipeo from: we never see or store your card details. Your subscription status is verified on our server (Supabase), tied to your account, to enable the corresponding features.",
+          "Crash reports (optional): if you explicitly agree to it in the app, when Clipeo closes unexpectedly we receive an automatic technical report through Firebase Crashlytics (Google): what the app was doing at that moment, the device model, the system version and the app version. It is off by default and you can turn it on or off at any time in settings. No player data ever travels in these reports: no names, numbers, birthdays or photos."
         ]
       },
       {

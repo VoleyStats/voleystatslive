@@ -560,7 +560,7 @@
   "privacy": {
     "docTitle": "Política de privacidad — Clipeo",
     "title": "Política de privacidad",
-    "lastUpdated": "Última actualización: 30 de septiembre de 2026",
+    "lastUpdated": "Última actualización: 13 de octubre de 2026",
     "sections": [
       {
         "paragraphs": [
@@ -607,7 +607,8 @@
       {
         "heading": "Publicidad, analítica y terceros",
         "paragraphs": [
-          "Clipeo no muestra publicidad, no utiliza analítica de terceros, y no vendemos ni cedemos tus datos. Usamos Firebase (Google) y Supabase únicamente como encargados del tratamiento para prestar las funciones de directo, sincronización y copia de seguridad que actives tú; tus datos viajan cifrados (HTTPS). Los pagos de suscripciones y compras dentro de la app los procesa Apple a través del App Store, o Google a través de Google Play, según la plataforma desde la que instales Clipeo: nunca vemos ni almacenamos datos de tu tarjeta. El estado de tu suscripción se verifica en nuestro servidor (Supabase), asociado a tu cuenta, para activar las funciones correspondientes."
+          "Clipeo no muestra publicidad, no utiliza analítica de terceros, y no vendemos ni cedemos tus datos. Usamos Firebase (Google) y Supabase únicamente como encargados del tratamiento para prestar las funciones de directo, sincronización y copia de seguridad que actives tú; tus datos viajan cifrados (HTTPS). Los pagos de suscripciones y compras dentro de la app los procesa Apple a través del App Store, o Google a través de Google Play, según la plataforma desde la que instales Clipeo: nunca vemos ni almacenamos datos de tu tarjeta. El estado de tu suscripción se verifica en nuestro servidor (Supabase), asociado a tu cuenta, para activar las funciones correspondientes.",
+          "Informes de fallos (opcionales): si lo aceptas expresamente en la app, cuando Clipeo se cierra de forma inesperada recibimos un informe técnico automático a través de Firebase Crashlytics (Google): qué estaba haciendo la app en ese momento, el modelo del dispositivo, la versión del sistema y la de la app. Está desactivado por defecto y puedes activarlo o desactivarlo cuando quieras desde los ajustes. En esos informes nunca viaja ningún dato de las jugadoras: ni nombres, ni dorsales, ni fechas de nacimiento, ni fotos."
         ]
       },
       {
