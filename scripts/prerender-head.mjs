@@ -20,6 +20,7 @@
 // OJO: esto prerenderiza el HEAD, no el BODY. Google (que ejecuta JS) ya no
 // tiene excusa para no indexar; los rastreadores de IA siguen viendo el body
 // vacío + `llms.txt`. Para eso haría falta SSG real (vite-ssg).
+import { createHash } from 'node:crypto'
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -42,6 +43,30 @@ const ROUTES = [
 ]
 
 const template = readFileSync(resolve(root, 'dist/index.html'), 'utf8')
+
+// La CSP de `vercel.json` es `script-src 'self'`, así que todo <script> inline
+// EJECUTABLE de index.html (hoy solo el que añade la clase `js` para los
+// reveals) tiene que ir autorizado por su hash. Sin él el navegador lo
+// bloquea en silencio: así estuvo meses, con los reveals de la portada sin
+// activarse nunca y un error de CSP en la consola de cada página. Cambiar una
+// coma del script cambia el hash, de ahí que se compruebe aquí en vez de
+// confiar en acordarse. Los `application/ld+json` no se ejecutan y no cuentan.
+{
+  const csps = JSON.parse(readFileSync(resolve(root, 'vercel.json'), 'utf8')).headers
+    .flatMap((h) => h.headers)
+    .filter((h) => h.key === 'Content-Security-Policy')
+    .map((h) => h.value)
+  const inline = [...template.matchAll(/<script(?![^>]*\bsrc=)(?![^>]*application\/ld\+json)[^>]*>([\s\S]*?)<\/script>/g)]
+  for (const [, body] of inline) {
+    const hash = `'sha256-${createHash('sha256').update(body).digest('base64')}'`
+    for (const csp of csps) {
+      if (!csp.includes(hash)) {
+        throw new Error(`prerender: el <script> inline de index.html no está autorizado en una CSP de vercel.json. Añade ${hash} a su script-src.`)
+      }
+    }
+  }
+}
+
 const i18nByLocale = {
   es: JSON.parse(readFileSync(resolve(root, 'src/i18n/es.json'), 'utf8')),
   en: JSON.parse(readFileSync(resolve(root, 'src/i18n/en.json'), 'utf8')),
