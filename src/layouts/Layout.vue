@@ -286,9 +286,10 @@ const showBack = computed(() => !["home", "code"].includes(baseName.value));
 
 // El CTA "Ver en vivo" solo aporta cuando el usuario aún no está dentro de un
 // directo: se oculta en las vistas de estadísticas, la página del equipo, el
-// overlay y el propio formulario de código.
+// overlay y el propio formulario de código. Y en la del curso, donde la sala
+// tiene que completar sus tres pasos sin salidas a otra parte.
 const showWatchLive = computed(
-  () => !["code", "stats", "players", "team", "overlay"].includes(baseName.value)
+  () => !["code", "stats", "players", "team", "overlay", "course"].includes(baseName.value)
 );
 
 // El toggle ES/EN cambiaba el idioma pero no la URL, asi que desde `/pricing`

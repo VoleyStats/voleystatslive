@@ -35,6 +35,10 @@
     "authAction": {
       "title": "Manage account — Clipeo",
       "description": "Reset your password, verify your email or confirm an account change for Clipeo."
+    },
+    "course": {
+      "title": "Workshop — Clipeo",
+      "description": "Activate your Clipeo workshop access and download the workshop match."
     }
   },
   "layout": {
@@ -832,6 +836,58 @@
       "tooShort": "The password must be at least 6 characters long.",
       "mismatch": "The two passwords don't match.",
       "generic": "Something went wrong while processing the link. Try again from the app."
+    }
+  },
+  "course": {
+    "loading": "Checking the code…",
+    "network": "We couldn't connect. Check your connection and try again.",
+    "retry": "Try again",
+    "invalid": {
+      "title": "This link isn't valid",
+      "text": "Make sure you scanned the workshop QR code, or ask the instructor for the link."
+    },
+    "title": "Three steps and you're in",
+    "plans": {
+      "normal": "Analysis",
+      "pro": "Analysis Live"
+    },
+    "step1": {
+      "title": "Install Clipeo and create your account",
+      "text": "Download it and create the account from the app itself, with your email and a password."
+    },
+    "step2": {
+      "title": "Activate {days} days of {plan}",
+      "text": "Sign in with the same account you just created in the app.",
+      "email": "Email",
+      "password": "Password",
+      "showPassword": "Show password",
+      "hidePassword": "Hide password",
+      "submit": "Activate",
+      "submitting": "Activating…",
+      "forgot": "Forgot your password?",
+      "forgotNeedEmail": "Type your email first, then tap again.",
+      "forgotSent": "If {email} has an account, we've sent you an email to reset the password.",
+      "success": {
+        "title": "All set!",
+        "text": "{plan} active until {date}. Open your profile in the app to see it.",
+        "already": "You had already activated it: {plan} until {date}. Open your profile in the app to see it."
+      },
+      "errors": {
+        "credentials": "Wrong email or password. Use the same account you sign in with in the app.",
+        "tooMany": "Too many attempts in a row. Wait a minute and try again.",
+        "network": "We couldn't connect. Check your connection and try again.",
+        "generic": "Something went wrong. Please try again."
+      }
+    },
+    "closed": {
+      "expired": "The window to activate this code has ended.",
+      "exhausted": "This code has already been used the maximum number of times.",
+      "not_started": "This code can't be activated yet."
+    },
+    "step3": {
+      "title": "Download the workshop match",
+      "text": "Open it with Clipeo: on iPad, from Files › Downloads; on Android, from the download notification.",
+      "button": "Download match"
     }
   },
   "common": {

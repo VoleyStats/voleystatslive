@@ -66,6 +66,16 @@ const routes = [
     meta: { seo: 'authAction', noindex: true },
   },
   {
+    // Página de la formación presencial: el QR de la diapositiva lleva aquí.
+    // Activa el mes de prueba (Edge Function `promo`) y ofrece el .clipeo del
+    // curso. Como /auth/action: destino técnico, nunca indexable ni en el
+    // sitemap/prerender — cada código vive unos días.
+    path: '/curso/:code',
+    name: 'course',
+    component: () => import('./pages/Course.vue'),
+    meta: { seo: 'course', noindex: true },
+  },
+  {
     path: '/stats/:id',
     name: 'parentStats',
     children: [

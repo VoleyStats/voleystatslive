@@ -35,6 +35,10 @@
     "authAction": {
       "title": "Gestionar cuenta — Clipeo",
       "description": "Restablece tu contraseña, verifica tu correo o confirma un cambio de cuenta de Clipeo."
+    },
+    "course": {
+      "title": "Formación — Clipeo",
+      "description": "Activa tu acceso de la formación de Clipeo y descarga el partido del curso."
     }
   },
   "layout": {
@@ -832,6 +836,58 @@
       "tooShort": "La contraseña debe tener al menos 6 caracteres.",
       "mismatch": "Las dos contraseñas no coinciden.",
       "generic": "Algo ha fallado al procesar el enlace. Inténtalo de nuevo desde la app."
+    }
+  },
+  "course": {
+    "loading": "Comprobando el código…",
+    "network": "No hemos podido conectar. Comprueba la conexión y vuelve a intentarlo.",
+    "retry": "Reintentar",
+    "invalid": {
+      "title": "Este enlace no es válido",
+      "text": "Comprueba que has escaneado el QR de la formación o pide el enlace a quien la imparte."
+    },
+    "title": "Tres pasos y listo",
+    "plans": {
+      "normal": "Análisis",
+      "pro": "Análisis Live"
+    },
+    "step1": {
+      "title": "Instala Clipeo y crea tu cuenta",
+      "text": "Descárgala y crea la cuenta desde la propia app, con tu email y una contraseña."
+    },
+    "step2": {
+      "title": "Activa {days} días de {plan}",
+      "text": "Entra con la misma cuenta que acabas de crear en la app.",
+      "email": "Email",
+      "password": "Contraseña",
+      "showPassword": "Mostrar contraseña",
+      "hidePassword": "Ocultar contraseña",
+      "submit": "Activar",
+      "submitting": "Activando…",
+      "forgot": "¿Has olvidado la contraseña?",
+      "forgotNeedEmail": "Escribe primero tu email y vuelve a pulsar.",
+      "forgotSent": "Si {email} tiene cuenta, te hemos enviado un correo para cambiar la contraseña.",
+      "success": {
+        "title": "¡Listo!",
+        "text": "{plan} activo hasta el {date}. Abre tu perfil en la app para verlo.",
+        "already": "Ya lo tenías activado: {plan} hasta el {date}. Abre tu perfil en la app para verlo."
+      },
+      "errors": {
+        "credentials": "Email o contraseña incorrectos. Usa la misma cuenta con la que entras en la app.",
+        "tooMany": "Demasiados intentos seguidos. Espera un minuto y vuelve a probar.",
+        "network": "No hemos podido conectar. Comprueba la conexión y vuelve a intentarlo.",
+        "generic": "Algo ha fallado. Vuelve a intentarlo."
+      }
+    },
+    "closed": {
+      "expired": "El plazo para activar este código ha terminado.",
+      "exhausted": "Este código ya se ha usado el máximo de veces.",
+      "not_started": "Este código todavía no se puede activar."
+    },
+    "step3": {
+      "title": "Descarga el partido del curso",
+      "text": "Ábrelo con Clipeo: en iPad, desde Archivos › Descargas; en Android, desde la notificación de la descarga.",
+      "button": "Descargar partido"
     }
   },
   "common": {
