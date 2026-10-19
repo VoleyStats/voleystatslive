@@ -38,6 +38,12 @@ export interface LiveMatch {
      * si el cliente que publicó es antiguo. Nunca `null`.
      */
     opponent_logo_url?: string;
+    /**
+     * Color de la ficha del rival (hex sin "#"), misma vía y misma excepción
+     * acotada que `opponent_logo_url`. `""` o ausente si no se puede resolver
+     * o si el cliente que publicó es anterior al campo.
+     */
+    opponent_color?: string;
     n_sets?: number;
     sets_us?: number;
     sets_them?: number;

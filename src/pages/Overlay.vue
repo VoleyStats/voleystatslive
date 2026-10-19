@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, ref, watch } from "vue"
+import { computed, onMounted, onUnmounted, reactive, ref, watch } from "vue"
 import { useRoute, useRouter } from "vue-router"
 import { useI18n } from "vue-i18n"
 import { collection, doc, onSnapshot, orderBy, query } from "firebase/firestore"
@@ -29,7 +29,7 @@ const code = String(route.params.code ?? "")
 const isSetup = computed(() => route.query.setup !== undefined)
 const hasAnyQueryParam = computed(() => Object.keys(route.query).length > 0)
 
-// Demo mode (?demo=1 in-play, ?demo=between between sets) feeds mock data so the
+// Demo mode (?demo=1 in-play, ?demo=between between sets, ?demo=banners in-play + banner loop) feeds mock data so the
 // overlay can be styled and placed in OBS without a real live match (and without
 // touching Firestore, so it works with no .env). Kept as a ref (rather than the
 // original plain const) so the setup panel's "demo data" toggle can flip it live.
@@ -56,6 +56,7 @@ const demoData = computed<LiveMatch | null>(() => {
         team: { name: "Demo team", color: "1e90ff", logo_url: "/icon-192.png" },
         opponent: "Demo opponent",
         opponent_logo_url: "/icon-192.png",
+        opponent_color: "f59e0b",
         n_sets: 5,
         sets_us: 1,
         sets_them: 1,
@@ -187,9 +188,85 @@ const bannerAxis = computed<"vertical" | "horizontal">(() =>
 // entrada/salida: estos estilos son INLINE y ganan a cualquier regla de la
 // hoja, así que un `transform` en `.sb-enter-from` no se aplicaría — la
 // escala tiene que COMPONERSE aquí, no sustituir a la colocación.
+// --- Fit to the widget (owner, 2026-10-19). Prism Live lets the browser widget
+// be any size, not just the full canvas, and the page used to lay itself out
+// for 1920×1080 regardless — so a smaller widget just cropped a window out of
+// it: the set-end panel and the banners were cut. Now every piece measures its
+// natural size and the scale applied is the streamer's `scale` CAPPED by what
+// fits in the viewport, so it can only shrink to fit, never grow past the
+// chosen size.
+const vw = ref(window.innerWidth)
+const vh = ref(window.innerHeight)
+function onResize() {
+    vw.value = window.innerWidth
+    vh.value = window.innerHeight
+}
+type FitKey = "compact" | "banner" | "expanded"
+const sizes = reactive<Record<FitKey, { w: number; h: number }>>({
+    compact: { w: 0, h: 0 },
+    banner: { w: 0, h: 0 },
+    expanded: { w: 0, h: 0 },
+})
+// offsetWidth/Height ignore transforms: the natural, unscaled size.
+const resizeObs =
+    typeof ResizeObserver !== "undefined"
+        ? new ResizeObserver((entries) => {
+              for (const e of entries) {
+                  const el = e.target as HTMLElement
+                  const key = el.dataset.fit as FitKey | undefined
+                  if (key) sizes[key] = { w: el.offsetWidth, h: el.offsetHeight }
+              }
+          })
+        : null
+const tracked = new Map<FitKey, HTMLElement>()
+// Function refs built ONCE (an inline arrow in the template would be a new
+// function each render, and Vue would unbind/rebind it every time).
+function fitRef(key: FitKey) {
+    return (el: unknown) => {
+        const next = el instanceof HTMLElement ? el : null
+        const prev = tracked.get(key) ?? null
+        if (prev === next) return
+        if (prev) resizeObs?.unobserve(prev)
+        if (next) {
+            next.dataset.fit = key
+            tracked.set(key, next)
+            resizeObs?.observe(next)
+            sizes[key] = { w: next.offsetWidth, h: next.offsetHeight }
+        } else {
+            tracked.delete(key)
+        }
+    }
+}
+const compactRef = fitRef("compact")
+const bannerRef = fitRef("banner")
+const expandedRef = fitRef("expanded")
+const marginPx = computed(() => 0.03 * Math.min(vw.value, vh.value))
+const BANNER_GAP = 10
+function fitScale(w: number, h: number): number {
+    if (w <= 0 || h <= 0) return scale.value
+    const m = marginPx.value
+    return Math.min(scale.value, (vw.value - 2 * m) / w, (vh.value - 2 * m) / h)
+}
+const compactScale = computed(() => fitScale(sizes.compact.w, sizes.compact.h))
+const expandedScale = computed(() => fitScale(sizes.expanded.w, sizes.expanded.h))
+// A banner never shrinks the scoreboard (that would make the score jump in
+// size every timeout). If it doesn't fit beside/above the bar at the bar's
+// scale, it covers the bar instead for its few seconds. The estimate covers
+// the first frame, before the banner has been measured.
+const BANNER_EST = { w: 340, h: 104 }
+const bannerFits = computed(() => {
+    const s = compactScale.value
+    const m = marginPx.value
+    const c = sizes.compact
+    const bw = Math.max(sizes.banner.w, BANNER_EST.w)
+    const bh = Math.max(sizes.banner.h, BANNER_EST.h)
+    if (bannerAxis.value === "vertical") return (c.h + BANNER_GAP + bh) * s <= vh.value - 2 * m
+    return (c.w + BANNER_GAP + bw) * s <= vw.value - 2 * m && Math.max(c.h, bh) * s <= vh.value - 2 * m
+})
+
 const compactStyle = computed(() => {
     const m = "3vmin"
-    const base: Record<string, string> = { transform: `scale(${scale.value}) scale(var(--sb-enter-scale, 1))` }
+    const base: Record<string, string> = { transform: `scale(${compactScale.value}) scale(var(--sb-enter-scale, 1))` }
     switch (pos.value) {
         case "bottom-right":
             return { ...base, bottom: m, right: m, transformOrigin: "bottom right" }
@@ -202,7 +279,7 @@ const compactStyle = computed(() => {
     }
 })
 const expandedStyle = computed(() => ({
-    transform: `translate(-50%, -50%) scale(${scale.value}) scale(var(--sb-enter-scale, 1))`,
+    transform: `translate(-50%, -50%) scale(${expandedScale.value}) scale(var(--sb-enter-scale, 1))`,
 }))
 
 // --- Derived match state ---
@@ -219,8 +296,44 @@ const themName = computed(() => match.value?.opponent || "Visitante")
 // Fallback is brand-400 (#6E93FF, see tailwind.config.js) — the site's own
 // blue — instead of an arbitrary sky tone, so an unbranded match still reads
 // as "Clipeo" rather than a generic color.
-const usColor = computed(() => cssColor(match.value?.team?.color, "#6E93FF"))
-const themColor = "#F87171"
+const US_FALLBACK = "#6E93FF"
+// The app paints the rival in pink (`.pink`, the "their player" button), so
+// that's the rival's fallback here too.
+const THEM_FALLBACK = "#FF375F"
+function rgb(hex: string): [number, number, number] {
+    const h = hex.replace("#", "")
+    return [0, 2, 4].map((i) => parseInt(h.slice(i, i + 2), 16)) as [number, number, number]
+}
+function luminance(hex: string): number {
+    const [r, g, b] = rgb(hex).map((c) => {
+        const v = c / 255
+        return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4
+    })
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b
+}
+// A team colour has to survive on the dark card: near-black (the default of a
+// rival sheet nobody painted, "000000") is replaced by the fallback.
+function visibleColor(hex: string | undefined, fallback: string): string {
+    const c = cssColor(hex, fallback)
+    return luminance(c) < 0.03 ? fallback : c
+}
+// Text drawn ON a team colour (the points box): dark ink on light colours.
+function inkOn(hex: string): string {
+    return luminance(hex) > 0.45 ? "#0b0f1a" : "#ffffff"
+}
+const usColor = computed(() => visibleColor(match.value?.team?.color, US_FALLBACK))
+// Each team in its own colour (owner, 2026-10-19): the rival's comes from its
+// sheet (`opponent_color`). If it's missing, or too close to ours to tell the
+// two rows apart, the app's rival pink takes over.
+const themColor = computed(() => {
+    const c = visibleColor(match.value?.opponent_color, THEM_FALLBACK)
+    const [r1, g1, b1] = rgb(c)
+    const [r2, g2, b2] = rgb(usColor.value)
+    const close = Math.hypot(r1 - r2, g1 - g2, b1 - b2) < 90
+    return close ? (usColor.value.toLowerCase() === THEM_FALLBACK.toLowerCase() ? US_FALLBACK : THEM_FALLBACK) : c
+})
+const usStyle = computed(() => ({ "--team": usColor.value, "--team-ink": inkOn(usColor.value) }))
+const themStyle = computed(() => ({ "--team": themColor.value, "--team-ink": inkOn(themColor.value) }))
 // Crests. `""` (no logo published, or crests switched off) falls back to the
 // color chip, which is exactly what the scoreboard showed before this existed.
 // The URL is passed through untouched — `TeamCrest`/`safeLogoUrl` own the host
@@ -363,11 +476,36 @@ function handleLiveStat(s: any) {
     if (s?.to !== 0 && activeBanner.value) advanceBanner()
 }
 
+// ?demo=banners: in-play mock data plus a timeout/substitution loop, so the
+// banners can be placed and sized in OBS without a live match.
+const DEMO_BANNERS: Omit<BannerItem, "id">[] = [
+    { kind: "sub", playerIn: "7 Demo In", playerOut: "12 Demo Out" },
+    { kind: "timeout", team: "us" },
+    { kind: "timeout", team: "them" },
+]
+let demoBannerTimer: ReturnType<typeof setInterval> | null = null
+let demoBannerIdx = 0
+watch(
+    () => demo.value === "banners",
+    (on) => {
+        if (demoBannerTimer) clearInterval(demoBannerTimer)
+        demoBannerTimer = null
+        bannerQueue.value = []
+        activeBanner.value = null
+        clearBannerTimer()
+        if (!on) return
+        const next = () => enqueueBanner(DEMO_BANNERS[demoBannerIdx++ % DEMO_BANNERS.length])
+        next()
+        demoBannerTimer = setInterval(next, BANNER_MS + 1500)
+    },
+    { immediate: true }
+)
+
 const bannerChipColor = computed(() => {
     const b = activeBanner.value
     if (!b) return "#93a4bd"
     if (b.kind === "sub") return usColor.value
-    return b.team === "us" ? usColor.value : b.team === "them" ? themColor : "#93a4bd"
+    return b.team === "us" ? usColor.value : b.team === "them" ? themColor.value : "#93a4bd"
 })
 // Vertical layout (top/bottom edge) keeps the original team-color left
 // border; horizontal layout (left/right edge) shows the accent as a top
@@ -375,6 +513,7 @@ const bannerChipColor = computed(() => {
 // bar, so it can't carry a 4px accent border there).
 const bannerAccentStyle = computed(() => ({ borderLeftColor: bannerChipColor.value }))
 const bannerPosClass = computed(() => {
+    if (!bannerFits.value) return pos.value.startsWith("top") ? "banner-over banner-over-top" : "banner-over banner-over-bottom"
     if (bannerAxis.value === "vertical") return bannerDir.value === "top" ? "banner-above" : "banner-below"
     return bannerDir.value === "right" ? "banner-extend-right" : "banner-extend-left"
 })
@@ -567,6 +706,7 @@ onMounted(() => {
     document.documentElement.style.colorScheme = "normal"
 
     startStatsSubscription()
+    window.addEventListener("resize", onResize)
 
     if (!isSetup.value && !hasAnyQueryParam.value) {
         window.addEventListener("mousemove", armSetupHint, { once: true })
@@ -584,7 +724,10 @@ onUnmounted(() => {
     document.documentElement.style.colorScheme = ""
     stopStatsSubscription()
     stopTeamSubscription()
+    if (demoBannerTimer) clearInterval(demoBannerTimer)
     window.removeEventListener("mousemove", armSetupHint)
+    window.removeEventListener("resize", onResize)
+    resizeObs?.disconnect()
     if (hintTimer) clearTimeout(hintTimer)
 })
 </script>
@@ -597,8 +740,8 @@ onUnmounted(() => {
             <Transition name="sb" mode="out-in">
                 <!-- COMPACT — during a set -->
                 <div v-if="phase === 'playing'" key="playing" class="compact-wrap" :style="compactStyle">
-                    <Transition :name="bannerAxis === 'vertical' ? 'banner' : 'banner-side'">
-                        <div v-if="activeBanner" :key="activeBanner.id" class="banner" :class="bannerPosClass" :style="bannerAccentStyle">
+                    <Transition :name="!bannerFits || bannerAxis === 'vertical' ? 'banner' : 'banner-side'">
+                        <div v-if="activeBanner" :key="activeBanner.id" :ref="bannerRef" class="banner" :class="bannerPosClass" :style="bannerAccentStyle">
                             <div v-if="activeBanner.kind === 'timeout'" class="banner-head">
                                 <span class="banner-title">{{ t("overlay.timeout") }}</span>
                                 <span v-if="activeBanner.team" class="banner-team">
@@ -629,13 +772,13 @@ onUnmounted(() => {
                             </div>
                         </div>
                     </Transition>
-                    <div class="compact">
+                    <div :ref="compactRef" class="compact">
                         <div class="compact-head">SET {{ currentSet }}</div>
                         <!-- El escudo ocupa el mismo hueco que el chip de color
                              y cae a ese mismo chip (slot) cuando no hay logo,
                              falla la carga o el operador los apaga: sin escudos
                              la barra queda idéntica a como era. -->
-                        <div class="team-row">
+                        <div class="team-row" :style="usStyle">
                             <TeamCrest :url="usLogo" :size="30" :alt="usName">
                                 <span class="chip" :style="{ background: usColor }"></span>
                             </TeamCrest>
@@ -646,7 +789,7 @@ onUnmounted(() => {
                                 <span class="pts">{{ cur.score_us }}</span>
                             </span>
                         </div>
-                        <div class="team-row">
+                        <div class="team-row" :style="themStyle">
                             <TeamCrest :url="themLogo" :size="30" :alt="themName">
                                 <span class="chip" :style="{ background: themColor }"></span>
                             </TeamCrest>
@@ -661,17 +804,19 @@ onUnmounted(() => {
                 </div>
 
                 <!-- EXPANDED — between sets / match over -->
-                <div v-else key="between" class="expanded" :style="expandedStyle">
-                    <div class="headline">{{ headline }}</div>
-                    <div class="panel">
-                        <div class="big-team" :class="{ winner: matchOver && effUs > effThem }">
+                <div v-else key="between" :ref="expandedRef" class="expanded" :style="expandedStyle">
+                    <div class="panel" :class="{ decided: matchOver }">
+                        <!-- Dentro del panel: fuera necesitaba una sombra de texto
+                             para leerse sobre el vídeo, y el estilo es plano. -->
+                        <div class="headline">{{ headline }}</div>
+                        <div class="big-team" :class="{ winner: matchOver && effUs > effThem }" :style="usStyle">
                             <TeamCrest :url="usLogo" :size="48" :alt="usName">
                                 <span class="chip" :style="{ background: usColor }"></span>
                             </TeamCrest>
                             <span class="bname">{{ usName }}</span>
                             <span class="bsets">{{ effUs }}</span>
                         </div>
-                        <div class="big-team" :class="{ winner: matchOver && effThem > effUs }">
+                        <div class="big-team" :class="{ winner: matchOver && effThem > effUs }" :style="themStyle">
                             <TeamCrest :url="themLogo" :size="48" :alt="themName">
                                 <span class="chip" :style="{ background: themColor }"></span>
                             </TeamCrest>
@@ -681,8 +826,8 @@ onUnmounted(() => {
                         <div class="divider"></div>
                         <div class="set-line" v-for="s in playedSets" :key="s.number">
                             <span class="slabel">Set {{ s.number }}</span>
-                            <span class="sval" :class="{ win: s.score_us > s.score_them }">{{ s.score_us }}</span>
-                            <span class="sval" :class="{ win: s.score_them > s.score_us }">{{ s.score_them }}</span>
+                            <span class="sval" :class="{ win: s.score_us > s.score_them }" :style="s.score_us > s.score_them ? { color: usColor } : {}">{{ s.score_us }}</span>
+                            <span class="sval" :class="{ win: s.score_them > s.score_us }" :style="s.score_them > s.score_us ? { color: themColor } : {}">{{ s.score_them }}</span>
                         </div>
 
                         <!-- Resumen de NUESTROS puntos del set + máxima anotadora -->
@@ -914,11 +1059,12 @@ onUnmounted(() => {
 .compact {
     position: relative;
     min-width: 340px;
-    padding: 10px 16px 14px;
-    background: rgba(var(--c-ink-900-rgb), 0.88);
-    border: 1px solid rgba(var(--c-brand-500-rgb), 0.24);
-    border-radius: 12px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+    padding: 10px 12px 12px 16px;
+    /* Flat (owner, 2026-10-19): solid card, hairline border, no shadow — the
+       same card language as the app and the web. */
+    background: rgba(var(--c-ink-900-rgb), 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 14px;
 }
 
 /* ---------- BANNER (timeout / substitution) ---------- */
@@ -932,11 +1078,10 @@ onUnmounted(() => {
     gap: 8px;
     min-width: 340px;
     padding: 10px 16px 10px 14px;
-    background: rgba(var(--c-ink-950-rgb), 0.94);
-    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(var(--c-ink-950-rgb), 0.96);
+    border: 1px solid rgba(255, 255, 255, 0.08);
     border-left: 4px solid rgba(255, 255, 255, 0.3);
-    border-radius: 12px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+    border-radius: 14px;
 }
 
 /* Anchor position relative to the compact bar — the only thing that
@@ -962,6 +1107,25 @@ onUnmounted(() => {
     top: 0;
     right: 100%;
     margin-right: 10px;
+}
+/* No room beside/above the bar at its scale (small widget, see `bannerFits`):
+   the banner covers the bar for its few seconds instead of being cropped. */
+.banner-over {
+    left: 0;
+    right: 0;
+    min-height: 100%;
+    z-index: 2;
+    justify-content: center;
+}
+.banner-over-top {
+    top: 0;
+}
+.banner-over-bottom {
+    bottom: 0;
+}
+.banner-over.banner-enter-from,
+.banner-over.banner-leave-to {
+    opacity: 0;
 }
 .banner-head {
     display: flex;
@@ -1010,7 +1174,6 @@ onUnmounted(() => {
     box-sizing: border-box;
 }
 .to-dot.filled {
-    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.25) inset;
 }
 .banner-sub-rows {
     display: flex;
@@ -1067,7 +1230,6 @@ onUnmounted(() => {
     width: 14px;
     height: 14px;
     border-radius: 4px;
-    box-shadow: 0 0 0 1.5px rgba(255, 255, 255, 0.35) inset, 0 1px 3px rgba(0, 0, 0, 0.45);
 }
 .team-row .chip {
     border-radius: v-bind(chipRadius);
@@ -1085,11 +1247,14 @@ onUnmounted(() => {
 }
 .sets {
     font-family: var(--font-display);
-    font-size: 24px;
+    font-size: 22px;
     font-weight: 700;
-    color: var(--c-slate-400);
-    min-width: 24px;
+    color: var(--c-slate-200);
+    min-width: 34px;
+    padding: 2px 0;
     text-align: center;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.06);
 }
 .pts-wrap {
     position: relative;
@@ -1098,13 +1263,19 @@ onUnmounted(() => {
     /* Reserved slot for .serve-dot so it never crowds the bar's border. */
     padding-right: 15px;
 }
+/* Each team in its own colour (owner, 2026-10-19): the points sit on a
+   solid box of the team colour, with ink picked for contrast (`inkOn`). */
 .pts {
     font-family: var(--font-display);
-    font-size: 40px;
+    font-size: 38px;
     font-weight: 700;
-    min-width: 56px;
+    min-width: 60px;
+    padding: 4px 6px;
     text-align: center;
     line-height: 1;
+    border-radius: 10px;
+    background: var(--team);
+    color: var(--team-ink);
 }
 /* Serving-team indicator: a volt dot anchored beside the serving team's
    point number, derived live from the stats stream (see `servingTeam`). */
@@ -1118,7 +1289,6 @@ onUnmounted(() => {
     height: 9px;
     border-radius: 50%;
     background: var(--c-volt-400);
-    box-shadow: 0 0 0 2px rgba(var(--c-ink-900-rgb), 0.95), 0 0 6px rgba(203, 251, 69, 0.65);
 }
 
 /* ---------- EXPANDED ---------- */
@@ -1126,24 +1296,27 @@ onUnmounted(() => {
     position: absolute;
     top: 50%;
     left: 50%;
+    /* Natural width, not shrink-to-fit against the half viewport left of
+       `left: 50%` — otherwise a narrow widget wraps the team names instead of
+       letting `expandedScale` shrink the whole panel. */
+    width: max-content;
     text-align: center;
 }
 .headline {
-    font-size: 22px;
+    font-size: 18px;
     font-weight: 700;
-    letter-spacing: 0.28em;
+    letter-spacing: 0.24em;
     text-transform: uppercase;
+    text-align: left;
     color: var(--c-slate-400);
-    margin-bottom: 18px;
-    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.8);
+    margin-bottom: 14px;
 }
 .panel {
     min-width: 560px;
-    padding: 34px 48px;
-    background: rgba(var(--c-ink-850-rgb), 0.92);
-    border: 1px solid rgba(var(--c-brand-500-rgb), 0.2);
+    padding: 28px 40px 32px;
+    background: rgba(var(--c-ink-900-rgb), 0.96);
+    border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 20px;
-    box-shadow: 0 24px 70px rgba(0, 0, 0, 0.55);
 }
 .big-team {
     display: grid;
@@ -1153,10 +1326,10 @@ onUnmounted(() => {
     align-items: center;
     column-gap: 22px;
     padding: 8px 0;
-    opacity: 0.92;
 }
-.big-team.winner {
-    opacity: 1;
+/* Match over: the loser steps back, the winner keeps full strength. */
+.panel.decided .big-team:not(.winner) {
+    opacity: 0.5;
 }
 .big-team .chip {
     width: 22px;
@@ -1164,6 +1337,7 @@ onUnmounted(() => {
     border-radius: v-bind(chipRadiusBig);
 }
 .bname {
+    white-space: nowrap;
     font-family: var(--font-display);
     font-size: 56px;
     font-weight: 700;
@@ -1173,18 +1347,19 @@ onUnmounted(() => {
 }
 .bsets {
     font-family: var(--font-display);
-    font-size: 72px;
+    font-size: 64px;
     font-weight: 700;
     line-height: 1;
-    min-width: 90px;
+    min-width: 96px;
+    padding: 8px 10px;
     text-align: center;
-}
-.winner .bsets {
-    color: var(--c-volt-400);
+    border-radius: 14px;
+    background: var(--team);
+    color: var(--team-ink);
 }
 .divider {
     height: 1px;
-    background: rgba(var(--c-brand-500-rgb), 0.2);
+    background: rgba(255, 255, 255, 0.08);
     margin: 20px 0 16px;
 }
 .set-line {
@@ -1241,7 +1416,7 @@ onUnmounted(() => {
     height: 8px;
     border-radius: 5px;
     overflow: hidden;
-    background: rgba(var(--c-ink-700-rgb), 0.6);
+    background: rgba(255, 255, 255, 0.08);
 }
 .origin-fill {
     height: 100%;
@@ -1260,7 +1435,7 @@ onUnmounted(() => {
     gap: 10px;
     margin-top: 14px;
     padding-top: 14px;
-    border-top: 1px solid rgba(var(--c-brand-500-rgb), 0.2);
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 .top-scorer-label {
     font-size: 13px;
