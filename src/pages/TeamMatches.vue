@@ -762,15 +762,17 @@ const receptionHistory = computed(() => {
     const perfect: number[] = [];
     const good: number[] = [];
     const bad: number[] = [];
+    const overpass: number[] = [];
     const errors: number[] = [];
     for (const m of chronologicalLoaded.value) {
         const r = receptionTotals(m.stats);
         perfect.push(r.perfect);
         good.push(r.good);
         bad.push(r.bad);
+        overpass.push(r.overpass);
         errors.push(r.errors);
     }
-    return { perfect, good, bad, errors };
+    return { perfect, good, bad, overpass, errors };
 });
 const attackHistory = computed(() => {
     const kills: number[] = [];
@@ -812,9 +814,10 @@ const receptionChart = computed(() => ({
         { name: t("stats.recGrade3"), data: receptionHistory.value.perfect },
         { name: t("stats.recGrade2"), data: receptionHistory.value.good },
         { name: t("stats.recGrade1"), data: receptionHistory.value.bad },
+        { name: t("stats.recGradeOverpass"), data: receptionHistory.value.overpass },
         { name: t("stats.recGrade0"), data: receptionHistory.value.errors },
     ],
-    chartOptions: <ApexOptions>{ ...lineChartBase(), colors: [GRADE_COLORS[3], GRADE_COLORS[2], GRADE_COLORS[1], GRADE_COLORS[0]] },
+    chartOptions: <ApexOptions>{ ...lineChartBase(), colors: [GRADE_COLORS[3], GRADE_COLORS[2], GRADE_COLORS[1], GRADE_COLORS[-1], GRADE_COLORS[0]] },
 }));
 
 const attackChart = computed(() => ({

@@ -18,8 +18,15 @@ export const ATTACK_ERR_IDS = ["16", "17"];
 export const SERVE_IDS = ["8", "15", "32", "39", "40", "41"];
 export const SERVE_ERR_IDS = ["15", "32"];
 export const RECEPTION_IDS = ["1", "2", "3", "4", "22"];
-// Nota de recepción: id de acción -> nota 0-3 (3 = perfecta).
-export const RECEPTION_GRADES: Record<string, number> = { "4": 3, "3": 2, "2": 1, "1": 0, "22": 0 };
+// CATEGORÍA de recepción: id de acción -> 3 (#), 2 (+), 1 (-), -1 (overpass,
+// id "1"), 0 (error, id "22"). Es una clave de categoría (histogramas, ataque
+// según la recepción, leyendas) — NUNCA se suma: el overpass restaría. Toda
+// nota o media usa `RECEPTION_VALUES`.
+export const RECEPTION_OVERPASS = -1;
+export const RECEPTION_CATEGORIES: Record<string, number> = { "4": 3, "3": 2, "2": 1, "1": RECEPTION_OVERPASS, "22": 0 };
+// VALOR de recepción en la escala 0-3 de la nota: # 3, + 2, - 1, overpass
+// 0.5 (mismo peso que `RADAR_RECEIVE_WEIGHTS`), error 0.
+export const RECEPTION_VALUES: Record<string, number> = { "4": 3, "3": 2, "2": 1, "1": 0.5, "22": 0 };
 // Nota de saque 0-3 (misma fórmula que la app iPad).
 export const SERVE_WEIGHTS: Record<string, number> = { "39": 0.5, "40": 1, "41": 2, "8": 3 };
 // Paleta única de "nota" 0-3 (recepción: RECEPTION_GRADES; saque: los ids
@@ -35,6 +42,9 @@ export const GRADE_COLORS: Record<number, string> = {
     2: "#4ADE80", // verde claro (buena) — green-400, igual que la referencia
     1: "#EAB308", // amarillo (mala) — yellow-500, igual que la referencia
     0: "#EF4444", // rojo (error) — red-500, ref. #DC2626 (red-600)
+    // Overpass de recepción (categoría -1): naranja entre el amarillo de "-" y
+    // el rojo de error.
+    [-1]: "#F97316", // naranja (overpass) — orange-500
 };
 // Pesos del eje "recepción" del radar de equipo/jugadora (0-3, mismo patrón
 // que SERVE_WEIGHTS): ids fuera de este mapa (incl. "22", error) pesan 0.
@@ -250,22 +260,24 @@ export interface ReceptionTotals {
     perfect: number;
     good: number;
     bad: number;
+    overpass: number;
     errors: number;
 }
 
 // Recepción propia (excluye al rival), con el desglose de notas.
 export function receptionTotals(stats: StatDoc[]): ReceptionTotals {
-    const r: ReceptionTotals = { total: 0, sum: 0, perfect: 0, good: 0, bad: 0, errors: 0 };
+    const r: ReceptionTotals = { total: 0, sum: 0, perfect: 0, good: 0, bad: 0, overpass: 0, errors: 0 };
     for (const s of stats) {
         if (isRival(s)) continue;
         const id = aid(s);
-        if (!(id in RECEPTION_GRADES)) continue;
+        if (!(id in RECEPTION_VALUES)) continue;
         r.total++;
-        r.sum += RECEPTION_GRADES[id];
+        r.sum += RECEPTION_VALUES[id];
         if (id === "4") r.perfect++;
         else if (id === "3") r.good++;
         else if (id === "2") r.bad++;
-        else r.errors++; // "1" (pasada en juego, cuenta como fallo) y "22" (error)
+        else if (id === "1") r.overpass++; // pasada en juego: categoría propia, valor 0.5
+        else r.errors++; // "22" (error)
     }
     return r;
 }
@@ -572,8 +584,8 @@ export function rotationBreakdown(gameStats: StatDoc[], derivedKills: Set<StatDo
         }
         if (!isRival(s)) {
             const id = aid(s);
-            if (id in RECEPTION_GRADES) {
-                e.recSum += RECEPTION_GRADES[id];
+            if (id in RECEPTION_VALUES) {
+                e.recSum += RECEPTION_VALUES[id];
                 e.recTotal++;
             }
             if (ATTACK_IDS.includes(id)) {
@@ -631,8 +643,8 @@ export function attackByReceptionGradeForMatch(
             lastGrade = null;
         }
         const id = aid(s);
-        if (!isRival(s) && id in RECEPTION_GRADES) {
-            lastGrade = RECEPTION_GRADES[id];
+        if (!isRival(s) && id in RECEPTION_CATEGORIES) {
+            lastGrade = RECEPTION_CATEGORIES[id];
         } else if (!isRival(s) && ATTACK_IDS.includes(id) && lastGrade !== null && attackerFilter(s)) {
             const b = buckets.get(lastGrade) ?? { attempts: 0, kills: 0, errors: 0, blocked: 0 };
             b.attempts++;

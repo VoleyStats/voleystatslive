@@ -148,10 +148,10 @@ export function serveSkillTable(gameStats: StatDoc[], allStatsRaw: StatDoc[]): S
 }
 
 // ------------------------------------------------------------------------
-// Recepción: columnas [total, 3(id4), 2(id3), 1(id2+id1), errores(id22)].
+// Recepción: columnas [total, 3(id4), 2(id3), 1(id2), overpass(id1), errores(id22)].
 // mark = etiqueta canónica "NN% (MM%)" (`receptionMarkLabel`): NN = media
 // (n1*0.5 + n2*1 + n3*2 + n4*3)/total (0-3) expresada como %, pesos sobre los
-// ids crudos 1/2/3/4, NO sobre la columna "1" ya fusionada; MM = % de
+// ids crudos 1/2/3/4 (el overpass, id 1, pesa 0.5 y tiene su propia columna); MM = % de
 // recepciones perfectas (nota 3, id "4") sobre el total — antes era una
 // columna `mark2` separada, ahora fusionada en el mismo string (paridad con
 // `StatsCalculator.receptionMarkLabel` de la app).
@@ -162,21 +162,22 @@ export function receiveSkillTable(gameStats: StatDoc[]): SkillTable {
         { key: "g3", labelKey: "team.col3" },
         { key: "g2", labelKey: "team.col2" },
         { key: "g1", labelKey: "team.col1" },
+        { key: "overpass", labelKey: "team.colOverpass" },
         { key: "errors", labelKey: "team.colErrors" },
     ];
-    const entries = new Map<string, { name: string; total: number; g3: number; g2: number; g1: number; errors: number; n1: number; n2: number; n3: number; n4: number }>();
+    const entries = new Map<string, { name: string; total: number; g3: number; g2: number; g1: number; overpass: number; errors: number; n1: number; n2: number; n3: number; n4: number }>();
     for (const s of gameStats) {
         const a = aid(s);
         if (isRival(s) || !RECEIVE_TABLE_IDS.includes(a)) continue;
         const id = String(s.player?.id ?? "");
         if (!id) continue;
         const e =
-            entries.get(id) ?? { name: s.player?.name || id, total: 0, g3: 0, g2: 0, g1: 0, errors: 0, n1: 0, n2: 0, n3: 0, n4: 0 };
+            entries.get(id) ?? { name: s.player?.name || id, total: 0, g3: 0, g2: 0, g1: 0, overpass: 0, errors: 0, n1: 0, n2: 0, n3: 0, n4: 0 };
         e.total++;
         if (a === "4") { e.g3++; e.n4++; }
         else if (a === "3") { e.g2++; e.n3++; }
         else if (a === "2") { e.g1++; e.n2++; }
-        else if (a === "1") { e.g1++; e.n1++; }
+        else if (a === "1") { e.overpass++; e.n1++; }
         else if (a === "22") e.errors++;
         entries.set(id, e);
     }
@@ -185,15 +186,15 @@ export function receiveSkillTable(gameStats: StatDoc[]): SkillTable {
         v.total ? receptionMarkLabel((v.n1 * 0.5 + v.n2 * 1 + v.n3 * 2 + v.n4 * 3) / v.total, perfectPctOf(v)) : "—";
     const rows: SkillRow[] = [...entries.entries()]
         .map(([id, e]) => {
-            const values = { total: e.total, g3: e.g3, g2: e.g2, g1: e.g1, errors: e.errors };
+            const values = { total: e.total, g3: e.g3, g2: e.g2, g1: e.g1, overpass: e.overpass, errors: e.errors };
             return { id, name: e.name, values, mark: markOf(e) };
         })
         .sort((a, b) => b.values.total - a.values.total);
     // Recalcula el mark del total a partir de los pesos crudos agregados
-    // (no se puede derivar solo de las columnas fusionadas g1/g2/g3).
+    // (se mantiene desde los contadores crudos n1..n4).
     let n1 = 0, n2 = 0, n3 = 0, n4 = 0;
     for (const e of entries.values()) { n1 += e.n1; n2 += e.n2; n3 += e.n3; n4 += e.n4; }
-    const totalValues = sumRows(rows, ["total", "g3", "g2", "g1", "errors"]);
+    const totalValues = sumRows(rows, ["total", "g3", "g2", "g1", "overpass", "errors"]);
     const totalMark = markOf({ total: totalValues.total, n1, n2, n3, n4 });
     return {
         columns,

@@ -199,6 +199,7 @@ import {
     attackPhaseTotals,
     attackTotals,
     GRADE_COLORS,
+    RECEPTION_OVERPASS,
     isRival,
     isUnforced,
     mergeGradeBuckets,
@@ -417,11 +418,11 @@ const attackByGradeBuckets = computed(() => {
     return attackByReceptionGradeForMatch(props.stats, props.derivedKills, filter);
 });
 const receptionGradeRows = computed(() =>
-    [3, 2, 1, 0]
+    [3, 2, 1, RECEPTION_OVERPASS, 0]
         .filter((g) => (attackByGradeBuckets.value.get(g)?.attempts ?? 0) > 0)
         .map((g) => {
             const b = attackByGradeBuckets.value.get(g)!;
-            return { grade: g, label: t(`stats.recGrade${g}`), attempts: b.attempts, kills: b.kills, killPct: pct(b.kills, b.attempts) };
+            return { grade: g, label: t(g === RECEPTION_OVERPASS ? "stats.recGradeOverpass" : `stats.recGrade${g}`), attempts: b.attempts, kills: b.kills, killPct: pct(b.kills, b.attempts) };
         })
 );
 const receptionGradeChart = computed(() => ({
@@ -470,6 +471,7 @@ const receptionDistribution = computed(() =>
         { label: t("stats.recGrade3"), n: kpiReception.value.perfect, color: GRADE_COLORS[3] },
         { label: t("stats.recGrade2"), n: kpiReception.value.good, color: GRADE_COLORS[2] },
         { label: t("stats.recGrade1"), n: kpiReception.value.bad, color: GRADE_COLORS[1] },
+        { label: t("stats.recGradeOverpass"), n: kpiReception.value.overpass, color: GRADE_COLORS[RECEPTION_OVERPASS] },
         { label: t("stats.recGrade0"), n: kpiReception.value.errors, color: GRADE_COLORS[0] },
     ].filter((r) => r.n > 0)
 );

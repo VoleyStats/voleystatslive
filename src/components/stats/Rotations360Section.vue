@@ -101,6 +101,7 @@ import {
     attackTotals,
     breakStats,
     GRADE_COLORS,
+    RECEPTION_OVERPASS,
     isPointEnder,
     pct,
     receptionMarkPercent,
@@ -219,13 +220,13 @@ const attackPhases = computed(() => {
 });
 
 const receptionGradeRows = computed(() =>
-    [3, 2, 1, 0]
+    [3, 2, 1, RECEPTION_OVERPASS, 0]
         .filter((g) => (props.receptionGradeBuckets.get(g)?.attempts ?? 0) > 0)
         .map((g) => {
             const b = props.receptionGradeBuckets.get(g)!;
             return {
                 grade: g,
-                label: t(`stats.recGrade${g}`),
+                label: t(g === RECEPTION_OVERPASS ? "stats.recGradeOverpass" : `stats.recGrade${g}`),
                 attempts: b.attempts,
                 kills: b.kills,
                 killPct: pct(b.kills, b.attempts),
