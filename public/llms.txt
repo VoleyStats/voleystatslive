@@ -51,7 +51,7 @@ anterior ("Volley Stats", "VolleyStats").
 ## Datos clave
 
 - Categoría: aplicación deportiva (voleibol / analítica deportiva).
-- Plataformas: iPad (iPadOS), en el App Store: https://apps.apple.com/us/app/voley-stats/id6737778450 — y Android, en Google Play. Ambas comparten datos: un equipo capturado en una se sincroniza y se restaura en la otra.
+- Plataformas: iPad (iPadOS), en el App Store: https://apps.apple.com/us/app/voley-stats/id6737778450 — y Android, en Google Play: https://play.google.com/store/apps/details?id=com.voleystats. Ambas comparten datos: un equipo capturado en una se sincroniza y se restaura en la otra.
 - Web en directo: gratuita para los espectadores, sin registro.
 - Idiomas: español e inglés.
 - Precio: descargar y anotar partidos es gratis. Plan Análisis: 19,99 €/año o 3,99 €/mes (Rally Map, histórico, temporada, PDF, sync, nube, exportación de equipo/torneo, compartir equipo). Plan Análisis Live: 34,99 €/año o 6,99 €/mes (todo lo de Análisis + directo, overlay OBS, página pública del equipo). Match pass: 2,99 € de compra única por partido (desbloquea directo, Rally Map e informe PDF para ese partido, sin suscripción). Compras gestionadas vía App Store (StoreKit) en iPad y vía Google Play Billing en Android.
