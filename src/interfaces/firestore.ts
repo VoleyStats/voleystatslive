@@ -66,6 +66,11 @@ export interface TeamOverlayConfig {
      * que nunca escriba este campo no debe apagar la feature.
      */
     logos?: boolean;
+    /**
+     * Idioma de los textos del overlay: "auto" | "es" | "en". **Ausente =
+     * "auto"**: se detecta por el navegador, como antes de existir el campo.
+     */
+    lang?: string;
 }
 
 /** Índice de partidos compartidos que publica `teams/{id}.matches[]`. */

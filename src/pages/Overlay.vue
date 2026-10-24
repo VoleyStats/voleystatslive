@@ -5,7 +5,7 @@ import { useI18n } from "vue-i18n"
 import { collection, doc, onSnapshot, orderBy, query } from "firebase/firestore"
 import { useDocument } from "vuefire"
 import { db } from "../firebase"
-import { ADMIN_IDS, aid, deriveCredits, isRival, pointsOrigin, rivalServing } from "../utils/volleyStats"
+import { ADMIN_IDS, KILL_IDS, aid, isRival, rivalServing } from "../utils/volleyStats"
 import TeamCrest from "../components/TeamCrest.vue"
 import { safeLogoUrl } from "../utils/teamLogo"
 // Everything the scoreboard needs already lives on the match doc: the app
@@ -13,12 +13,12 @@ import { safeLogoUrl } from "../utils/teamLogo"
 // point, plus `sets_us`/`sets_them`/`current_set`. So we subscribe only to
 // `live_matches/{code}` — no need to read the (potentially huge) stats
 // subcollection. Shapes live in `src/interfaces/firestore.ts`; the remote
-// placement config (`teams/{team.id}.overlay`: `pos`/`scale`/`banners`/`logos`)
+// placement config (`teams/{team.id}.overlay`: `pos`/`scale`/`banners`/`logos`/`lang`)
 // mirrors the URL params below and, once published, takes priority over them —
 // see the priority cascade (session > remote > URL > default) further down.
 import type { LiveMatch, SetScore, TeamOverlayConfig as RemoteOverlay } from "../interfaces/firestore"
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 
 const route = useRoute()
 const router = useRouter()
@@ -121,12 +121,23 @@ function parseLogos(v: unknown): boolean | null {
     return null
 }
 
+// Language of the overlay's texts. OBS/Prism run their own embedded browser,
+// so the detected language (navigator / saved choice) is not something the
+// streamer can see or change — hence an explicit "es"/"en". "auto" (or
+// anything else) = no opinion, fall through to the next level of the cascade.
+type OverlayLang = "es" | "en"
+function parseLang(v: unknown): OverlayLang | null {
+    const s = String(v ?? "").toLowerCase()
+    return s === "es" || s === "en" ? s : null
+}
+
 // Parsed once from the URL at load time — immutable for the life of the page
 // (unlike the session overrides below, these never change once resolved).
 const posUrlParam = parsePos(route.query.pos)
 const scaleUrlParam = parseScale(route.query.scale)
 const bannersUrlParam = parseBannersMode(route.query.banners)
 const logosUrlParam = parseLogos(route.query.logos)
+const langUrlParam = parseLang(route.query.lang)
 
 // Populated ONLY by the `?setup` panel's controls (see the `@click`/`v-model`
 // handlers below) — stays `null` for the whole session otherwise, including
@@ -135,6 +146,9 @@ const posSession = ref<Pos | null>(null)
 const scaleSession = ref<number | null>(null)
 const bannersSession = ref<BannersMode | null>(null)
 const logosSession = ref<boolean | null>(null)
+// "auto" here is an explicit choice in the setup panel (back to detection),
+// unlike `null`, which means the panel never touched the control.
+const langSession = ref<OverlayLang | "auto" | null>(null)
 
 const pos = computed<Pos>(() => posSession.value ?? parsePos(remoteOverlay.value?.pos) ?? posUrlParam ?? "bottom-left")
 const scale = computed<number>(() => scaleSession.value ?? parseScale(remoteOverlay.value?.scale) ?? scaleUrlParam ?? 1)
@@ -153,6 +167,14 @@ const bannersMode = computed<BannersMode>(
 const showLogos = computed<boolean>(
     () => logosSession.value ?? parseLogos(remoteOverlay.value?.logos) ?? logosUrlParam ?? true
 )
+// What `src/i18n` detected at load (saved choice or navigator), the "auto"
+// fallback. The overlay switches the global locale WITHOUT `setLocale`, so
+// it never persists to localStorage nor leaks into the rest of the site.
+const detectedLang = locale.value as OverlayLang
+const overlayLang = computed<OverlayLang>(() => {
+    if (langSession.value) return langSession.value === "auto" ? detectedLang : langSession.value
+    return parseLang(remoteOverlay.value?.lang) ?? langUrlParam ?? detectedLang
+})
 // Writable proxy for the setup panel's checkbox, same shape as `scaleInput`.
 const logosInput = computed<boolean>({
     get: () => showLogos.value,
@@ -346,16 +368,14 @@ const themLogo = computed(() => (showLogos.value ? match.value?.opponent_logo_ur
 // color chip then just centers inside it (see `.chip` in the styles below).
 // Consumed from the CSS via `v-bind()`.
 const CREST_SIZE = 30
-const CREST_SIZE_BIG = 48
 const anyCrest = computed(() => !!safeLogoUrl(usLogo.value) || !!safeLogoUrl(themLogo.value))
 const idCol = computed(() => (anyCrest.value ? `${CREST_SIZE}px` : "14px"))
-const idColBig = computed(() => (anyCrest.value ? `${CREST_SIZE_BIG}px` : "22px"))
 // Forma del chip de color, por la misma razón: si un equipo trae escudo (ya
 // recortado en círculo por la app) y el otro no, un cuadradito redondeado justo
 // encima de un círculo canta. Cuando hay algún escudo en el marcador el chip se
 // vuelve redondo también; sin ningún escudo conserva su radio de siempre y la
 // barra queda pixel a pixel como estaba. Solo se sobreescribe dentro de
-// `.team-row`/`.big-team`: el chip del rótulo de sustitución usa la regla base
+// `.team-row`/`.vs-team`: el chip del rótulo de sustitución usa la regla base
 // `.chip` y se queda cuadrado siempre.
 const chipRadius = computed(() => (anyCrest.value ? "50%" : "4px"))
 const chipRadiusBig = computed(() => (anyCrest.value ? "50%" : "6px"))
@@ -403,10 +423,7 @@ const matchOver = computed(() => between.value && (effUs.value >= majority.value
 
 // playing: compact bar during a set. between: big breakdown once a set ends.
 const phase = computed<"playing" | "between">(() => (between.value ? "between" : "playing"))
-const headline = computed(() => (matchOver.value ? "Final" : `Fin del set ${currentSet.value}`))
-const playedSets = computed(() =>
-    scoreboard.value.filter((s) => s.number <= currentSet.value).sort((a, b) => a.number - b.number)
-)
+const headline = computed(() => (matchOver.value ? t("overlay.matchEnd") : t("overlay.setEnd", { n: currentSet.value })))
 
 // --- Stats subcollection: momentary banners (timeout/substitution), the
 // serving-team indicator and the "set stats" block of the expanded panel.
@@ -554,6 +571,16 @@ const servingTeam = computed<"us" | "them" | null>(() => {
 // resolves `team.id`; re-subscribes if the id changes; skipped entirely in
 // demo mode (no real team doc) — see the `id` computation below.
 const remoteOverlay = ref<RemoteOverlay | null>(null)
+// Applies the overlay's language (see `overlayLang`). Declared here, not next
+// to it: `immediate` runs now and the cascade reads `remoteOverlay`.
+watch(
+    overlayLang,
+    (l) => {
+        locale.value = l
+        document.documentElement.lang = l
+    },
+    { immediate: true }
+)
 let teamUnsub: (() => void) | null = null
 let subscribedTeamId: string | null = null
 
@@ -606,50 +633,105 @@ function stopStatsSubscription() {
     clearBannerTimer()
 }
 
-// --- Set stats block (expanded panel): a ONE-SIDED summary of our own
-// team's set — this app captures almost exclusively our own actions, so the
-// rival's columns are essentially always empty; showing them side by side
-// (as the old comparative bars did) is misleading. `currentSet` still points
-// at the set that just ended until the app starts the next one.
+// --- Set stats block (expanded panel): both teams row against row, like a
+// broadcast "set statistics" card (owner, 2026-10-24). Only what was LOGGED,
+// nothing inferred (owner: "no es lo mismo un error de defensa que un punto
+// de ataque"):
+//  - attack/block/ace: the winning team's own kill (9/10/11), block (13) or
+//    ace (8) row. The rival's come from "their player" taps.
+//  - the one complementary pair that ends a rally: a reception error (22) is
+//    saved together with the server's ace (8, `to` 0, half an order apart —
+//    `CaptureEngine.complementDecision`), so that error counts as the ace.
+//  - "opponent errors": any other error of the losing team, as logged.
+// So a team's categories need not add up to its points (a downhit kill, a
+// court-capture rally logged as a rival error, …) — the score card has the points.
+// `currentSet` still points at the set that just ended until the app starts
+// the next one.
 const finishedSetGameStats = computed(() =>
     allStats.value.filter((s) => Number(s?.set?.number) === currentSet.value && !ADMIN_IDS.includes(aid(s)))
 )
 const finishedSetPointEnders = computed(() => finishedSetGameStats.value.filter((s) => s.to !== 0))
-const finishedSetCredits = computed(() => deriveCredits(finishedSetGameStats.value))
 
-const setOriginRows = computed(() => {
-    const o = pointsOrigin(finishedSetPointEnders.value, finishedSetCredits.value)
-    const usTotal = cur.value.score_us || 0
-    const rows = [
-        { key: "attack", label: t("stats.originAttack"), value: o.attack.us },
-        { key: "block", label: t("stats.originBlock"), value: o.block.us },
-        { key: "ace", label: t("stats.originAce"), value: o.ace.us },
-        { key: "errors", label: t("stats.originErrors"), value: o.errors.us },
-    ]
-    return rows.map((row) => ({ ...row, pct: usTotal > 0 ? Math.round((row.value / usTotal) * 100) : 0 }))
-})
-
-// Top scorer of the set just finished — same crediting rules as
-// GeneralStats.vue's `topScorers` (court-capture wins recorded as a rival
-// "error" get reattributed to whoever actually earned the credit).
-const setTopScorer = computed<{ name: string; points: number } | null>(() => {
-    const credits = finishedSetCredits.value
-    const byPlayer = new Map<string, number>()
-    for (const s of finishedSetPointEnders.value) {
-        if (s.to !== 1) continue
-        if (!isRival(s)) {
-            const name = s.player?.name ?? ""
-            if (name) byPlayer.set(name, (byPlayer.get(name) ?? 0) + 1)
-            continue
-        }
-        const credit = credits.creditedBy.get(s)
-        if (!credit) continue
-        const name = (credits.aces.has(credit) ? credit.server?.name : credit.player?.name) ?? ""
-        if (name) byPlayer.set(name, (byPlayer.get(name) ?? 0) + 1)
+type PointOrigin = "attack" | "block" | "ace" | "errors" | null
+function pointOrigin(s: any, aceOrders: { us: Set<number>; them: Set<number> }): PointOrigin {
+    const id = aid(s)
+    const winner = s.to === 1 ? "us" : "them"
+    const winnersRow = (winner === "them") === isRival(s)
+    if (winnersRow) {
+        if (KILL_IDS.includes(id)) return "attack"
+        if (id === "13") return "block"
+        if (id === "8") return "ace"
+        return null
     }
-    const sorted = [...byPlayer.entries()].sort((a, b) => b[1] - a[1])
-    return sorted[0] ? { name: sorted[0][0], points: sorted[0][1] } : null
+    const o = Number(s.order)
+    if (id === "22" && (aceOrders[winner].has(o - 0.5) || aceOrders[winner].has(o + 0.5))) return "ace"
+    return "errors"
+}
+
+interface SetStatRow {
+    key: string
+    label: string
+    us: number
+    them: number
+    usPct: number
+    themPct: number
+}
+const setStatRows = computed<SetStatRow[]>(() => {
+    // Complementary aces (`to` 0) by team, keyed by order, to pair them with
+    // the reception error they were saved with.
+    const aceOrders = { us: new Set<number>(), them: new Set<number>() }
+    for (const s of finishedSetGameStats.value)
+        if (aid(s) === "8" && s.to === 0) aceOrders[isRival(s) ? "them" : "us"].add(Number(s.order))
+    const count = { us: { attack: 0, block: 0, ace: 0, errors: 0 }, them: { attack: 0, block: 0, ace: 0, errors: 0 } }
+    for (const s of finishedSetPointEnders.value) {
+        const origin = pointOrigin(s, aceOrders)
+        if (origin) count[s.to === 1 ? "us" : "them"][origin]++
+    }
+    const rows = (["attack", "block", "ace", "errors"] as const).map((k) => ({
+        key: k,
+        label: t(`stats.origin${k.charAt(0).toUpperCase()}${k.slice(1)}`),
+        us: count.us[k],
+        them: count.them[k],
+    }))
+    // One scale for every bar, so lengths compare across rows too. The set
+    // score lives in its own card (`.score-card`), not as a row.
+    const max = Math.max(1, ...rows.flatMap((r) => [r.us, r.them]))
+    return rows.map((r) => ({ ...r, usPct: (r.us / max) * 100, themPct: (r.them / max) * 100 }))
 })
+const hasSetStats = computed(() => finishedSetPointEnders.value.length > 0)
+
+// ?demo=between: a plausible set 3 (25-18), with rival actions and our errors, so the
+// set statistics block can be previewed and placed without a live match.
+function demoSetStats(): any[] {
+    let order = 0
+    const stat = (to: number, rival: boolean, id: string, extra: object = {}) => ({
+        set: { number: 3 },
+        order: (order += 1),
+        to,
+        player: { id: rival ? "0" : "demo", name: rival ? "" : "Demo" },
+        server: { id: "demo" },
+        action: { id },
+        ...extra,
+    })
+    const rep = (n: number, to: number, rival: boolean, id: string) => Array.from({ length: n }, () => stat(to, rival, id))
+    // Our reception error saved with the rival's complementary ace.
+    const receptionError = () => {
+        const ace = stat(0, true, "8")
+        return [ace, { ...stat(2, false, "22"), order: ace.order + 0.5 }]
+    }
+    return [
+        ...rep(13, 1, false, "9"),
+        ...rep(3, 1, false, "13"),
+        ...rep(2, 1, false, "8"),
+        ...rep(7, 1, true, "15"),
+        ...rep(5, 2, true, "9"),
+        ...rep(2, 2, true, "13"),
+        ...receptionError(),
+        ...rep(3, 2, false, "23"),
+        ...rep(3, 2, false, "15"),
+        ...rep(4, 2, false, "16"),
+    ]
+}
 
 // --- Setup-mode discoverability: a small "configure" link, shown only when
 // the overlay is opened bare (no query params at all — a configured OBS
@@ -675,12 +757,22 @@ function armSetupHint() {
 // leaving a control untouched means the copied URL has no opinion on it, so
 // the remote config (and, failing that, the default) keeps applying live
 // even after this URL is pasted into OBS.
+// Setup panel language buttons. Language names stay in their own language.
+const langOptions = computed(() => [
+    { value: "auto" as const, label: t("overlay.setupLangAuto") },
+    { value: "es" as const, label: "Español" },
+    { value: "en" as const, label: "English" },
+])
+// Highlighted button: the session pick, else what the remote/URL config asks
+// for, else "auto".
+const langChoice = computed(() => langSession.value ?? parseLang(remoteOverlay.value?.lang) ?? langUrlParam ?? "auto")
 const finalOverlayUrl = computed(() => {
     const q: Record<string, string> = {}
     if (posSession.value) q.pos = posSession.value
     if (scaleSession.value != null) q.scale = String(scaleSession.value)
     if (bannersSession.value) q.banners = bannersSession.value
     if (logosSession.value != null) q.logos = logosSession.value ? "1" : "0"
+    if (langSession.value && langSession.value !== "auto") q.lang = langSession.value
     const resolved = router.resolve({ name: "overlay", params: { code }, query: q })
     return `${window.location.origin}${resolved.href}`
 })
@@ -718,6 +810,13 @@ watch(demo, (isDemo) => {
     if (isDemo) stopStatsSubscription()
     else startStatsSubscription()
 })
+watch(
+    demo,
+    (d) => {
+        if (d) allStats.value = d === "between" ? demoSetStats() : []
+    },
+    { immediate: true }
+)
 onUnmounted(() => {
     document.documentElement.style.background = ""
     document.body.style.background = ""
@@ -773,7 +872,7 @@ onUnmounted(() => {
                         </div>
                     </Transition>
                     <div :ref="compactRef" class="compact">
-                        <div class="compact-head">SET {{ currentSet }}</div>
+                        <div class="compact-head"><span>SET {{ currentSet }}</span><span class="brand"><img src="/logo.png" alt="" aria-hidden="true" />Clipeo</span></div>
                         <!-- El escudo ocupa el mismo hueco que el chip de color
                              y cae a ese mismo chip (slot) cuando no hay logo,
                              falla la carga o el operador los apaga: sin escudos
@@ -805,48 +904,63 @@ onUnmounted(() => {
 
                 <!-- EXPANDED — between sets / match over -->
                 <div v-else key="between" :ref="expandedRef" class="expanded" :style="expandedStyle">
-                    <div class="panel" :class="{ decided: matchOver }">
-                        <!-- Dentro del panel: fuera necesitaba una sombra de texto
-                             para leerse sobre el vídeo, y el estilo es plano. -->
-                        <div class="headline">{{ headline }}</div>
-                        <div class="big-team" :class="{ winner: matchOver && effUs > effThem }" :style="usStyle">
-                            <TeamCrest :url="usLogo" :size="48" :alt="usName">
-                                <span class="chip" :style="{ background: usColor }"></span>
-                            </TeamCrest>
-                            <span class="bname">{{ usName }}</span>
-                            <span class="bsets">{{ effUs }}</span>
-                        </div>
-                        <div class="big-team" :class="{ winner: matchOver && effThem > effUs }" :style="themStyle">
-                            <TeamCrest :url="themLogo" :size="48" :alt="themName">
-                                <span class="chip" :style="{ background: themColor }"></span>
-                            </TeamCrest>
-                            <span class="bname">{{ themName }}</span>
-                            <span class="bsets">{{ effThem }}</span>
-                        </div>
-                        <div class="divider"></div>
-                        <div class="set-line" v-for="s in playedSets" :key="s.number">
-                            <span class="slabel">Set {{ s.number }}</span>
-                            <span class="sval" :class="{ win: s.score_us > s.score_them }" :style="s.score_us > s.score_them ? { color: usColor } : {}">{{ s.score_us }}</span>
-                            <span class="sval" :class="{ win: s.score_them > s.score_us }" :style="s.score_them > s.score_us ? { color: themColor } : {}">{{ s.score_them }}</span>
+                    <!-- Tres tarjetas con el mismo estilo: equipos con los sets (como la
+                         VNL), marcador del set terminado y estadísticas. -->
+                    <div class="panels" :class="{ decided: matchOver }">
+                        <div class="card vs-head">
+                            <div class="vs-team us" :class="{ winner: matchOver && effUs > effThem }">
+                                <TeamCrest :url="usLogo" :size="48" :alt="usName">
+                                    <span class="chip" :style="{ background: usColor }"></span>
+                                </TeamCrest>
+                                <span class="bname">{{ usName }}</span>
+                            </div>
+                            <div class="vs-score">
+                                <span class="bsets" :style="usStyle">{{ effUs }}</span>
+                                <span class="vs-dash">–</span>
+                                <span class="bsets" :style="themStyle">{{ effThem }}</span>
+                            </div>
+                            <div class="vs-team them" :class="{ winner: matchOver && effThem > effUs }">
+                                <span class="bname">{{ themName }}</span>
+                                <TeamCrest :url="themLogo" :size="48" :alt="themName">
+                                    <span class="chip" :style="{ background: themColor }"></span>
+                                </TeamCrest>
+                            </div>
                         </div>
 
-                        <!-- Resumen de NUESTROS puntos del set + máxima anotadora -->
-                        <template v-if="setOriginRows.some((r) => r.value > 0) || setTopScorer">
-                            <div class="divider"></div>
-                            <div class="stats-title">{{ t("overlay.setStatsTitle") }}</div>
-                            <div class="origin-row" v-for="row in setOriginRows" :key="row.key">
-                                <span class="origin-label">{{ row.label }}</span>
-                                <div class="origin-track">
-                                    <div class="origin-fill" :style="{ width: row.pct + '%', background: usColor }"></div>
+                        <!-- Marcador del set que acaba de terminar -->
+                        <div class="card score-card">
+                            <div class="headline">{{ headline }}</div>
+                            <div class="set-score">
+                                <span class="spts"><span class="spts-flag" :style="{ background: usColor }"></span>{{ cur.score_us || 0 }}</span>
+                                <span class="vs-dash">–</span>
+                                <span class="spts">{{ cur.score_them || 0 }}<span class="spts-flag" :style="{ background: themColor }"></span></span>
+                            </div>
+                            <span class="brand"><img src="/logo.png" alt="" aria-hidden="true" />Clipeo</span>
+                        </div>
+
+                        <!-- Estadísticas del set: los dos equipos, fila contra fila -->
+                        <div v-if="hasSetStats" class="card">
+                            <div class="stats-title">{{ t("overlay.setStatsTitle") }} · Set {{ currentSet }}</div>
+                            <div class="cmp-row" v-for="row in setStatRows" :key="row.key">
+                                <div class="cmp-label">{{ row.label }}</div>
+                                <div class="cmp-lines">
+                                    <div class="cmp-line">
+                                        <span class="cmp-flag" :style="{ background: usColor }"></span>
+                                        <span class="cmp-num">{{ row.us }}</span>
+                                        <div class="cmp-track">
+                                            <div class="cmp-fill" :style="{ width: row.usPct + '%', background: usColor }"></div>
+                                        </div>
+                                    </div>
+                                    <div class="cmp-line">
+                                        <span class="cmp-flag" :style="{ background: themColor }"></span>
+                                        <span class="cmp-num">{{ row.them }}</span>
+                                        <div class="cmp-track">
+                                            <div class="cmp-fill" :style="{ width: row.themPct + '%', background: themColor }"></div>
+                                        </div>
+                                    </div>
                                 </div>
-                                <span class="origin-num">{{ row.value }}</span>
                             </div>
-                            <div v-if="setTopScorer" class="top-scorer">
-                                <span class="top-scorer-label">{{ t("overlay.topScorer") }}</span>
-                                <span class="top-scorer-name">{{ setTopScorer.name }}</span>
-                                <span class="top-scorer-pts">{{ setTopScorer.points }}</span>
-                            </div>
-                        </template>
+                        </div>
                     </div>
                 </div>
             </Transition>
@@ -954,6 +1068,22 @@ onUnmounted(() => {
                 <input v-model="logosInput" type="checkbox" class="h-4 w-4 accent-volt-400" />
             </label>
 
+            <div class="mt-5">
+                <p class="text-xs font-medium uppercase tracking-widest text-brand-300">{{ t("overlay.setupLang") }}</p>
+                <div class="mt-2 grid grid-cols-3 gap-2">
+                    <button
+                        v-for="opt in langOptions"
+                        :key="opt.value"
+                        type="button"
+                        class="rounded-lg border px-2 py-2 text-xs font-semibold transition-colors"
+                        :class="langChoice === opt.value ? 'border-brand-400 bg-brand-500/20 text-white' : 'border-white/10 bg-white/5 text-slate-300 hover:bg-white/10'"
+                        @click="langSession = opt.value"
+                    >
+                        {{ opt.label }}
+                    </button>
+                </div>
+            </div>
+
             <label class="mt-5 flex items-center justify-between gap-3">
                 <span class="text-xs font-medium uppercase tracking-widest text-brand-300">{{ t("overlay.setupDemo") }}</span>
                 <input v-model="demoOn" type="checkbox" class="h-4 w-4 accent-volt-400" />
@@ -1048,7 +1178,7 @@ onUnmounted(() => {
 .overlay-root.is-setup .banner {
     backdrop-filter: blur(6px);
 }
-.overlay-root.is-setup .panel {
+.overlay-root.is-setup .card {
     backdrop-filter: blur(10px);
 }
 
@@ -1201,6 +1331,10 @@ onUnmounted(() => {
     color: #f87171;
 }
 .compact-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
     font-size: 13px;
     font-weight: 700;
     letter-spacing: 0.18em;
@@ -1302,36 +1436,44 @@ onUnmounted(() => {
     width: max-content;
     text-align: center;
 }
-.headline {
-    font-size: 18px;
-    font-weight: 700;
-    letter-spacing: 0.24em;
-    text-transform: uppercase;
-    text-align: left;
-    color: var(--c-slate-400);
-    margin-bottom: 14px;
+/* Three cards with the same look — teams, score, set stats — stacked with a
+   gap so the score reads apart from the breakdown (owner, 2026-10-24). */
+.panels {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    min-width: 760px;
 }
-.panel {
-    min-width: 560px;
-    padding: 28px 40px 32px;
+.card {
+    padding: 22px 32px;
     background: rgba(var(--c-ink-900-rgb), 0.96);
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 20px;
 }
-.big-team {
+/* VNL-style: team · sets · team. */
+.vs-head {
     display: grid;
-    grid-template-columns: v-bind(idColBig) 1fr auto;
-    /* Mismo salto que en `.team-row`, aquí de 22px a 48px. */
-    transition: grid-template-columns 0.22s var(--ease-out);
+    grid-template-columns: 1fr auto 1fr;
     align-items: center;
-    column-gap: 22px;
-    padding: 8px 0;
+    column-gap: 28px;
+}
+.vs-team.us {
+    justify-content: flex-end;
+}
+.vs-team.them {
+    justify-content: flex-start;
+}
+.vs-team {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    transition: opacity 0.22s var(--ease-out);
 }
 /* Match over: the loser steps back, the winner keeps full strength. */
-.panel.decided .big-team:not(.winner) {
+.panels.decided .vs-team:not(.winner) {
     opacity: 0.5;
 }
-.big-team .chip {
+.vs-team .chip {
     width: 22px;
     height: 22px;
     border-radius: v-bind(chipRadiusBig);
@@ -1339,127 +1481,168 @@ onUnmounted(() => {
 .bname {
     white-space: nowrap;
     font-family: var(--font-display);
-    font-size: 56px;
+    font-size: 44px;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: -0.01em;
-    text-align: left;
+}
+.score-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding-top: 16px;
+    padding-bottom: 16px;
+}
+.headline {
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--c-slate-400);
+}
+.vs-score {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+.vs-dash {
+    font-family: var(--font-display);
+    font-size: 40px;
+    font-weight: 700;
+    color: var(--c-slate-400);
 }
 .bsets {
     font-family: var(--font-display);
     font-size: 64px;
     font-weight: 700;
     line-height: 1;
-    min-width: 96px;
+    min-width: 86px;
     padding: 8px 10px;
     text-align: center;
     border-radius: 14px;
     background: var(--team);
     color: var(--team-ink);
 }
-.divider {
-    height: 1px;
-    background: rgba(255, 255, 255, 0.08);
-    margin: 20px 0 16px;
-}
-.set-line {
-    display: grid;
-    grid-template-columns: 1fr 70px 70px;
+/* Points of the set that just ended: big plain numbers, each with its
+   team's colour as a side flag, so they don't compete with the sets boxes. */
+.set-score {
+    display: flex;
     align-items: center;
-    column-gap: 12px;
-    padding: 5px 0;
+    gap: 18px;
 }
-.slabel {
-    text-align: left;
-    font-size: 22px;
-    font-weight: 600;
-    color: var(--c-slate-400);
-    letter-spacing: 0.06em;
-}
-.sval {
+.spts {
+    display: flex;
+    align-items: center;
+    gap: 14px;
     font-family: var(--font-display);
-    font-size: 30px;
+    font-size: 60px;
     font-weight: 700;
-    text-align: center;
-    color: var(--c-slate-200);
-}
-.sval.win {
+    line-height: 1;
     color: #fff;
+}
+.spts-flag {
+    width: 8px;
+    height: 44px;
+    border-radius: 3px;
 }
 
-/* ---------- SET STATS (expanded panel): one-sided "our set" summary ---------- */
-.stats-title {
-    font-size: 18px;
-    font-weight: 700;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    text-align: left;
-    color: var(--c-slate-400);
-    margin: 0 0 12px;
-}
-.origin-row {
-    display: grid;
-    grid-template-columns: 1fr 90px 30px;
+/* Clipeo watermark: compact head (right of "SET n") and score card. */
+.brand {
+    display: inline-flex;
     align-items: center;
-    column-gap: 12px;
-    padding: 4px 0;
-}
-.origin-label {
-    text-align: left;
-    font-size: 15px;
-    font-weight: 600;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-    color: var(--c-slate-400);
-}
-.origin-track {
-    height: 8px;
-    border-radius: 5px;
-    overflow: hidden;
-    background: rgba(255, 255, 255, 0.08);
-}
-.origin-fill {
-    height: 100%;
-    border-radius: 5px;
-}
-.origin-num {
+    gap: 6px;
     font-family: var(--font-display);
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    text-transform: none;
+    color: var(--c-slate-200);
+    opacity: 0.75;
+}
+.brand img {
+    width: 1.35em;
+    height: 1.35em;
+    object-fit: contain;
+}
+/* Between sets the mark sits in the score card's right corner — the one
+   card that is always there — and not on the video, where it read poorly. */
+.score-card {
+    position: relative;
+}
+.score-card .brand {
+    position: absolute;
+    right: 28px;
+    bottom: 16px;
     font-size: 18px;
-    font-weight: 700;
-    text-align: right;
-    color: #fff;
 }
-.top-scorer {
-    display: flex;
-    align-items: baseline;
-    gap: 10px;
-    margin-top: 14px;
-    padding-top: 14px;
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
-}
-.top-scorer-label {
-    font-size: 13px;
+
+/* ---------- SET STATS (expanded panel): both teams, row against row ---------- */
+.stats-title {
+    font-size: 16px;
     font-weight: 700;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.16em;
     text-transform: uppercase;
+    text-align: left;
     color: var(--c-slate-400);
+    margin-bottom: 4px;
 }
-.top-scorer-name {
-    flex: 1;
+.cmp-row {
+    display: grid;
+    grid-template-columns: 190px 1fr;
+    column-gap: 10px;
+    margin-top: 8px;
+}
+/* Label block spanning both team lines, like the VNL card. */
+.cmp-label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 14px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.06);
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    text-align: center;
+    color: #fff;
+}
+.cmp-lines {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.cmp-line {
+    display: grid;
+    grid-template-columns: 8px 52px minmax(320px, 1fr);
+    align-items: center;
+    column-gap: 8px;
+    height: 32px;
+}
+.cmp-flag {
+    width: 8px;
+    height: 100%;
+    border-radius: 3px;
+}
+.cmp-num {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.06);
     font-family: var(--font-display);
-    font-size: 20px;
+    font-size: 22px;
     font-weight: 700;
     color: #fff;
-    text-align: left;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
 }
-.top-scorer-pts {
-    font-family: var(--font-display);
-    font-size: 24px;
-    font-weight: 700;
-    color: var(--c-volt-400);
+.cmp-track {
+    height: 22px;
+}
+.cmp-fill {
+    height: 100%;
+    min-width: 4px;
+    border-radius: 0 6px 6px 0;
 }
 
 /* ---------- transition between the two states ----------
