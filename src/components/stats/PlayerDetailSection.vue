@@ -33,11 +33,11 @@
                     <p class="text-[11px] text-slate-400 mt-1">{{ $t('players.kpiPoints') }}</p>
                 </div>
                 <div class="rounded-lg bg-white/[0.04] border border-white/10 py-3 text-center">
-                    <p class="text-lg font-display font-bold" :class="kpiAttack.attempts ? effColor(kpiAttackEff) : 'text-slate-500'">
-                        {{ kpiAttack.attempts ? kpiAttackKillPct : '—' }}
+                    <p class="text-lg font-display font-bold" :class="kpiAttack.attempts ? efficiencyClass(kpiAttackEff) : 'text-slate-500'">
+                        {{ kpiAttack.attempts ? efficiencyLabel(kpiAttackEff) : '—' }}
                     </p>
                     <p class="text-[11px] text-slate-400 leading-4 mt-1">
-                        {{ $t('players.kpiAttack') }}<br v-if="kpiAttack.attempts" />{{ kpiAttack.attempts ? $t('stats.effShort', { eff: kpiAttackEff }) : '' }}
+                        {{ $t('players.kpiAttack') }}<br v-if="kpiAttack.attempts" />{{ kpiAttack.attempts ? `${kpiAttack.kills}/${kpiAttack.attempts}` : '' }}
                     </p>
                 </div>
                 <div class="rounded-lg bg-white/[0.04] border border-white/10 py-3 text-center">
@@ -68,9 +68,9 @@
             <p class="text-sm font-semibold mb-3">{{ $t('players.attackTitle') }}</p>
             <div v-if="attackPhases.some((p) => p.attempts > 0)" class="grid grid-cols-2 gap-2 mb-4">
                 <div v-for="ph in attackPhases" :key="ph.label" class="text-center rounded-xl bg-white/[0.04] border border-white/10 py-3">
-                    <p class="text-2xl font-display font-bold" :class="ph.color">{{ ph.killPct }}</p>
+                    <p class="text-2xl font-display font-bold" :class="ph.color">{{ ph.effLabel }}</p>
                     <p class="text-xs text-slate-400 leading-4 mt-1">
-                        {{ ph.label }}<br />{{ ph.kills }}/{{ ph.attempts }} · {{ $t('stats.effShort', { eff: ph.eff }) }}
+                        {{ ph.label }}<br />{{ ph.kills }}/{{ ph.attempts }}
                     </p>
                 </div>
             </div>
@@ -131,7 +131,7 @@
                     {{ $t(f.labelKey) }}
                 </button>
             </div>
-            <CourtMap :stats="playerStats" :rival="false" :action-ids="directionsIds" />
+            <CourtMap :stats="playerStats" :rival="false" :action-ids="directionsIds" :derived="derived" />
         </article>
 
         <!-- ============ PUNTOS POR SET ============ -->
@@ -160,11 +160,12 @@
 // concatenados). `allStats` es la secuencia CRUDA del mismo ámbito (solo se
 // usa para "puntos ganados sacando", universo `to === 1` sin restringir a
 // juego, como en `serveSkillTable`) — si no se pasa, cae a `stats`.
-// `derivedKills`/`derivedAces`/`creditedBy` son el resultado de
-// `deriveCredits`/`mergeCredits` calculado una sola vez en el padre (el motor
-// de captura en cancha, ver volleyStats.ts). `creditedBy` es necesaria para
-// atribuir a la jugadora real los puntos que quedaron registrados como error
-// del sentinel rival (mismo patrón que `topScorers` en GeneralStats.vue).
+// `derived` es el resultado de `deriveCredits`/`mergeCredits` calculado una
+// sola vez en el padre (ver volleyStats.ts): aces/kills derivados y
+// `creditedBy`, que atribuye a la jugadora real los puntos que quedaron
+// registrados como error del sentinel rival (mismo patrón que `topScorers` en
+// GeneralStats.vue). Todos los números salen del motor único (METRICS.md): el
+// ataque se mide SOLO con la eficiencia `(puntos − errores)/ataques`.
 //
 // El bloque "ataque según nota de recepción" necesita recorrer la secuencia
 // COMPLETA del equipo en orden (el puntero de última recepción avanza con
@@ -185,12 +186,9 @@ import type { ApexOptions } from "apexcharts";
 import { CHART_ANIMATIONS_ENTRY, CHART_ANIMATIONS_OFF } from "../../utils/chartMotion";
 import CourtMap from "../CourtMap.vue";
 import EmptyState from "../EmptyState.vue";
-import { SERVE_TABLE_IDS } from "../../utils/teamTables";
 import {
     ATTACK_IDS,
-    SERVE_ERR_IDS,
     SERVE_IDS,
-    SERVE_WEIGHTS,
     aid,
     areaTotals,
     attackByReceptionGradeForMatch,
@@ -198,18 +196,22 @@ import {
     attackEfficiency,
     attackPhaseTotals,
     attackTotals,
+    efficiencyClass,
+    efficiencyLabel,
     GRADE_COLORS,
     RECEPTION_OVERPASS,
     isRival,
     isUnforced,
     mergeGradeBuckets,
-    pct,
     perfectReceptionPercent,
-    playerRadarFilters,
     radarAxes,
     receptionMarkLabel,
     receptionTotals,
+    serveChart as buildServeChart,
+    serveMark,
+    wonServingByServer,
     type AttackTotals,
+    type DerivedCredits,
     type StatDoc,
 } from "../../utils/volleyStats";
 
@@ -217,9 +219,7 @@ const props = withDefaults(
     defineProps<{
         stats: StatDoc[];
         allStats?: StatDoc[];
-        derivedKills: Set<StatDoc>;
-        derivedAces: Set<StatDoc>;
-        creditedBy?: Map<StatDoc, StatDoc>;
+        derived: DerivedCredits;
         matchGroups?: StatDoc[][];
         nSets?: number;
         set?: number;
@@ -243,7 +243,6 @@ const chartAnimations = computed(() => (props.liveUpdating ? CHART_ANIMATIONS_OF
 const selectedPlayerId = defineModel<string>("playerId", { default: "" });
 
 const rawStats = computed(() => props.allStats ?? props.stats);
-const credited = computed(() => props.creditedBy ?? new Map<StatDoc, StatDoc>());
 
 // Puntos ganados por `playerId` en `list`: propios directos (`to===1`,
 // `player.id` propio) más los derivados de captura en cancha (sentinel de
@@ -257,9 +256,9 @@ function pointsForPlayer(list: StatDoc[], playerId: string): number {
             if (String(s.player?.id ?? "") === playerId) n++;
             continue;
         }
-        const credit = credited.value.get(s);
+        const credit = props.derived.creditedBy.get(s);
         if (!credit) continue;
-        const creditPlayerId = props.derivedAces.has(credit) ? String(credit.server?.id ?? "") : String(credit.player?.id ?? "");
+        const creditPlayerId = props.derived.aces.has(credit) ? String(credit.server?.id ?? "") : String(credit.player?.id ?? "");
         if (creditPlayerId === playerId) n++;
     }
     return n;
@@ -288,20 +287,14 @@ const currentPlayerId = computed(() =>
 const currentPlayer = computed(() => rosterPlayers.value.find((p) => p.id === currentPlayerId.value));
 
 const playerStats = computed(() => props.stats.filter((s) => String(s.player?.id ?? "") === currentPlayerId.value));
-// Saque: filtra por `server.id` (más fiable que `player.id` para esa acción
-// concreta, mismo criterio que el radar — ver `playerRadarFilters`).
-const playerServeStats = computed(() =>
-    props.stats.filter((s) => String(s.server?.id ?? "") === currentPlayerId.value && SERVE_IDS.includes(aid(s)))
-);
 
 // ------------------------------------------------------------------ de un vistazo
 const kpiPoints = computed(() => pointsForPlayer(props.stats, currentPlayerId.value));
 const kpiAttack = computed(() =>
-    attackTotals(props.stats, props.derivedKills, (s) => String(s.player?.id ?? "") === currentPlayerId.value)
+    attackTotals(props.stats, props.derived, (s) => String(s.player?.id ?? "") === currentPlayerId.value)
 );
 const kpiAttackEff = computed(() => attackEfficiency(kpiAttack.value));
-const kpiAttackKillPct = computed(() => pct(kpiAttack.value.kills, kpiAttack.value.attempts));
-const kpiReception = computed(() => receptionTotals(playerStats.value));
+const kpiReception = computed(() => receptionTotals(props.stats, currentPlayerId.value));
 // Etiqueta canónica "NN% (MM%)" (ver `receptionMarkLabel`) — fusiona la nota
 // media y el % de recepciones perfectas en un único KPI (antes eran dos
 // cifras separadas), paridad con la app.
@@ -310,43 +303,28 @@ const kpiReceptionMark = computed(() =>
         ? receptionMarkLabel(kpiReception.value.sum / kpiReception.value.total, perfectReceptionPercent(kpiReception.value) ?? 0)
         : "—"
 );
-const kpiServeTotal = computed(() => playerServeStats.value.length);
-const kpiServeMark = computed(() => {
-    if (!kpiServeTotal.value) return "0.0";
-    let sum = 0;
-    for (const s of playerServeStats.value) sum += SERVE_WEIGHTS[aid(s)] ?? 0;
-    return (sum / kpiServeTotal.value).toFixed(1);
-});
+// Saque (D1): por `server` (motor: `serveMark`/`serveChart`), sin K1 ni servidor rival.
+const playerServe = computed(() => serveMark(props.stats, props.derived, currentPlayerId.value));
+const kpiServeTotal = computed(() => playerServe.value.total);
+const kpiServeMark = computed(() => playerServe.value.mark.toFixed(1));
 const kpiUnforced = computed(() => playerStats.value.filter(isUnforced).length);
 
-const effColor = (eff: number): string => (eff >= 40 ? "text-volt-400" : eff >= 25 ? "text-brand-300" : "text-slate-200");
 const markColor = (mark: string): string => {
     const v = parseFloat(mark);
     return v >= 2 ? "text-green-400" : v >= 1.5 ? "text-yellow-400" : "text-red-400";
-};
-const killColor = (kills: number, attempts: number): string => {
-    if (!attempts) return "text-slate-500";
-    const p = kills / attempts;
-    return p >= 0.4 ? "text-volt-400" : p >= 0.25 ? "text-yellow-400" : "text-red-400";
 };
 
 // "Puntos ganados sacando": universo crudo (`allStats`, sin excluir admin),
 // `to === 1`, agrupado por `server.id` — mismo criterio que la columna
 // `wonServing` de `serveSkillTable` (teamTables.ts).
-const wonServing = computed(() => {
-    let n = 0;
-    for (const s of rawStats.value) {
-        if (s.to === 1 && String(s.server?.id ?? "") === currentPlayerId.value) n++;
-    }
-    return n;
-});
+const wonServing = computed(() => wonServingByServer(rawStats.value).get(currentPlayerId.value) ?? 0);
 
 // ------------------------------------------------------------------ radar
 const RADAR_AXIS_ORDER = ["attack", "serve", "block", "dig", "receive"] as const;
 const radarAxisLabels = computed(() => RADAR_AXIS_ORDER.map((k) => t(`team.radar${k.charAt(0).toUpperCase()}${k.slice(1)}`)));
 const radarValues = computed(() =>
     currentPlayerId.value
-        ? radarAxes(props.stats, playerRadarFilters(currentPlayerId.value))
+        ? radarAxes(props.stats, props.derived, currentPlayerId.value)
         : { attack: 0, serve: 0, block: 0, dig: 0, receive: 0 }
 );
 const radarChart = computed(() => ({
@@ -366,14 +344,13 @@ const radarChart = computed(() => ({
 
 // ------------------------------------------------------------------ ataque
 const attackPhases = computed(() => {
-    const { k1, k2 } = attackPhaseTotals(playerStats.value, props.derivedKills);
+    const { k1, k2 } = attackPhaseTotals(playerStats.value, props.derived);
     const mk = (label: string, tt: AttackTotals) => ({
         label,
         attempts: tt.attempts,
         kills: tt.kills,
-        killPct: pct(tt.kills, tt.attempts),
-        eff: attackEfficiency(tt),
-        color: killColor(tt.kills, tt.attempts),
+        effLabel: tt.attempts ? efficiencyLabel(attackEfficiency(tt)) : "—",
+        color: tt.attempts ? efficiencyClass(attackEfficiency(tt)) : "text-slate-500",
     });
     return [mk(t("stats.attackK1"), k1), mk(t("stats.attackK2"), k2)];
 });
@@ -386,10 +363,10 @@ const TECHNIQUE_LABEL_KEYS: Record<string, string> = {
 };
 const TECHNIQUE_COLORS: Record<string, string> = { spike: "#6E93FF", tip: "#CBFB45", blockout: "#F59E0B", downhit: "#94a3b8" };
 const techniqueRows = computed(() =>
-    attackByTechnique(playerStats.value, props.derivedKills).map((b) => ({
+    attackByTechnique(playerStats.value, props.derived).map((b) => ({
         ...b,
         label: t(TECHNIQUE_LABEL_KEYS[b.key] ?? b.key),
-        killPct: pct(b.kills, b.attempts),
+        effLabel: efficiencyLabel(b.eff),
     }))
 );
 const techniqueChart = computed(() => ({
@@ -402,7 +379,7 @@ const techniqueChart = computed(() => ({
         dataLabels: { enabled: true, formatter: (val: number) => Math.round(val) + "%" },
         tooltip: {
             theme: "dark",
-            y: { formatter: (val: number, opts: { seriesIndex: number }) => `${val} · ${techniqueRows.value[opts.seriesIndex]?.killPct ?? ""} kill` },
+            y: { formatter: (val: number, opts: { seriesIndex: number }) => `${val} · ${t("stats.effShort", { eff: techniqueRows.value[opts.seriesIndex]?.effLabel ?? "" })}` },
         },
     },
 }));
@@ -413,16 +390,16 @@ const techniqueChart = computed(() => ({
 const attackByGradeBuckets = computed(() => {
     const filter = (s: StatDoc) => String(s.player?.id ?? "") === currentPlayerId.value;
     if (props.matchGroups) {
-        return mergeGradeBuckets(props.matchGroups.map((g) => attackByReceptionGradeForMatch(g, props.derivedKills, filter)));
+        return mergeGradeBuckets(props.matchGroups.map((g) => attackByReceptionGradeForMatch(g, props.derived, filter)));
     }
-    return attackByReceptionGradeForMatch(props.stats, props.derivedKills, filter);
+    return attackByReceptionGradeForMatch(props.stats, props.derived, filter);
 });
 const receptionGradeRows = computed(() =>
     [3, 2, 1, RECEPTION_OVERPASS, 0]
         .filter((g) => (attackByGradeBuckets.value.get(g)?.attempts ?? 0) > 0)
         .map((g) => {
             const b = attackByGradeBuckets.value.get(g)!;
-            return { grade: g, label: t(g === RECEPTION_OVERPASS ? "stats.recGradeOverpass" : `stats.recGrade${g}`), attempts: b.attempts, kills: b.kills, killPct: pct(b.kills, b.attempts) };
+            return { grade: g, label: t(g === RECEPTION_OVERPASS ? "stats.recGradeOverpass" : `stats.recGrade${g}`), attempts: b.attempts, kills: b.kills, effLabel: efficiencyLabel(attackEfficiency(b)) };
         })
 );
 const receptionGradeChart = computed(() => ({
@@ -435,7 +412,7 @@ const receptionGradeChart = computed(() => ({
         dataLabels: { enabled: true, formatter: (val: number) => Math.round(val) + "%" },
         tooltip: {
             theme: "dark",
-            y: { formatter: (val: number, opts: { seriesIndex: number }) => `${val} · ${receptionGradeRows.value[opts.seriesIndex]?.killPct ?? ""} kill` },
+            y: { formatter: (val: number, opts: { seriesIndex: number }) => `${val} · ${t("stats.effShort", { eff: receptionGradeRows.value[opts.seriesIndex]?.effLabel ?? "" })}` },
         },
     },
 }));
@@ -445,15 +422,16 @@ const receptionGradeChart = computed(() => ({
 // perfecto), así que usa el lima de marca en vez de GRADE_COLORS[3] — evita
 // que coincida con GRADE_COLORS[2] (verde claro de "buena") en este mismo
 // donut.
-const serveDistribution = computed(() =>
-    [
-        { label: t("stats.actions.a8"), n: playerServeStats.value.filter((s) => aid(s) === "8").length, color: "#CBFB45" },
-        { label: t("team.col3"), n: playerServeStats.value.filter((s) => aid(s) === "41").length, color: GRADE_COLORS[3] },
-        { label: t("team.col2"), n: playerServeStats.value.filter((s) => aid(s) === "40").length, color: GRADE_COLORS[2] },
-        { label: t("team.col1"), n: playerServeStats.value.filter((s) => aid(s) === "39").length, color: GRADE_COLORS[1] },
-        { label: t("team.colErrors"), n: playerServeStats.value.filter((s) => SERVE_ERR_IDS.includes(aid(s))).length, color: GRADE_COLORS[0] },
-    ].filter((r) => r.n > 0)
-);
+const serveDistribution = computed(() => {
+    const c = buildServeChart(props.stats, props.derived, currentPlayerId.value);
+    return [
+        { label: t("stats.actions.a8"), n: c.ace, color: "#CBFB45" },
+        { label: t("team.col3"), n: c.strong, color: GRADE_COLORS[3] },
+        { label: t("team.col2"), n: c.medium, color: GRADE_COLORS[2] },
+        { label: t("team.col1"), n: c.weak, color: GRADE_COLORS[1] },
+        { label: t("team.colErrors"), n: c.errors, color: GRADE_COLORS[0] },
+    ].filter((r) => r.n > 0);
+});
 const serveDistChart = computed(() => ({
     series: serveDistribution.value.map((r) => r.n),
     chartOptions: <ApexOptions>{
@@ -488,16 +466,16 @@ const receptionDistChart = computed(() => ({
 }));
 
 // ------------------------------------------------------------------ otras áreas
-// Área 8 (free ball) ya no tiene fila propia (spec acciones-free-downball):
-// `areaTotals` pliega sus históricos en el área 2 (defensa) antes de llegar
-// aquí, así que la fila "defense" ya los incluye sin cambios adicionales.
+// Totales por fundamento del motor (`areaTotals`: mismas líneas que las
+// tablas; errores = `ownErrors().bySkill`). Los históricos de free ball ya
+// cuentan en defensa.
 const OTHER_AREA_DEFS = [
     { area: 1, labelKey: "stats.areas.block" },
     { area: 2, labelKey: "stats.areas.defense" },
     { area: 3, labelKey: "stats.areas.setting" },
 ] as const;
 const otherAreaRows = computed(() => {
-    const rows = areaTotals(playerStats.value);
+    const rows = areaTotals(props.stats, props.derived, currentPlayerId.value);
     return OTHER_AREA_DEFS.map((def) => {
         const row = rows.find((r) => r.area === def.area);
         return { area: def.area, label: t(def.labelKey), total: row?.total ?? 0, won: row?.won ?? 0, errors: row?.errors ?? 0 };
@@ -511,10 +489,10 @@ const DIRECTION_FAMILIES = [
 ] as const;
 type DirectionFamily = (typeof DIRECTION_FAMILIES)[number]["key"];
 const directionsFamily = ref<DirectionFamily>("attack");
-const directionsIds = computed(() => (directionsFamily.value === "serve" ? SERVE_TABLE_IDS : ATTACK_IDS));
+const directionsIds = computed(() => (directionsFamily.value === "serve" ? SERVE_IDS : ATTACK_IDS));
 const hasAnyDirectionData = computed(() =>
     playerStats.value.some(
-        (s) => (ATTACK_IDS.includes(aid(s)) || SERVE_TABLE_IDS.includes(aid(s))) && typeof s.direction === "string" && s.direction.includes("#")
+        (s) => (ATTACK_IDS.includes(aid(s)) || SERVE_IDS.includes(aid(s))) && typeof s.direction === "string" && s.direction.includes("#")
     )
 );
 

@@ -7,7 +7,7 @@
                 <span class="text-center text-slate-400 px-1">{{ $t('team.colSO') }}</span>
                 <span class="text-center text-slate-400 px-1">{{ $t('team.colBR') }}</span>
                 <span class="text-center text-slate-400 px-1">{{ $t('team.colRec') }}</span>
-                <span class="text-center text-slate-400 px-1">{{ $t('team.colKill') }}</span>
+                <span class="text-center text-slate-400 px-1">{{ $t('team.colEff') }}</span>
                 <span class="text-center text-slate-400 px-1">{{ $t('team.colErr') }}</span>
                 <span class="text-center text-slate-400 px-1">{{ $t('team.colPts') }}</span>
                 <span class="text-center text-slate-400 px-1">{{ $t('team.colDiff') }}</span>
@@ -16,7 +16,7 @@
                     <span class="text-center rounded-md py-1.5" :style="row.so.style">{{ row.so.text }}</span>
                     <span class="text-center rounded-md py-1.5" :style="row.br.style">{{ row.br.text }}</span>
                     <span class="text-center rounded-md py-1.5" :style="row.rec.style">{{ row.rec.text }}</span>
-                    <span class="text-center rounded-md py-1.5" :style="row.kill.style">{{ row.kill.text }}</span>
+                    <span class="text-center rounded-md py-1.5" :style="row.eff.style">{{ row.eff.text }}</span>
                     <span class="text-center rounded-md py-1.5" :style="row.err.style">{{ row.err.text }}</span>
                     <span class="text-center py-1.5 text-slate-300">{{ row.pts }}</span>
                     <span class="text-center rounded-md py-1.5" :style="row.diff.style">{{ row.diff.text }}</span>
@@ -25,7 +25,7 @@
                 <span class="text-center pt-2 border-t border-white/10 text-slate-300">{{ pct(kpiSideOut.won, kpiSideOut.total) }}</span>
                 <span class="text-center pt-2 border-t border-white/10 text-slate-300">{{ pct(kpiBreak.won, kpiBreak.total) }}</span>
                 <span class="text-center pt-2 border-t border-white/10 text-slate-300">{{ receptionMarkPercent(rotationAverages.rec) }}</span>
-                <span class="text-center pt-2 border-t border-white/10 text-slate-300">{{ Math.round(rotationAverages.kill * 100) }}%</span>
+                <span class="text-center pt-2 border-t border-white/10 text-slate-300">{{ efficiencyLabel(rotationAverages.eff) }}</span>
                 <span class="text-center pt-2 border-t border-white/10 text-slate-300">{{ Math.round(rotationAverages.err * 100) }}%</span>
                 <span class="text-center pt-2 border-t border-white/10 text-slate-300">{{ rotationAverages.rallies }}</span>
                 <span class="text-center pt-2 border-t border-white/10 text-slate-500">—</span>
@@ -37,9 +37,9 @@
         <p class="text-sm font-semibold mb-3">{{ $t('stats.attackByPhase') }}</p>
         <div class="grid grid-cols-2 gap-2">
             <div v-for="ph in attackPhases" :key="ph.label" class="text-center rounded-xl bg-white/[0.04] border border-white/10 py-3">
-                <p class="text-2xl font-display font-bold" :class="ph.color">{{ ph.killPct }}</p>
+                <p class="text-2xl font-display font-bold" :class="ph.color">{{ ph.effLabel }}</p>
                 <p class="text-xs text-slate-400 leading-4 mt-1">
-                    {{ ph.label }}<br />{{ ph.kills }}/{{ ph.attempts }} · {{ $t('stats.effShort', { eff: ph.eff }) }}
+                    {{ ph.label }}<br />{{ ph.kills }}/{{ ph.attempts }}
                 </p>
             </div>
         </div>
@@ -60,7 +60,7 @@
         <div class="grid grid-cols-[1fr_auto_auto] gap-y-1.5 text-sm items-center">
             <span></span>
             <span class="w-16 text-center text-xs text-slate-400">{{ $t('team.colRaw') }}</span>
-            <span class="w-14 text-center text-xs text-slate-400">{{ $t('stats.colKillPct') }}</span>
+            <span class="w-14 text-center text-xs text-slate-400">{{ $t('stats.colEff') }}</span>
             <template v-for="row in setterRows" :key="row.key">
                 <span class="text-slate-300 py-1 truncate">{{ row.setter }} → {{ row.attacker }}</span>
                 <span class="w-16 text-center py-1">{{ row.kills }}/{{ row.attempts }}</span>
@@ -78,16 +78,17 @@
 //
 // `stats` debe ser la secuencia de stats de JUEGO (ya filtrada con
 // `isGameStat`) del ámbito a mostrar — un partido/set o la concatenación de
-// varios partidos de un equipo. `derivedKills` es el `Set` de kills/aces
-// derivados (`deriveCredits(...).kills` para un solo partido, o
-// `mergeCredits([...]).kills` para varios) válido para esa misma `stats`.
+// varios partidos de un equipo. `derived` son los créditos derivados
+// (`deriveCredits(...)` para un solo partido, o `mergeCredits([...])` para
+// varios) válidos para esa misma `stats`. Todo el ataque se mide con la
+// EFICIENCIA `(puntos − errores)/ataques` (no existe kill%), ver METRICS.md.
 //
 // `receptionGradeBuckets` (ataque por nota de recepción) NO se calcula aquí:
 // `attackByReceptionGradeForMatch` opera sobre la secuencia de UN partido (el
 // puntero de "última recepción" se reinicia por partido/set), así que fusionar
 // varios partidos es responsabilidad del consumidor (`mergeGradeBuckets` en
 // TeamMatches.vue); para un único partido basta pasar el resultado directo de
-// `attackByReceptionGradeForMatch(stats, derivedKills)`.
+// `attackByReceptionGradeForMatch(stats, derived)`.
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 import VueApexCharts from "vue3-apexcharts";
@@ -100,17 +101,21 @@ import {
     attackPhaseTotals,
     attackTotals,
     breakStats,
+    connectionEfficiency,
+    efficiencyClass,
+    efficiencyLabel,
     GRADE_COLORS,
     RECEPTION_OVERPASS,
     isPointEnder,
     pct,
     receptionMarkPercent,
     receptionTotals,
+    rotationAttackEfficiency,
     rotationBreakdown,
     setterConnections,
-    shrinkRate,
     sideOutStats,
     type AttackTotals,
+    type DerivedCredits,
     type GradeBucket,
     type StatDoc,
 } from "../../utils/volleyStats";
@@ -118,7 +123,7 @@ import {
 const props = withDefaults(
     defineProps<{
         stats: StatDoc[];
-        derivedKills: Set<StatDoc>;
+        derived: DerivedCredits;
         receptionGradeBuckets: Map<number, GradeBucket>;
         /** Los datos de entrada se repintan en vivo (`onSnapshot`). */
         liveUpdating?: boolean;
@@ -141,17 +146,10 @@ const pointEnders = computed(() => props.stats.filter(isPointEnder));
 const kpiSideOut = computed(() => sideOutStats(pointEnders.value));
 const kpiBreak = computed(() => breakStats(pointEnders.value));
 const kpiReception = computed(() => receptionTotals(props.stats));
-const kpiAttack = computed(() => attackTotals(props.stats, props.derivedKills));
-
-// Color compartido de % de remate (mismo criterio que GeneralStats.vue).
-const killColor = (kills: number, attempts: number): string => {
-    if (!attempts) return "text-slate-500";
-    const p = kills / attempts;
-    return p >= 0.4 ? "text-volt-400" : p >= 0.25 ? "text-yellow-400" : "text-red-400";
-};
+const kpiAttack = computed(() => attackTotals(props.stats, props.derived));
 
 // --- D: rotaciones 360 (heatmap) -------------------------------------------
-const rotationRows = computed(() => rotationBreakdown(props.stats, props.derivedKills));
+const rotationRows = computed(() => rotationBreakdown(props.stats, props.derived));
 const rotationAverages = computed(() => {
     const errSum = rotationRows.value.reduce((a, r) => a + r.ourErrors, 0);
     const ralliesSum = rotationRows.value.reduce((a, r) => a + r.rallies, 0);
@@ -159,7 +157,7 @@ const rotationAverages = computed(() => {
         so: kpiSideOut.value.total ? kpiSideOut.value.won / kpiSideOut.value.total : 0,
         br: kpiBreak.value.total ? kpiBreak.value.won / kpiBreak.value.total : 0,
         rec: kpiReception.value.total ? kpiReception.value.sum / kpiReception.value.total : 0,
-        kill: kpiAttack.value.attempts ? kpiAttack.value.kills / kpiAttack.value.attempts : 0,
+        eff: attackEfficiency(kpiAttack.value),
         err: ralliesSum ? errSum / ralliesSum : 0,
         rallies: ralliesSum,
     };
@@ -187,14 +185,14 @@ const rotationCells = computed(() => {
         const soRate = r.soTotal ? r.soWon / r.soTotal : 0;
         const brRate = r.brTotal ? r.brWon / r.brTotal : 0;
         const recRate = r.recTotal ? r.recSum / r.recTotal : 0;
-        const killRate = r.atkTotal ? r.atkKills / r.atkTotal : 0;
+        const effRate = rotationAttackEfficiency(r);
         const errRate = r.rallies ? r.ourErrors / r.rallies : 0;
         return {
             n: r.n,
             so: { text: r.soTotal ? pct(r.soWon, r.soTotal) : "—", style: heatStyle(soRate, avg.so, 0.15, false, r.soTotal > 0) },
             br: { text: r.brTotal ? pct(r.brWon, r.brTotal) : "—", style: heatStyle(brRate, avg.br, 0.15, false, r.brTotal > 0) },
             rec: { text: r.recTotal ? receptionMarkPercent(recRate) : "—", style: heatStyle(recRate, avg.rec, 0.6, false, r.recTotal > 0) },
-            kill: { text: r.atkTotal ? pct(r.atkKills, r.atkTotal) : "—", style: heatStyle(killRate, avg.kill, 0.15, false, r.atkTotal > 0) },
+            eff: { text: r.atkTotal ? efficiencyLabel(effRate) : "—", style: heatStyle(effRate, avg.eff, 0.15, false, r.atkTotal > 0) },
             err: {
                 text: r.rallies ? `${r.ourErrors} · ${Math.round(errRate * 100)}%` : "—",
                 style: heatStyle(errRate, avg.err, 0.1, true, r.rallies > 0),
@@ -207,14 +205,13 @@ const rotationCells = computed(() => {
 
 // --- E: ataque por fase K1/K2, por grado de recepción y por técnica --------
 const attackPhases = computed(() => {
-    const { k1, k2 } = attackPhaseTotals(props.stats, props.derivedKills);
+    const { k1, k2 } = attackPhaseTotals(props.stats, props.derived);
     const mk = (label: string, tt: AttackTotals) => ({
         label,
         attempts: tt.attempts,
         kills: tt.kills,
-        killPct: pct(tt.kills, tt.attempts),
-        eff: attackEfficiency(tt),
-        color: killColor(tt.kills, tt.attempts),
+        effLabel: tt.attempts ? efficiencyLabel(attackEfficiency(tt)) : "—",
+        color: tt.attempts ? efficiencyClass(attackEfficiency(tt)) : "text-slate-500",
     });
     return [mk(t("stats.attackK1"), k1), mk(t("stats.attackK2"), k2)];
 });
@@ -229,8 +226,7 @@ const receptionGradeRows = computed(() =>
                 label: t(g === RECEPTION_OVERPASS ? "stats.recGradeOverpass" : `stats.recGrade${g}`),
                 attempts: b.attempts,
                 kills: b.kills,
-                killPct: pct(b.kills, b.attempts),
-                eff: attackEfficiency(b),
+                effLabel: efficiencyLabel(attackEfficiency(b)),
             };
         })
 );
@@ -246,7 +242,7 @@ const receptionGradeChart = computed(() => ({
             theme: "dark",
             y: {
                 formatter: (val: number, opts: { seriesIndex: number }) =>
-                    `${val} · ${receptionGradeRows.value[opts.seriesIndex]?.killPct ?? ""} kill`,
+                    `${val} · ${t("stats.effShort", { eff: receptionGradeRows.value[opts.seriesIndex]?.effLabel ?? "" })}`,
             },
         },
     },
@@ -260,10 +256,10 @@ const TECHNIQUE_LABEL_KEYS: Record<string, string> = {
 };
 const TECHNIQUE_COLORS: Record<string, string> = { spike: "#6E93FF", tip: "#CBFB45", blockout: "#F59E0B", downhit: "#94a3b8" };
 const techniqueRows = computed(() =>
-    attackByTechnique(props.stats, props.derivedKills).map((b) => ({
+    attackByTechnique(props.stats, props.derived).map((b) => ({
         ...b,
         label: t(TECHNIQUE_LABEL_KEYS[b.key] ?? b.key),
-        killPct: pct(b.kills, b.attempts),
+        effLabel: efficiencyLabel(b.eff),
     }))
 );
 const techniqueChart = computed(() => ({
@@ -278,7 +274,7 @@ const techniqueChart = computed(() => ({
             theme: "dark",
             y: {
                 formatter: (val: number, opts: { seriesIndex: number }) =>
-                    `${val} · ${techniqueRows.value[opts.seriesIndex]?.killPct ?? ""} kill`,
+                    `${val} · ${t("stats.effShort", { eff: techniqueRows.value[opts.seriesIndex]?.effLabel ?? "" })}`,
             },
         },
     },
@@ -287,24 +283,22 @@ const techniqueChart = computed(() => ({
 // --- F: colocadora → atacante -----------------------------------------------
 const setterRows = computed(() => {
     const activeIds = activePlayerIds(props.stats);
-    const qualified = setterConnections(props.stats, props.derivedKills, activeIds).filter((c) => c.attempts >= 6);
+    const qualified = setterConnections(props.stats, props.derived, activeIds).filter((c) => c.attempts >= 6);
     if (!qualified.length) return [];
-    const totalKills = qualified.reduce((a, c) => a + c.kills, 0);
-    const totalAttempts = qualified.reduce((a, c) => a + c.attempts, 0);
-    const base = totalAttempts ? totalKills / totalAttempts : 0;
-    const killAvg = kpiAttack.value.attempts ? kpiAttack.value.kills / kpiAttack.value.attempts : 0;
+    // Base del encogimiento = eficiencia del equipo en el ámbito.
+    const base = attackEfficiency(kpiAttack.value);
     return [...qualified]
         .sort((a, b) => b.attempts - a.attempts)
         .map((c) => {
-            const shrunk = shrinkRate(c.kills, c.attempts, base, 12);
+            const shrunk = connectionEfficiency(c, base);
             return {
                 key: c.key,
                 setter: c.setterName,
                 attacker: c.attackerName,
                 attempts: c.attempts,
                 kills: c.kills,
-                pct: Math.round(shrunk * 100) + "%",
-                color: shrunk > killAvg + 0.05 ? "text-volt-400" : shrunk < killAvg - 0.05 ? "text-red-400" : "text-slate-200",
+                pct: efficiencyLabel(shrunk),
+                color: shrunk > base + 0.05 ? "text-volt-400" : shrunk < base - 0.05 ? "text-red-400" : "text-slate-200",
             };
         });
 });

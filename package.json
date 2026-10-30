@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc && vite build && node scripts/prerender-head.mjs",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "vitest run"
   },
   "dependencies": {
     "apexcharts": "^5.16.0",
@@ -25,6 +26,7 @@
     "tailwindcss": "^3.4.19",
     "typescript": "^6.0.3",
     "vite": "^8.1.3",
+    "vitest": "^3.2.7",
     "vue-tsc": "^3.3.6"
   },
   "engines": {

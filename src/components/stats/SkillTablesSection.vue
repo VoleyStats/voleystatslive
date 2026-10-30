@@ -72,29 +72,32 @@
 <script lang="ts" setup>
 // Tab "Tablas por destreza" extraído de TeamMatches.vue para reusarlo también
 // en la vista de un partido/set (GeneralStats.vue, tanda 2). Sin cambios de
-// fórmula: recorte 1:1 sobre `teamTables.ts`.
+// fórmula: recorte 1:1 sobre `teamTables.ts` (que lee del motor único,
+// `volleyStats.ts`).
 //
 // `stats` es la secuencia de stats de JUEGO (ya filtrada con `isGameStat`)
 // del ámbito a mostrar (un partido/set, o varios partidos concatenados).
 // `allStats` es la secuencia CRUDA (sin filtrar acciones admin) del mismo
 // ámbito — solo la usa `serveSkillTable` para la columna "puntos ganados
 // sacando" (universo `to === 1`, no restringido a acciones de juego).
+// `derived` son los créditos derivados (`deriveCredits`/`mergeCredits`) del
+// mismo ámbito: los aces/kills de las tablas de saque y ataque pasan por ellos.
 import { computed, ref } from "vue";
 import {
     attackSkillTable,
     blockSkillTable,
     digSkillTable,
-    downhitTotals,
     faultSkillTable,
     receiveSkillTable,
     serveSkillTable,
     setSkillTable,
 } from "../../utils/teamTables";
-import type { StatDoc } from "../../utils/volleyStats";
+import { downhitTotals, type DerivedCredits, type StatDoc } from "../../utils/volleyStats";
 
 const props = defineProps<{
     stats: StatDoc[];
     allStats: StatDoc[];
+    derived: DerivedCredits;
 }>();
 
 // Etiquetas de pestaña reutilizando `stats.areas.*` (ya cubren las 8
@@ -117,8 +120,8 @@ type SkillKey = (typeof SKILL_DEFS)[number]["key"];
 const selectedSkill = ref<SkillKey>("attack");
 
 const skillTables = computed(() => ({
-    attack: attackSkillTable(props.stats),
-    serve: serveSkillTable(props.stats, props.allStats),
+    attack: attackSkillTable(props.stats, props.derived),
+    serve: serveSkillTable(props.stats, props.allStats, props.derived),
     receive: receiveSkillTable(props.stats),
     block: blockSkillTable(props.stats),
     dig: digSkillTable(props.stats),

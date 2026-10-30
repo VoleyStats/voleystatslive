@@ -29,7 +29,7 @@ npm run build     # vue-tsc (type-check estricto) + vite build — un error de t
 npm run preview   # sirve el build de producción
 ```
 
-Requiere `.env` (copiar `.env.example`) con las claves `VITE_*` de Firebase, apuntando al mismo proyecto que usan las apps. Sin `.env` válido, `firebase.ts` inicializa con config `undefined` y toda lectura falla en runtime. No hay test runner ni linter; `vue-tsc` (parte de `build`) es el único check estático. `tsconfig` es estricto (`noUnusedLocals`/`noUnusedParameters`) — mantén el código limpio en vez de añadir `@ts-ignore` (actualmente no hay ninguno en el repo).
+Requiere `.env` (copiar `.env.example`) con las claves `VITE_*` de Firebase, apuntando al mismo proyecto que usan las apps. Sin `.env` válido, `firebase.ts` inicializa con config `undefined` y toda lectura falla en runtime. `npm test` (vitest) cubre solo el motor de métricas (`src/utils/volleyStats.test.ts`); no hay linter, y `vue-tsc` (parte de `build`) es el check estático. `tsconfig` es estricto (`noUnusedLocals`/`noUnusedParameters`) — mantén el código limpio en vez de añadir `@ts-ignore` (actualmente no hay ninguno en el repo).
 
 ## Code-splitting
 
@@ -83,7 +83,7 @@ Toda la agregación (marcador, rachas, eficiencias, kills/aces derivados, rotaci
 
 ## Dónde vive la lógica compartida
 
-- `src/utils/volleyStats.ts` — el núcleo: constantes de `action.id` por área (`KILL_IDS`, `ATTACK_IDS`, `SERVE_IDS`, `RECEPTION_IDS`...), `AREA_LABEL_KEYS` (10 áreas, 0–9), derivación de kills/aces reales (`deriveCredits`/`mergeCredits`, re-atribuyendo errores rivales de recepción/defensa como punto nuestro), eficiencias, side-out/break, `isMatchFinished`/`isMatchCacheable`, radar, rotaciones, ataque por técnica/dirección. Punto de entrada obligado para tocar cualquier métrica.
+- `src/utils/volleyStats.ts` — **motor único** de métricas (definiciones canónicas en `../VoleyStatsApp/METRICS.md`: derivados, saque D1 por `server`, ataque = solo eficiencia `(puntos−errores)/ataques` sin kill%, `ownErrors`, `ratings`/radar). Páginas, tablas e insights LEEN de aquí; nunca recuentan ids por su cuenta. Todo lo que cuente aces/kills recibe los `DerivedCredits` del ámbito. El núcleo: constantes de `action.id` por área (`KILL_IDS`, `ATTACK_IDS`, `SERVE_IDS`, `RECEPTION_IDS`...), `AREA_LABEL_KEYS` (10 áreas, 0–9), derivación de kills/aces reales (`deriveCredits`/`mergeCredits`, re-atribuyendo errores rivales de recepción/defensa como punto nuestro), eficiencias, side-out/break, `isMatchFinished`/`isMatchCacheable`, radar, rotaciones, ataque por técnica/dirección. Punto de entrada obligado para tocar cualquier métrica.
 - `src/utils/teamTables.ts` — tablas agregadas multi-partido para `/team/:id`.
 - `src/composables/useLocalePath.ts` — `localeTo`/`homeAnchor`/`baseName` para que todo enlace interno respete el gemelo `/en` (ver la trampa arriba).
 - `src/utils/edgeFade.ts` — directivo `v-edge-fade` para las tiras de pestañas con scroll horizontal (`.tabstrip`): mide y escribe `data-edge="start end"`, y el CSS enciende el degradado del lado que corresponda. Se mide en vez de poner un degradado fijo porque uno fijo a la izquierda apaga la primera pestaña —normalmente la activa— sin que haya nada oculto detrás.
@@ -151,6 +151,6 @@ Dark-only (no hay light theme real; `ToggleTheme` no está enganchado). Tokens e
 
 ## Deuda conocida
 
-- No hay tests automatizados ni linter; la única verificación es `vue-tsc` vía `npm run build`.
+- Solo hay tests del motor de métricas (`npm test`); el resto de la verificación es `vue-tsc` vía `npm run build`.
 - `GeneralStats.vue` y `TeamMatches.vue` comparten bastante estructura de pestañas/selector de set pero no un componente común — al tocar cómo se filtra/pintan las pestañas, revisa ambos.
 - Sin SSG de `<body>`: el head sí va prerenderizado por ruta, pero el contenido depende de que el bot ejecute JS (mitigado con JSON-LD/`llms.txt`, ver SEO/GEO).

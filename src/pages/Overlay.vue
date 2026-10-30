@@ -5,7 +5,7 @@ import { useI18n } from "vue-i18n"
 import { collection, doc, onSnapshot, orderBy, query } from "firebase/firestore"
 import { useDocument } from "vuefire"
 import { db } from "../firebase"
-import { ADMIN_IDS, KILL_IDS, aid, isRival, rivalServing } from "../utils/volleyStats"
+import { ADMIN_IDS, aid, deriveCredits, pointsOrigin, rivalServing } from "../utils/volleyStats"
 import TeamCrest from "../components/TeamCrest.vue"
 import { safeLogoUrl } from "../utils/teamLogo"
 // Everything the scoreboard needs already lives on the match doc: the app
@@ -634,39 +634,21 @@ function stopStatsSubscription() {
 }
 
 // --- Set stats block (expanded panel): both teams row against row, like a
-// broadcast "set statistics" card (owner, 2026-10-24). Only what was LOGGED,
-// nothing inferred (owner: "no es lo mismo un error de defensa que un punto
-// de ataque"):
-//  - attack/block/ace: the winning team's own kill (9/10/11), block (13) or
-//    ace (8) row. The rival's come from "their player" taps.
-//  - the one complementary pair that ends a rally: a reception error (22) is
-//    saved together with the server's ace (8, `to` 0, half an order apart —
-//    `CaptureEngine.complementDecision`), so that error counts as the ace.
-//  - "opponent errors": any other error of the losing team, as logged.
-// So a team's categories need not add up to its points (a downhit kill, a
-// court-capture rally logged as a rival error, …) — the score card has the points.
+// broadcast "set statistics" card (owner, 2026-10-24). The numbers come from
+// the web's single engine (`pointsOrigin` in utils/volleyStats.ts, METRICS.md
+// §2.1), the same as the app and the stats page, so each team's categories add
+// up to its points:
+//  - us: attack / block / ace / opponent errors — with the DERIVED credits
+//    (a rally we won logged as the rival's reception/dig error 22/23 is our
+//    ace or kill, whatever the capture mode); "opponent errors" excludes them.
+//  - them: attack / block / ace / our errors (a blocked attack counts as their
+//    block).
 // `currentSet` still points at the set that just ended until the app starts
 // the next one.
 const finishedSetGameStats = computed(() =>
     allStats.value.filter((s) => Number(s?.set?.number) === currentSet.value && !ADMIN_IDS.includes(aid(s)))
 )
 const finishedSetPointEnders = computed(() => finishedSetGameStats.value.filter((s) => s.to !== 0))
-
-type PointOrigin = "attack" | "block" | "ace" | "errors" | null
-function pointOrigin(s: any, aceOrders: { us: Set<number>; them: Set<number> }): PointOrigin {
-    const id = aid(s)
-    const winner = s.to === 1 ? "us" : "them"
-    const winnersRow = (winner === "them") === isRival(s)
-    if (winnersRow) {
-        if (KILL_IDS.includes(id)) return "attack"
-        if (id === "13") return "block"
-        if (id === "8") return "ace"
-        return null
-    }
-    const o = Number(s.order)
-    if (id === "22" && (aceOrders[winner].has(o - 0.5) || aceOrders[winner].has(o + 0.5))) return "ace"
-    return "errors"
-}
 
 interface SetStatRow {
     key: string
@@ -677,21 +659,12 @@ interface SetStatRow {
     themPct: number
 }
 const setStatRows = computed<SetStatRow[]>(() => {
-    // Complementary aces (`to` 0) by team, keyed by order, to pair them with
-    // the reception error they were saved with.
-    const aceOrders = { us: new Set<number>(), them: new Set<number>() }
-    for (const s of finishedSetGameStats.value)
-        if (aid(s) === "8" && s.to === 0) aceOrders[isRival(s) ? "them" : "us"].add(Number(s.order))
-    const count = { us: { attack: 0, block: 0, ace: 0, errors: 0 }, them: { attack: 0, block: 0, ace: 0, errors: 0 } }
-    for (const s of finishedSetPointEnders.value) {
-        const origin = pointOrigin(s, aceOrders)
-        if (origin) count[s.to === 1 ? "us" : "them"][origin]++
-    }
+    const origin = pointsOrigin(finishedSetPointEnders.value, deriveCredits(finishedSetGameStats.value))
     const rows = (["attack", "block", "ace", "errors"] as const).map((k) => ({
         key: k,
         label: t(`stats.origin${k.charAt(0).toUpperCase()}${k.slice(1)}`),
-        us: count.us[k],
-        them: count.them[k],
+        us: origin[k].us,
+        them: origin[k].them,
     }))
     // One scale for every bar, so lengths compare across rows too. The set
     // score lives in its own card (`.score-card`), not as a row.
@@ -714,11 +687,9 @@ function demoSetStats(): any[] {
         ...extra,
     })
     const rep = (n: number, to: number, rival: boolean, id: string) => Array.from({ length: n }, () => stat(to, rival, id))
-    // Our reception error saved with the rival's complementary ace.
-    const receptionError = () => {
-        const ace = stat(0, true, "8")
-        return [ace, { ...stat(2, false, "22"), order: ace.order + 0.5 }]
-    }
+    // A rally we won logged the Rally Map way: our swing (6, rally goes on) and the
+    // rival's reception error closing it -> the engine credits our kill.
+    const derivedKill = () => [stat(0, false, "6"), stat(1, true, "23")]
     return [
         ...rep(13, 1, false, "9"),
         ...rep(3, 1, false, "13"),
@@ -726,7 +697,8 @@ function demoSetStats(): any[] {
         ...rep(7, 1, true, "15"),
         ...rep(5, 2, true, "9"),
         ...rep(2, 2, true, "13"),
-        ...receptionError(),
+        ...derivedKill(),
+        ...derivedKill(),
         ...rep(3, 2, false, "23"),
         ...rep(3, 2, false, "15"),
         ...rep(4, 2, false, "16"),

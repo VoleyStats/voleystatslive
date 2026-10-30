@@ -51,7 +51,7 @@
 
         <p v-if="total === 0" class="text-xs text-slate-500">{{ $t('courtMap.noDirections') }}</p>
         <p v-else class="text-xs text-slate-500">
-            {{ $t('courtMap.summary') }}
+            {{ isAttackFamily ? $t('courtMap.summaryEff') : $t('courtMap.summary') }}
         </p>
     </div>
 </template>
@@ -59,6 +59,7 @@
 <script lang="ts" setup>
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
+import { ATTACK_IDS, NO_CREDITS, directionEfficiency, attackEfficiency, efficiencyHex, type DerivedCredits } from "../utils/volleyStats";
 
 // Pista SVG con los corredores de ataque construidos desde el formato de
 // dirección de la app ("from#to", zonas "4A", red "N3", fuera "OT2/OL4",
@@ -75,9 +76,16 @@ const props = withDefaults(
         stats: any[];
         rival: boolean;
         actionIds?: string[];
+        /** Créditos derivados del ámbito (kills propios de la eficiencia por corredor). */
+        derived?: DerivedCredits;
     }>(),
-    { actionIds: () => ["6", "9", "10", "11", "16", "17", "47"] }
+    { actionIds: () => [...ATTACK_IDS], derived: () => NO_CREDITS }
 );
+
+// Familia de ataque: el color de cada corredor es su EFICIENCIA
+// `(puntos − errores)/ataques` (verde ≥25%, ámbar ≥10%, rojo debajo; errores
+// 16/17). El saque conserva el color por resultado del rally.
+const isAttackFamily = computed(() => props.actionIds.every((id) => ATTACK_IDS.includes(id)));
 
 const { t } = useI18n();
 
@@ -177,6 +185,7 @@ function toPoint(token: string): { x: number; y: number } | null {
 interface Corridor {
     x1: number; y1: number; x2: number; y2: number;
     count: number; wins: number; fails: number;
+    rows: any[];
     color: string;
     // Curva cuadrática: la flecha se arquea SIEMPRE hacia el mismo lado del
     // sentido de la marcha, así una ruta A→B y su vuelta B→A se separan en
@@ -227,8 +236,9 @@ const aggregated = computed(() => {
         const win = props.rival ? s.to === 2 : s.to === 1;
         const fail = props.rival ? s.to === 1 : s.to === 2;
         const entry: Corridor = map.get(key) ??
-            { x1: from.x, y1: from.y, x2: to.x, y2: to.y, count: 0, wins: 0, fails: 0, color: "", d: "", head: "", width: 0, opacity: 0 };
+            { x1: from.x, y1: from.y, x2: to.x, y2: to.y, count: 0, wins: 0, fails: 0, rows: [], color: "", d: "", head: "", width: 0, opacity: 0 };
         entry.count++;
+        entry.rows.push(s);
         if (win) entry.wins++;
         if (fail) entry.fails++;
         map.set(key, entry);
@@ -236,7 +246,7 @@ const aggregated = computed(() => {
     const list = [...map.values()];
     const maxC = Math.max(...list.map((c) => c.count), 1);
     for (const c of list) {
-        c.color = corridorColor(c.wins, c.fails);
+        c.color = isAttackFamily.value ? efficiencyHex(attackEfficiency(directionEfficiency(c.rows, props.derived))) : corridorColor(c.wins, c.fails);
         // Peso 0..1 dentro del rango de frecuencias de este mapa. Si todas las
         // rutas valen lo mismo (lo habitual con subzonas) se pintan todas a
         // peso medio en vez de todas finas o todas gruesas.
@@ -299,7 +309,9 @@ const heat = computed(() =>
         x: c.x2,
         y: c.y2,
         count: c.count,
-        color: c.wins >= c.fails ? (c.wins > 0 ? "#4ade80" : "#38bdf8") : "#f87171",
+        color: isAttackFamily.value
+            ? c.color
+            : c.wins >= c.fails ? (c.wins > 0 ? "#4ade80" : "#38bdf8") : "#f87171",
     }))
 );
 

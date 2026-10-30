@@ -295,7 +295,7 @@
                                 <p class="text-[11px] text-slate-400 leading-4 mt-1">{{ $t('team.receptionMark') }}<br />{{ kpiReception.total }}</p>
                             </div>
                             <div class="rounded-lg bg-white/[0.04] border border-white/10 py-3 text-center">
-                                <p class="text-lg font-display font-bold" :class="kpiAttackEff >= 40 ? 'text-volt-400' : kpiAttackEff >= 25 ? 'text-brand-300' : 'text-slate-200'">{{ kpiAttackEff }}%</p>
+                                <p class="text-lg font-display font-bold" :class="kpiAttack.attempts ? efficiencyClass(kpiAttackEff) : 'text-slate-500'">{{ kpiAttack.attempts ? efficiencyLabel(kpiAttackEff) : '—' }}</p>
                                 <p class="text-[11px] text-slate-400 leading-4 mt-1">{{ $t('team.attackEff') }}<br />{{ kpiAttack.kills }}/{{ kpiAttack.attempts }}</p>
                             </div>
                             <div class="rounded-lg bg-white/[0.04] border border-white/10 py-3 text-center">
@@ -318,7 +318,7 @@
                 <template v-else-if="statsTab === 'rotations'">
                     <Rotations360Section
                         :stats="gameStats"
-                        :derived-kills="derivedKills"
+                        :derived="derivedCredits"
                         :reception-grade-buckets="receptionGradeBuckets"
                         :live-updating="hasLiveMatch"
                     />
@@ -366,7 +366,7 @@
 
                 <!-- ============ 5. DIRECCIONES ============ -->
                 <template v-else-if="statsTab === 'directions'">
-                    <DirectionsSection :stats="gameStats" />
+                    <DirectionsSection :stats="gameStats" :derived="derivedCredits" />
                 </template>
 
                 <!-- ============ 6. POR JUGADORA ============ -->
@@ -375,9 +375,7 @@
                         v-model:player-id="selectedPlayerId"
                         :stats="gameStats"
                         :all-stats="allStats"
-                        :derived-kills="derivedKills"
-                        :derived-aces="derivedAces"
-                        :credited-by="derivedCredits.creditedBy"
+                        :derived="derivedCredits"
                         :match-groups="gameStatsByMatch"
                         :live-updating="hasLiveMatch"
                     />
@@ -385,7 +383,7 @@
 
                 <!-- ============ 7. TABLAS POR DESTREZA ============ -->
                 <template v-else-if="statsTab === 'tables'">
-                    <SkillTablesSection :stats="gameStats" :all-stats="allStats" />
+                    <SkillTablesSection :stats="gameStats" :all-stats="allStats" :derived="derivedCredits" />
                 </template>
                 </div>
                 </template>
@@ -414,9 +412,6 @@ import DirectionsSection from "../components/stats/DirectionsSection.vue";
 import PlayerDetailSection from "../components/stats/PlayerDetailSection.vue";
 import { useTeamStats } from "../composables/useTeamStats";
 import {
-    SERVE_ERR_IDS,
-    TEAM_RADAR_FILTERS,
-    aid,
     areaTotals,
     attackByReceptionGradeForMatch,
     attackEfficiency,
@@ -424,18 +419,22 @@ import {
     breakStats,
     currentSetsWon,
     deriveCredits,
+    downhitTotals,
+    efficiencyClass,
+    efficiencyLabel,
     GRADE_COLORS,
     isGameStat,
     isMatchNotStarted,
     isPointEnder,
-    isRival,
     mergeCredits,
     mergeGradeBuckets,
+    NO_CREDITS,
     pct,
     perfectReceptionPercent,
     radarAxes,
     receptionMarkLabel,
     receptionTotals,
+    serveLine,
     sideOutStats,
     unforcedShare,
     type StatDoc,
@@ -625,8 +624,6 @@ const creditsByCode = computed(() => {
 // cual a <PlayerDetailSection> (tab "Por jugadora"), que necesita las tres
 // piezas para atribuir puntos derivados a la jugadora seleccionada.
 const derivedCredits = computed(() => mergeCredits([...creditsByCode.value.values()]));
-const derivedKills = computed(() => derivedCredits.value.kills);
-const derivedAces = computed(() => derivedCredits.value.aces);
 // Secuencia ORDENADA de stats de juego por partido (una entrada por partido,
 // sin fusionar) — la necesita <PlayerDetailSection> para el bloque "ataque
 // según la nota de recepción" (el puntero de última recepción no puede
@@ -644,14 +641,14 @@ const kpiReceptionMark = computed(() =>
         ? receptionMarkLabel(kpiReception.value.sum / kpiReception.value.total, perfectReceptionPercent(kpiReception.value) ?? 0)
         : "—"
 );
-// Retrofit fase 2a: la eficiencia FIVB pasa a contar kills con `isKill`
-// (incluye los derivados de la captura en cancha, ver A).
-const kpiAttack = computed(() => attackTotals(gameStats.value, derivedKills.value));
+// Eficiencia de ataque `(puntos − errores)/ataques` (METRICS.md D2): puntos con
+// `isKill` (incluye los derivados, ver A), errores 16/17 (bloqueados dentro).
+const kpiAttack = computed(() => attackTotals(gameStats.value, derivedCredits.value));
 const kpiAttackEff = computed(() => attackEfficiency(kpiAttack.value));
 const kpiUnforced = computed(() => unforcedShare(pointEnders.value));
 
 // --- por área ---
-const areaRows = computed(() => areaTotals(gameStats.value));
+const areaRows = computed(() => areaTotals(gameStats.value, derivedCredits.value));
 
 // "Datos absolutos" en la app son 6 pies (serve/receive/block/dig/set/attack)
 // con total/ganados/errores, no una tabla — reutiliza `areaRows` (misma
@@ -670,13 +667,17 @@ const AREA_DONUT_DEFS = [
     { area: 3, labelKey: "stats.areas.setting" },
     { area: 5, labelKey: "stats.areas.attack" },
 ] as const;
-const EXTRA_AREA_DONUT_DEFS = [
-    { area: 7, labelKey: "stats.areas.adjust" },
-    { area: 9, labelKey: "stats.areas.downhit" },
-] as const;
+const EXTRA_AREA_DONUT_DEFS = [{ area: 9, labelKey: "stats.areas.downhit" }] as const;
 
 function areaDonut(def: { area: number; labelKey: string }) {
-    const row = areaRows.value.find((r) => r.area === def.area);
+    // El área 9 (free / down ball) sale de `downhitTotals`; el resto, de `areaTotals`.
+    const row =
+        def.area === 9
+            ? (() => {
+                  const dh = downhitTotals(gameStats.value);
+                  return { area: 9, total: dh.total, won: dh.won, errors: dh.errors };
+              })()
+            : areaRows.value.find((r) => r.area === def.area);
     const total = row?.total ?? 0;
     const won = row?.won ?? 0;
     const errors = row?.errors ?? 0;
@@ -716,7 +717,7 @@ const radarChartOptions = (color: string): ApexOptions => ({
     tooltip: { theme: "dark" },
 });
 
-const radarTeam = computed(() => radarAxes(gameStats.value, TEAM_RADAR_FILTERS));
+const radarTeam = computed(() => radarAxes(gameStats.value, derivedCredits.value));
 const radarTeamChart = computed(() => ({
     series: [{ name: t("team.radarTitle"), data: RADAR_AXIS_ORDER.map((k) => radarTeam.value[k]) }],
     chartOptions: radarChartOptions("#6E93FF"),
@@ -731,11 +732,11 @@ const selectedPlayerId = ref<string>("");
 // atacante viven en <Rotations360Section> (src/components/stats/). Solo se
 // calcula aquí lo que es específico del ámbito "equipo" (fusión entre
 // partidos de las notas de recepción, ver comentario de la función): el
-// resto de datos que necesita el componente (rotationCount, derivedKills)
-// ya están disponibles como `gameStats`/`derivedKills` más arriba.
+// resto de datos que necesita el componente (rotationCount, derivedCredits)
+// ya están disponibles como `gameStats`/`derivedCredits` más arriba.
 const receptionGradeBuckets = computed(() => {
     const perMatch = loadedMatches.value.map((m) =>
-        attackByReceptionGradeForMatch((m.stats as StatDoc[]).filter(isGameStat), creditsByCode.value.get(m.code)?.kills ?? new Set())
+        attackByReceptionGradeForMatch((m.stats as StatDoc[]).filter(isGameStat), creditsByCode.value.get(m.code) ?? NO_CREDITS)
     );
     return mergeGradeBuckets(perMatch);
 });
@@ -751,10 +752,11 @@ const matchLabels = computed(() => chronologicalLoaded.value.map((m) => m.oppone
 const serveHistory = computed(() => {
     const aces: number[] = [];
     const errors: number[] = [];
+    // D1: saques por `server` (con la falta de pie), aces con derivados.
     for (const m of chronologicalLoaded.value) {
-        const own = m.stats.filter((s) => !isRival(s));
-        aces.push(own.filter((s) => aid(s) === "8").length);
-        errors.push(own.filter((s) => SERVE_ERR_IDS.includes(aid(s))).length);
+        const line = serveLine((m.stats as StatDoc[]).filter(isGameStat), creditsByCode.value.get(m.code) ?? NO_CREDITS);
+        aces.push(line.aces);
+        errors.push(line.errors);
     }
     return { aces, errors };
 });
@@ -778,7 +780,7 @@ const attackHistory = computed(() => {
     const kills: number[] = [];
     const errors: number[] = [];
     for (const m of chronologicalLoaded.value) {
-        const t = attackTotals(m.stats, creditsByCode.value.get(m.code)?.kills ?? new Set());
+        const t = attackTotals(m.stats, creditsByCode.value.get(m.code) ?? NO_CREDITS);
         kills.push(t.kills);
         errors.push(t.errors);
     }

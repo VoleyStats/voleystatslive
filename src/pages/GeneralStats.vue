@@ -328,7 +328,7 @@
             <template v-else-if="activeTab === 'rotations'">
                 <Rotations360Section
                     :stats="gameStats"
-                    :derived-kills="derived.kills"
+                    :derived="derived"
                     :reception-grade-buckets="receptionGradeBuckets"
                 />
             </template>
@@ -339,9 +339,7 @@
                     v-model:player-id="selectedPlayerId"
                     :stats="gameStats"
                     :all-stats="setStats"
-                    :derived-kills="derived.kills"
-                    :derived-aces="derived.aces"
-                    :credited-by="derived.creditedBy"
+                    :derived="derived"
                     :n-sets="nSets"
                     :set="set"
                 />
@@ -349,12 +347,12 @@
 
             <!-- ============ 4. TABLAS ============ -->
             <template v-else-if="activeTab === 'tables'">
-                <SkillTablesSection :stats="gameStats" :all-stats="setStats" />
+                <SkillTablesSection :stats="gameStats" :all-stats="setStats" :derived="derived" />
             </template>
 
             <!-- ============ 5. DIRECCIONES ============ -->
             <template v-else-if="activeTab === 'directions'">
-                <DirectionsSection :stats="gameStats" />
+                <DirectionsSection :stats="gameStats" :derived="derived" />
             </template>
 
             <!-- ============ 6. PUNTO A PUNTO ============ -->
@@ -425,19 +423,25 @@ import { collection, doc, getDocs, getDocsFromCache, onSnapshot, orderBy, query 
 import { db } from "../firebase";
 import {
     ADMIN_IDS,
-    AREA_LABEL_KEYS,
-    ATTACK_IDS,
     aid,
     attackByReceptionGradeForMatch,
+    attackDistribution,
+    breakStats,
     currentSetsWon,
     deriveCredits,
     isMatchCacheable,
     isMatchFinished,
     isMatchNotStarted,
     isRival,
-    isUnforced,
+    longRallies,
+    ownErrors,
+    pct,
     pointsOrigin,
-    rivalServing,
+    rivalBlockouts,
+    rivalCorridors,
+    serveLine,
+    sideOutStats,
+    unforcedShare,
 } from "../utils/volleyStats";
 
 const props = defineProps({
@@ -482,7 +486,19 @@ const actionLabel = (s: any): string => {
     const key = `stats.actions.a${aid(s)}`;
     return te(key) ? t(key) : s?.action?.name ?? "";
 };
-const AREA_LABELS = computed(() => AREA_LABEL_KEYS.map((key) => t(`stats.areas.${key}`)));
+// Cajones de `ownErrors().bySkill` -> clave `stats.areas.*` (receive/set/dig
+// usan los nombres de área de la UI); "other" cae a `stats.otherArea`.
+const ERROR_SKILL_LABEL_KEYS: Record<string, string> = {
+    attack: "attack",
+    serve: "serve",
+    receive: "reception",
+    set: "setting",
+    dig: "defense",
+    block: "block",
+    fault: "fault",
+};
+const errorSkillLabel = (skill: string): string =>
+    ERROR_SKILL_LABEL_KEYS[skill] ? t(`stats.areas.${ERROR_SKILL_LABEL_KEYS[skill]}`) : t("stats.otherArea");
 
 // ------------------------------------------------------------------ datos
 const match = useDocument(doc(db, "live_matches", props?.id ?? "x"));
@@ -604,7 +620,7 @@ const selectedPlayerId = ref<string>("");
 // Ataque según la nota de la recepción previa, para el tab "Rotaciones"
 // (recorre el ámbito en orden, reiniciando entre sets y al cerrarse cada
 // punto — helper compartido, un solo scope aquí así que no hace falta merge).
-const receptionGradeBuckets = computed(() => attackByReceptionGradeForMatch(gameStats.value, derived.value.kills));
+const receptionGradeBuckets = computed(() => attackByReceptionGradeForMatch(gameStats.value, derived.value));
 
 // ------------------------------------------------------------------ marcador
 const score = computed(() => [lastPoint.value?.score_us ?? 0, lastPoint.value?.score_them ?? 0]);
@@ -663,16 +679,9 @@ const streak = computed(() => {
     return { count, ours: last.to === 1 };
 });
 
-const sideOut = computed(() => {
-    const rec = pointEnders.value.filter((s) => rivalServing(s));
-    return { total: rec.length, won: rec.filter((s) => s.to === 1).length };
-});
-const breakPts = computed(() => {
-    const srv = pointEnders.value.filter((s) => !rivalServing(s));
-    return { total: srv.length, won: srv.filter((s) => s.to === 1).length };
-});
-const pct = (won: number, total: number): string =>
-    total > 0 ? Math.round((won / total) * 100) + "%" : "—";
+// Side-out / break por `server` (motor único, METRICS.md §2.1).
+const sideOut = computed(() => sideOutStats(pointEnders.value));
+const breakPts = computed(() => breakStats(pointEnders.value));
 
 // ------------------------------------------------------------------ punto a punto
 const timeline = computed(() =>
@@ -741,19 +750,17 @@ const setsComparison = computed(() => {
         );
         if (!pts.length) continue;
         const sb = scoreboard.value.find((x) => x.number === n);
-        const rec = pts.filter((s) => rivalServing(s));
-        const srv = pts.filter((s) => !rivalServing(s));
-        const theirPts = pts.filter((s) => s.to === 2);
-        const unforced = theirPts.filter(isUnforced).length;
-        const share = theirPts.length ? unforced / theirPts.length : 0;
+        const so = sideOutStats(pts);
+        const br = breakStats(pts);
+        const unf = unforcedShare(pts);
         rows.push({
             n,
             result: sb ? `${sb.score_us}-${sb.score_them}` : "",
             won: (sb?.score_us ?? 0) > (sb?.score_them ?? 0),
-            sideOut: pct(rec.filter((s) => s.to === 1).length, rec.length),
-            breakPts: pct(srv.filter((s) => s.to === 1).length, srv.length),
-            unforced: theirPts.length ? `${unforced} · ${Math.round(share * 100)}%` : "—",
-            unforcedColor: theirPts.length ? unforcedColor(share) : "text-slate-500",
+            sideOut: pct(so.won, so.total),
+            breakPts: pct(br.won, br.total),
+            unforced: unf.total ? `${unf.count} · ${Math.round(unf.share * 100)}%` : "—",
+            unforcedColor: unf.total ? unforcedColor(unf.share) : "text-slate-500",
         });
     }
     return rows;
@@ -769,53 +776,43 @@ const insights = computed(() => {
 
     // Errores no forzados en lugar del antiguo "regalados": con la captura en
     // cuadrícula, todo punto rival figura como acción propia y el bruto no servía.
-    const theirPts = points.filter((s) => s.to === 2);
-    const unforced = theirPts.filter(isUnforced).length;
-    if (theirPts.length >= 8 && unforced / theirPts.length >= 0.35) {
-        out.push({ icon: "bi-gift-fill", color: "text-red-400", text: t("stats.insights.unforced", { n: unforced, total: theirPts.length }) });
+    const unf = unforcedShare(points);
+    if (unf.total >= 8 && unf.share >= 0.35) {
+        out.push({ icon: "bi-gift-fill", color: "text-red-400", text: t("stats.insights.unforced", { n: unf.count, total: unf.total }) });
     }
 
-    const k3 = points.filter((s) => Number(s.stage) === 3);
-    const k3lost = k3.filter((s) => s.to === 2).length;
-    if (k3.length >= 8 && k3lost / k3.length >= 0.7) {
-        out.push({ icon: "bi-stopwatch", color: "text-orange-400", text: t("stats.insights.longRallies", { lost: k3lost, total: k3.length }) });
+    const k3 = longRallies(points);
+    const k3lost = k3.total - k3.won;
+    if (k3.total >= 8 && k3lost / k3.total >= 0.7) {
+        out.push({ icon: "bi-stopwatch", color: "text-orange-400", text: t("stats.insights.longRallies", { lost: k3lost, total: k3.total }) });
     }
 
-    const serves = game.filter((s) => !isRival(s) && ["8", "15", "32", "39", "40", "41"].includes(aid(s)));
-    const serveErr = serves.filter((s) => ["15", "32"].includes(aid(s))).length;
-    if (serves.length >= 8 && serveErr >= 3 && serveErr / serves.length >= 0.25) {
-        out.push({ icon: "bi-bullseye", color: "text-yellow-400", text: t("stats.insights.serveErrors", { errors: serveErr, total: serves.length }) });
+    // Saque (D1): por `server`, con la falta de pie (32) y sin K1.
+    const serve = serveLine(game, derived.value);
+    if (serve.total >= 8 && serve.errors >= 3 && serve.errors / serve.total >= 0.25) {
+        out.push({ icon: "bi-bullseye", color: "text-yellow-400", text: t("stats.insights.serveErrors", { errors: serve.errors, total: serve.total }) });
     }
 
-    const ourAttacks = game.filter((s) => !isRival(s) && ATTACK_IDS.includes(aid(s)));
-    if (ourAttacks.length >= 12) {
-        const byPlayer = new Map<string, number>();
-        for (const s of ourAttacks) byPlayer.set(s.player?.name ?? "", (byPlayer.get(s.player?.name ?? "") ?? 0) + 1);
-        const top = [...byPlayer.entries()].sort((a, b) => b[1] - a[1])[0];
-        if (byPlayer.size > 1 && top && top[1] / ourAttacks.length >= 0.5) {
-            out.push({ icon: "bi-diagram-3-fill", color: "text-orange-400", text: t("stats.insights.attackConcentration", { player: top[0], pct: Math.round((top[1] / ourAttacks.length) * 100) }) });
+    const dist = attackDistribution(game);
+    const attackTotal = dist.reduce((a, x) => a + x.count, 0);
+    if (attackTotal >= 12) {
+        const top = dist[0];
+        if (dist.length > 1 && top && top.count / attackTotal >= 0.5) {
+            out.push({ icon: "bi-diagram-3-fill", color: "text-orange-400", text: t("stats.insights.attackConcentration", { player: top.name, pct: Math.round((top.count / attackTotal) * 100) }) });
         }
     }
 
-    const blockouts = game.filter((s) => isRival(s) && aid(s) === "11").length;
+    const blockouts = rivalBlockouts(game);
     if (blockouts >= 3) {
         out.push({ icon: "bi-hand-index-thumb-fill", color: "text-red-400", text: t("stats.insights.blockouts", { n: blockouts }) });
     }
 
-    const rivalDir = game.filter((s) => isRival(s) && ATTACK_IDS.includes(aid(s)) && String(s.direction ?? "").includes("#"));
-    if (rivalDir.length >= 6) {
-        const corridors = new Map<string, number>();
-        for (const s of rivalDir) {
-            const parts = String(s.direction).split("#");
-            const from = parts[0]?.[0];
-            const to = parts[parts.length - 1]?.[0];
-            if (from && to && /\d/.test(from) && /\d/.test(to)) {
-                corridors.set(`${from} → ${to}`, (corridors.get(`${from} → ${to}`) ?? 0) + 1);
-            }
-        }
-        const top = [...corridors.entries()].sort((a, b) => b[1] - a[1])[0];
-        if (top && top[1] >= 4 && top[1] / rivalDir.length >= 0.5) {
-            out.push({ icon: "bi-eye-fill", color: "text-purple-400", text: t("stats.insights.corridor", { pct: Math.round((top[1] / rivalDir.length) * 100), corridor: top[0] }) });
+    const corridors = rivalCorridors(game);
+    const rivalDirTotal = corridors.reduce((a, c) => a + c.count, 0);
+    if (rivalDirTotal >= 6) {
+        const top = corridors[0];
+        if (top && top.count >= 4 && top.count / rivalDirTotal >= 0.5) {
+            out.push({ icon: "bi-eye-fill", color: "text-purple-400", text: t("stats.insights.corridor", { pct: Math.round((top.count / rivalDirTotal) * 100), corridor: top.key }) });
         }
     }
 
@@ -861,22 +858,14 @@ const momentum = computed(() => {
     };
 });
 
-// Errores propios por área (bloque "General"). Los históricos de free ball
-// (área 8) se pliegan en defensa (área 2) — misma regla que `areaTotals`
-// (ver volleyStats.ts): la familia free ya no aparece como categoría propia
-// en ninguna tabla/gráfico orientado a usuario.
+// Errores propios (bloque "General"): `ownErrors().bySkill` del motor (D4) —
+// todas las filas propias con `to == 2` (faltas, roja y bloqueados incluidos)
+// repartidas por fundamento con los cajones "falta" y "otros"; la suma de las
+// barras es el total de errores del acta.
 const errors = computed(() => {
-    const grouped = new Map<number, number>();
-    for (const s of gameStats.value) {
-        if (s.to === 2 && !isRival(s) && s.action?.type === "error") {
-            let area = Number(s.action?.area ?? -1);
-            if (area === 8) area = 2;
-            grouped.set(area, (grouped.get(area) ?? 0) + 1);
-        }
-    }
-    const entries = [...grouped.entries()].sort((a, b) => a[0] - b[0]);
+    const entries = ownErrors(gameStats.value).bySkill;
     return {
-        series: [{ name: t("stats.errorsSeries"), data: entries.map(([, v]) => v) }],
+        series: [{ name: t("stats.errorsSeries"), data: entries.map((e) => e.count) }],
         chartOptions: <ApexOptions>{
             // Visible durante el directo (pestaña General): se recalcula con
             // cada punto, así que se pinta sin animación.
@@ -886,7 +875,7 @@ const errors = computed(() => {
             plotOptions: { bar: { borderRadius: 6, columnWidth: 30, borderRadiusApplication: "end" } },
             dataLabels: { enabled: false },
             xaxis: {
-                categories: entries.map(([k]) => AREA_LABELS.value[k] ?? t("stats.otherArea")),
+                categories: entries.map((e) => errorSkillLabel(e.skill)),
                 labels: { style: { colors: "#94a3b8" } },
                 axisBorder: { show: false },
                 axisTicks: { show: false },

@@ -58,7 +58,7 @@
                 {{ p.name }}
             </button>
         </div>
-        <CourtMap :stats="directionsStats" :rival="directionsSide === 'rival'" :action-ids="directionsIds" />
+        <CourtMap :stats="directionsStats" :rival="directionsSide === 'rival'" :action-ids="directionsIds" :derived="derived" />
     </article>
 </template>
 
@@ -74,11 +74,12 @@
 // hace falta pasarlo aparte.
 import { computed, ref } from "vue";
 import CourtMap from "../CourtMap.vue";
-import { ATTACK_IDS, isRival, type StatDoc } from "../../utils/volleyStats";
-import { SERVE_TABLE_IDS } from "../../utils/teamTables";
+import { ATTACK_IDS, SERVE_IDS, isRival, type DerivedCredits, type StatDoc } from "../../utils/volleyStats";
 
 const props = defineProps<{
     stats: StatDoc[];
+    /** Créditos derivados del mismo ámbito (kills propios en la eficiencia de cada corredor). */
+    derived: DerivedCredits;
 }>();
 
 const DIRECTION_FAMILIES = [
@@ -103,7 +104,7 @@ const rosterPlayers = computed(() => {
         .sort((a, b) => a.name.localeCompare(b.name));
 });
 
-const directionsIds = computed(() => (directionsFamily.value === "serve" ? SERVE_TABLE_IDS : ATTACK_IDS));
+const directionsIds = computed(() => (directionsFamily.value === "serve" ? SERVE_IDS : ATTACK_IDS));
 const directionsStats = computed(() => {
     if (directionsSide.value === "us" && directionsPlayerId.value !== "all") {
         return props.stats.filter((s) => String(s.player?.id ?? "") === directionsPlayerId.value);
