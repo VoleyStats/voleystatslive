@@ -121,6 +121,26 @@ const isOwnOf = (playerId?: string) => (s: StatDoc): boolean =>
 // los .5 negativos hacia +inf (-12.5 -> -12) y la app da -13.
 export const roundHalfAway = (x: number): number => (x < 0 ? -Math.round(-x) : Math.round(x));
 
+// `order` se reinicia en cada set (las apps numeran desde 0 por set), así que
+// `orderBy("order")` sobre la subcolección entera INTERCALA los sets
+// (s1#0, s2#0, s1#1…). Esto devuelve una copia en orden cronológico real:
+// por `set.number` y, dentro del set, por `order`. Estable: si falta `order`
+// (stats slim de la caché, que ya venían ordenados) conserva el orden relativo.
+// Aplicar a los stats de UN partido, nunca a varios mezclados.
+export function sortChronological<T>(stats: T[]): T[] {
+    const num = (v: unknown): number => {
+        const n = Number(v);
+        return Number.isFinite(n) ? n : 0;
+    };
+    return [...stats].sort((a: any, b: any) => {
+        const ds = num(a?.set?.number) - num(b?.set?.number);
+        if (ds !== 0) return ds;
+        const oa = Number(a?.order);
+        const ob = Number(b?.order);
+        return Number.isFinite(oa) && Number.isFinite(ob) ? oa - ob : 0;
+    });
+}
+
 // ------------------------------------------------------------------------
 // A. Motor de kills/aces DERIVADOS (en cualquier modo de captura)
 // ------------------------------------------------------------------------
@@ -212,8 +232,13 @@ export interface PointsOriginRow {
 // `concededSources()` (suma `score_them`). `pointEnders` son los stats de
 // cierre de punto (`to !== 0`) del ámbito ya filtrados de acciones admin y
 // CON las filas del rival; `d` los derivados del MISMO ámbito.
-// `errors.us` = "puntos por error del rival" SIN los derivados (que cuentan
-// como ace/ataque propio); `errors.them` = errores propios.
+// Regla simétrica (METRICS.md `pointSources`/`concededSources`), con el
+// catálogo `ERROR_IDS_BY_SKILL`: el error de quien pierde el punto se acredita
+// al otro equipo según el fundamento — ataque "Blocked" -> bloqueo, recepción ->
+// ace, defensa (`DIG_ERROR_IDS`) o bloqueo -> ataque, y el resto (saque, ataque
+// no bloqueado, colocación, faltas, desconocidos) -> errores. `errors.us` =
+// errores del rival restantes (los derivados ya cuentan como ace/ataque
+// propio); `errors.them` = errores propios restantes. Las sumas son los puntos.
 export interface PointsOrigin {
     attack: PointsOriginRow;
     block: PointsOriginRow;
@@ -231,20 +256,31 @@ export function pointsOrigin(pointEnders: StatDoc[], d: DerivedCredits): PointsO
     for (const p of pointEnders) {
         const id = aid(p);
         const rival = isRival(p);
+        // Catálogo de errores por fundamento (`ERROR_IDS_BY_SKILL`).
+        const isRecvErr = ERROR_IDS_BY_SKILL.find((e) => e.skill === "receive")!.ids.includes(id);
+        const isBlockedAtk = ATTACK_ERR_IDS.includes(id) && p.detail === "Blocked";
+        const isDefBlockErr =
+            DIG_ERROR_IDS.includes(id) || ERROR_IDS_BY_SKILL.find((e) => e.skill === "block")!.ids.includes(id);
         if (p.to === 1) {
             const credit = d.creditedBy.get(p);
             if (credit) {
                 if (d.aces.has(credit)) rows.ace.us++;
                 else rows.attack.us++;
-            } else if (rival) rows.errors.us++;
-            else if (KILL_IDS.includes(id) || id === "12") rows.attack.us++;
+            } else if (rival) {
+                // Error del rival que no es derivado: se reparte simétrico al lado "them".
+                if (isBlockedAtk) rows.block.us++;
+                else if (isRecvErr) rows.ace.us++;
+                else if (isDefBlockErr) rows.attack.us++;
+                else rows.errors.us++;
+            } else if (KILL_IDS.includes(id) || id === "12") rows.attack.us++;
             else if (id === "13") rows.block.us++;
             else if (id === "8") rows.ace.us++;
             else rows.errors.us++;
         } else if (p.to === 2) {
             if (!rival) {
-                // Ataque bloqueado: es el punto de bloqueo del rival guardado en nuestro lado.
-                if (ATTACK_ERR_IDS.includes(id) && p.detail === "Blocked") rows.block.them++;
+                if (isBlockedAtk) rows.block.them++;
+                else if (isRecvErr) rows.ace.them++;
+                else if (isDefBlockErr) rows.attack.them++;
                 else rows.errors.them++;
             } else if (id === "8") rows.ace.them++;
             else if (id === "13") rows.block.them++;

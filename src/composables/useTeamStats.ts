@@ -13,7 +13,7 @@ import {
 } from "firebase/firestore";
 import { useDocument } from "vuefire";
 import { db } from "../firebase";
-import { isMatchCacheable, isMatchFinished, type StatDoc } from "../utils/volleyStats";
+import { isMatchCacheable, isMatchFinished, sortChronological, type StatDoc } from "../utils/volleyStats";
 import type { TeamDoc, TeamMatchIndexEntry } from "../interfaces/firestore";
 
 // Capa de datos de estadísticas agregadas de un equipo (multipartido),
@@ -220,7 +220,8 @@ export interface TeamMatchData {
 // Vue. Evita el coste de proxificación profunda y garantiza que la identidad
 // de objeto se conserva intacta desde la carga hasta el consumo.
 function rawStats(stats: StatDoc[]): StatDoc[] {
-    return stats.map((s) => markRaw(s));
+    // `order` se reinicia por set: ordena cronológicamente (por partido).
+    return sortChronological(stats).map((s) => markRaw(s));
 }
 
 // Cuánto se espacian, como mínimo, los commits del agregado `matches`

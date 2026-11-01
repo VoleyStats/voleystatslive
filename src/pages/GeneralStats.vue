@@ -437,6 +437,7 @@ import {
     ownErrors,
     pct,
     pointsOrigin,
+    sortChronological,
     rivalBlockouts,
     rivalCorridors,
     serveLine,
@@ -528,7 +529,7 @@ const stopStatsModeWatch = watch(
         const isLiveActive = m?.live === true && !isMatchCacheable(m);
         if (isLiveActive) {
             statsUnsub = onSnapshot(statsQuery, (q) => {
-                baseStats.data = q.docs.map((d) => d.data());
+                baseStats.data = sortChronological(q.docs.map((d) => d.data()));
                 baseStats.loaded = true;
             });
             return;
@@ -537,7 +538,7 @@ const stopStatsModeWatch = watch(
             try {
                 const cacheSnap = await getDocsFromCache(statsQuery);
                 if (!cacheSnap.empty) {
-                    baseStats.data = cacheSnap.docs.map((d) => d.data());
+                    baseStats.data = sortChronological(cacheSnap.docs.map((d) => d.data()));
                     baseStats.loaded = true;
                     return;
                 }
@@ -545,7 +546,7 @@ const stopStatsModeWatch = watch(
                 // Sin caché local (IndexedDB) para esta consulta todavía: cae a servidor.
             }
             const serverSnap = await getDocs(statsQuery);
-            baseStats.data = serverSnap.docs.map((d) => d.data());
+            baseStats.data = sortChronological(serverSnap.docs.map((d) => d.data()));
             baseStats.loaded = true;
         })();
     },

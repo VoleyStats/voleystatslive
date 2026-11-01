@@ -5,7 +5,7 @@ import { useI18n } from "vue-i18n"
 import { collection, doc, onSnapshot, orderBy, query } from "firebase/firestore"
 import { useDocument } from "vuefire"
 import { db } from "../firebase"
-import { ADMIN_IDS, aid, deriveCredits, pointsOrigin, rivalServing } from "../utils/volleyStats"
+import { ADMIN_IDS, aid, deriveCredits, pointsOrigin, rivalServing, sortChronological } from "../utils/volleyStats"
 import TeamCrest from "../components/TeamCrest.vue"
 import { safeLogoUrl } from "../utils/teamLogo"
 // Everything the scoreboard needs already lives on the match doc: the app
@@ -548,21 +548,24 @@ const timeoutCount = computed<number | null>(() => {
     ).length
 })
 
-// --- Serving-team indicator (compact bar): the current rally is served by
-// the team on `server` of the LAST stat (skipping admin stats); if that last
-// stat already closed a rally (`to !== 0`), the next serve goes to whoever
-// won it. `null` (nothing shown) until there is at least one real stat.
+// --- Serving-team indicator (compact bar). `stats.order` restarts at 0 in every
+// set and the subscription sorts the whole subcollection by it, so the "last
+// stat" of `allStats` is NOT the latest of the match: only look at the CURRENT
+// set's stats, in `order`. Skipping admin stats, if the last one closed a rally
+// (`to !== 0`) the next serve goes to whoever won it; otherwise the rally in
+// progress is served by its `server`. A set with no stats yet falls back to the
+// set's `first_serve` (match.sets[]: 1 = us, 2 = rival); else `null`.
 const servingTeam = computed<"us" | "them" | null>(() => {
-    const stats = allStats.value
-    for (let i = stats.length - 1; i >= 0; i--) {
-        const s = stats[i]
-        if (ADMIN_IDS.includes(aid(s))) continue
-        if (s?.to === 1) return "us"
-        if (s?.to === 2) return "them"
-        if (s?.server == null) return null
+    const stats = allStats.value.filter((s) => Number(s?.set?.number) === currentSet.value && !ADMIN_IDS.includes(aid(s)))
+    const s = stats[stats.length - 1]
+    if (s) {
+        if (s.to === 1) return "us"
+        if (s.to === 2) return "them"
+        if (s.server == null) return null
         return rivalServing(s) ? "them" : "us"
     }
-    return null
+    const fs = match.value?.sets?.find((x) => Number(x?.number) === currentSet.value)?.first_serve
+    return fs === 1 ? "us" : fs === 2 ? "them" : null
 })
 
 // --- Remote overlay config: `teams/{team.id}.overlay`, hot-reloaded so a
@@ -612,7 +615,7 @@ function startStatsSubscription() {
     let firstSnapshot = true
     const statsQuery = query(collection(db, "live_matches", code, "stats"), orderBy("order"))
     statsUnsub = onSnapshot(statsQuery, (snap) => {
-        allStats.value = snap.docs.map((d) => d.data())
+        allStats.value = sortChronological(snap.docs.map((d) => d.data()))
         // The first snapshot replays the whole match history — never
         // treat those as "live" events, only real additions afterwards.
         if (firstSnapshot) {
@@ -641,8 +644,12 @@ function stopStatsSubscription() {
 //  - us: attack / block / ace / opponent errors — with the DERIVED credits
 //    (a rally we won logged as the rival's reception/dig error 22/23 is our
 //    ace or kill, whatever the capture mode); "opponent errors" excludes them.
-//  - them: attack / block / ace / our errors (a blocked attack counts as their
-//    block).
+//  - them: attack / block / ace / our errors. Symmetric rule (METRICS.md
+//    `pointSources`/`concededSources`): a point we lose on our own row is their
+//    block if it is a blocked attack error, their ace if it is a reception
+//    error, their attack if it is a dig/block error, else our error; the rival's
+//    own error rows we win mirror it (blocked attack -> our block, reception ->
+//    our ace, dig/block -> our attack, else their error).
 // `currentSet` still points at the set that just ended until the app starts
 // the next one.
 const finishedSetGameStats = computed(() =>

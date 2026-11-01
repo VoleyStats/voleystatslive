@@ -22,6 +22,7 @@ import {
     ownErrors,
     ownServes,
     pointsOrigin,
+    sortChronological,
     radarAxes,
     ratings,
     rotationBreakdown,
@@ -51,11 +52,12 @@ interface Opts {
     setter?: { id: string; name: string } | null;
     rot?: number;
     direction?: string;
+    order?: number;
 }
 function st(id: string, o: Opts = {}): StatDoc {
     seq += 1;
     return {
-        order: seq,
+        order: o.order ?? seq,
         to: o.to ?? 0,
         stage: o.stage ?? 2,
         player: o.player ?? ME,
@@ -110,7 +112,7 @@ describe("derivados (ace / kill) por secuencia", () => {
     });
 
     it("sin acción propia previa, el error del rival es de verdad un error del rival (no derivado)", () => {
-        const rows = [rv("22", { to: 1 })];
+        const rows = [rv("15", { to: 1 })];
         const d = deriveCredits(rows);
         expect(d.creditedBy.size).toBe(0);
         expect(pointsOrigin(rows, d).errors.us).toBe(1);
@@ -299,8 +301,48 @@ describe("errores (D4): ownErrors cuadra con el total y reparte por fundamento",
         const r = [st("6"), rv("23", { to: 1 }), rv("22", { to: 1 }), rv("15", { to: 1 })];
         const d = deriveCredits(r);
         const o = pointsOrigin(r.filter((s) => s.to !== 0), d);
-        expect(o.errors.us).toBe(2);
+        // 23 derivado por el 6 -> ataque; 22 sin derivar -> ace; 15 -> error.
+        expect(o.errors.us).toBe(1);
+        expect(o.ace.us).toBe(1);
         expect(o.attack.us).toBe(1);
+    });
+    it("origen simétrico, lado nuestro (fila rival to=1 no derivada)", () => {
+        const r = [
+            rv("16", { to: 1, detail: "Blocked" }),
+            rv("22", { to: 1 }),
+            rv("23", { to: 1 }),
+            rv("21", { to: 1 }),
+            rv("25", { to: 1 }),
+            rv("20", { to: 1 }),
+            rv("17", { to: 1 }),
+            rv("15", { to: 1 }),
+        ];
+        const o = pointsOrigin(r, deriveCredits(r));
+        expect(o.block.us).toBe(1);
+        expect(o.ace.us).toBe(1);
+        expect(o.attack.us).toBe(4);
+        expect(o.errors.us).toBe(2);
+        expect(o.attack.us + o.block.us + o.ace.us + o.errors.us).toBe(r.length);
+    });
+    it("origen simétrico, lado rival (fila propia to=2)", () => {
+        const r = [
+            st("16", { to: 2, detail: "Blocked" }),
+            st("22", { to: 2 }),
+            st("23", { to: 2 }),
+            st("21", { to: 2 }),
+            st("25", { to: 2 }),
+            st("20", { to: 2 }),
+            st("17", { to: 2 }),
+            st("15", { to: 2 }),
+            st("24", { to: 2 }),
+            st("28", { to: 2 }),
+        ];
+        const o = pointsOrigin(r, deriveCredits(r));
+        expect(o.block.them).toBe(1);
+        expect(o.ace.them).toBe(1);
+        expect(o.attack.them).toBe(4);
+        expect(o.errors.them).toBe(4);
+        expect(o.attack.them + o.block.them + o.ace.them + o.errors.them).toBe(r.length);
     });
     it("conceded: bloqueado propio va a bloqueo del rival; fila rival 8/13/otro", () => {
         const r = [st("16", { to: 2, detail: "Blocked" }), st("15", { to: 2 }), rv("8", { to: 2 }), rv("13", { to: 2 }), rv("9", { to: 2 })];
@@ -395,5 +437,59 @@ describe("conexiones colocadora → atacante (shrinkage k=12 sobre kills−error
         expect(c).toMatchObject({ attempts: 6, kills: 3, errors: 2 });
         const base = 0.1;
         expect(connectionEfficiency(c, base)).toBeCloseTo((1 + 12 * base) / (6 + 12), 10);
+    });
+});
+
+describe("sortChronological: order se reinicia por set", () => {
+    it("desintercala los sets y conserva el orden dentro de cada set", () => {
+        const a = st("6", { order: 0, set: 1 });
+        const b = st("6", { order: 0, set: 2 });
+        const c = st("13", { order: 1, set: 1, to: 1 });
+        const d = st("13", { order: 1, set: 2, to: 1 });
+        expect(sortChronological([a, b, c, d])).toEqual([a, c, b, d]);
+    });
+    it("deriveCredits no pierde el derivado con dos sets intercalados", () => {
+        const swing = st("6", { order: 0, set: 1 });
+        const other = st("9", { order: 0, set: 2, to: 1 });
+        const err = rv("23", { order: 1, set: 1, to: 1 });
+        const mixed = [swing, other, err]; // orden de Firestore: por order
+        expect(deriveCredits(mixed).kills.size).toBe(0);
+        expect(deriveCredits(sortChronological(mixed)).kills.has(swing)).toBe(true);
+    });
+});
+
+describe("pointsOrigin: pares complementarios de la captura en rejilla", () => {
+    const origin = (rows: StatDoc[]) => {
+        const sorted = sortChronological(rows);
+        return pointsOrigin(sorted.filter((s) => s.to !== 0), deriveCredits(sorted));
+    };
+    const total = (o: ReturnType<typeof pointsOrigin>, side: "us" | "them") =>
+        o.attack[side] + o.block[side] + o.ace[side] + o.errors[side];
+
+    it("(a) ace propio 8 to=1 + 22 rival to=0: un solo ace nuestro", () => {
+        const o = origin([st("8", { to: 1, order: 1 }), rv("22", { to: 0, order: 2 })]);
+        expect(o.ace.us).toBe(1);
+        expect(o.attack.us + o.block.us + o.errors.us).toBe(0);
+        expect(total(o, "us")).toBe(1);
+        expect(total(o, "them")).toBe(0);
+    });
+    it("(b) 22 propio to=2 + 8 rival to=0: un solo ace del rival, sin error nuestro", () => {
+        const o = origin([st("22", { to: 2, order: 1 }), rv("8", { to: 0, order: 2 })]);
+        expect(o.ace.them).toBe(1);
+        expect(o.errors.them).toBe(0);
+        expect(total(o, "them")).toBe(1);
+        expect(total(o, "us")).toBe(0);
+    });
+    it("(c) K2: 8 propio to=0 + 22 rival to=1 (order +0.5): ace nuestro, sin error del rival", () => {
+        const o = origin([st("8", { to: 0, order: 4 }), rv("22", { to: 1, order: 4.5 })]);
+        expect(o.ace.us).toBe(1);
+        expect(o.errors.us).toBe(0);
+        expect(total(o, "us")).toBe(1);
+    });
+    it("(d) Rally Map: 8 propio to=0 + 22 rival to=1: ace nuestro", () => {
+        const o = origin([st("8", { to: 0, order: 1 }), rv("22", { to: 1, order: 2 })]);
+        expect(o.ace.us).toBe(1);
+        expect(o.errors.us).toBe(0);
+        expect(total(o, "us")).toBe(1);
     });
 });

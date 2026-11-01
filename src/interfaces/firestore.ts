@@ -50,6 +50,8 @@ export interface LiveMatch {
     current_set?: number;
     set_closed?: boolean;
     sets_scoreboard?: SetScore[];
+    /** `Set.toJSON()` de cada set (sin stats). `first_serve`: 1 = sacamos nosotros, 2 = rival. */
+    sets?: { number?: number; first_serve?: number }[];
 }
 
 /**
