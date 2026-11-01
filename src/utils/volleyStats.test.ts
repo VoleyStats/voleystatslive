@@ -19,6 +19,7 @@ import {
     isGameStat,
     isKill,
     mergeCredits,
+    overlaySetsWon,
     ownErrors,
     ownServes,
     pointsOrigin,
@@ -491,5 +492,25 @@ describe("pointsOrigin: pares complementarios de la captura en rejilla", () => {
         expect(o.ace.us).toBe(1);
         expect(o.errors.us).toBe(0);
         expect(total(o, "us")).toBe(1);
+    });
+});
+
+describe("overlaySetsWon", () => {
+    const sb = [
+        { number: 1, score_us: 25, score_them: 20 },
+        { number: 2, score_us: 22, score_them: 25 },
+        { number: 3, score_us: 25, score_them: 18 },
+    ];
+    it("partido terminado (current_set = último+1): no suma nada", () => {
+        expect(overlaySetsWon({ sets_us: 2, sets_them: 1, current_set: 4, sets_scoreboard: sb }, true)).toEqual({ us: 2, them: 1 });
+    });
+    it("fin de set en juego: suma el set recién cerrado", () => {
+        expect(overlaySetsWon({ sets_us: 1, sets_them: 1, current_set: 3, sets_scoreboard: sb }, true)).toEqual({ us: 2, them: 1 });
+    });
+    it("set en juego: solo sets_*", () => {
+        expect(overlaySetsWon({ sets_us: 1, sets_them: 1, current_set: 3, sets_scoreboard: sb }, false)).toEqual({ us: 1, them: 1 });
+    });
+    it("sin datos", () => {
+        expect(overlaySetsWon({}, true)).toEqual({ us: 0, them: 0 });
     });
 });

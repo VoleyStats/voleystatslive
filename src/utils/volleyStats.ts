@@ -1168,3 +1168,29 @@ export function directionEfficiency(rows: StatDoc[], d: DerivedCredits): AttackT
     for (const s of rows) addAttack(t, s, d);
     return t;
 }
+
+// ------------------------------------------------------------------------
+// Overlay: sets ganados que se muestran
+// ------------------------------------------------------------------------
+// `sets_us`/`sets_them` solo cuentan los sets ANTERIORES a `current_set`
+// (`updateLiveScoreboard`). Mientras se juega, el set que acaba de cerrarse
+// (`between`) aún no está dentro, así que se suma. Un partido TERMINADO se
+// publica con `current_set = último set + 1` (`publishFinishedMatch`): no hay
+// entrada para ese set en `sets_scoreboard` y `sets_*` ya cuentan todos los
+// sets decididos, así que NO se suma nada (si no, un 3-0 podría leerse 4-0).
+export interface OverlaySetsInput {
+    sets_us?: number;
+    sets_them?: number;
+    current_set?: number;
+    sets_scoreboard?: { number: number; score_us: number; score_them: number }[];
+}
+export function overlaySetsWon(m: OverlaySetsInput, between: boolean): { us: number; them: number } {
+    const us = m.sets_us ?? 0;
+    const them = m.sets_them ?? 0;
+    const cur = (m.sets_scoreboard ?? []).find((s) => s.number === (m.current_set ?? 1));
+    if (!between || !cur) return { us, them };
+    return {
+        us: us + (cur.score_us > cur.score_them ? 1 : 0),
+        them: them + (cur.score_them > cur.score_us ? 1 : 0),
+    };
+}

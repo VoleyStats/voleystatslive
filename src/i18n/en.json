@@ -255,6 +255,7 @@
     "setEnd": "End of set {n}",
     "matchEnd": "Final",
     "setStatsTitle": "Set stats",
+    "matchStatsTitle": "Match statistics",
     "configure": "Configure",
     "setupTitle": "Configure overlay",
     "setupSubtitle": "Adjust position and size, then copy the link for OBS.",

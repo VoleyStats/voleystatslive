@@ -5,7 +5,7 @@ import { useI18n } from "vue-i18n"
 import { collection, doc, onSnapshot, orderBy, query } from "firebase/firestore"
 import { useDocument } from "vuefire"
 import { db } from "../firebase"
-import { ADMIN_IDS, aid, deriveCredits, pointsOrigin, rivalServing, sortChronological } from "../utils/volleyStats"
+import { ADMIN_IDS, aid, deriveCredits, overlaySetsWon, pointsOrigin, rivalServing, sortChronological } from "../utils/volleyStats"
 import TeamCrest from "../components/TeamCrest.vue"
 import { safeLogoUrl } from "../utils/teamLogo"
 // Everything the scoreboard needs already lives on the match doc: the app
@@ -29,7 +29,7 @@ const code = String(route.params.code ?? "")
 const isSetup = computed(() => route.query.setup !== undefined)
 const hasAnyQueryParam = computed(() => Object.keys(route.query).length > 0)
 
-// Demo mode (?demo=1 in-play, ?demo=between between sets, ?demo=banners in-play + banner loop) feeds mock data so the
+// Demo mode (?demo=1 in-play, ?demo=between between sets, ?demo=matchend finished 2-1 match, ?demo=banners in-play + banner loop) feeds mock data so the
 // overlay can be styled and placed in OBS without a real live match (and without
 // touching Firestore, so it works with no .env). Kept as a ref (rather than the
 // original plain const) so the setup panel's "demo data" toggle can flip it live.
@@ -49,6 +49,26 @@ const liveMatch = useDocument<LiveMatch>(
 const demoData = computed<LiveMatch | null>(() => {
     if (!demo.value) return null
     const between = demo.value === "between"
+    if (demo.value === "matchend") {
+        // Same shape `publishFinishedMatch` writes: `current_set` is one past the
+        // last set (no scoreboard entry), `sets_*` already count every set.
+        return {
+            team: { name: "Demo team", color: "1e90ff", logo_url: "/icon-192.png" },
+            opponent: "Demo opponent",
+            opponent_logo_url: "/icon-192.png",
+            opponent_color: "f59e0b",
+            n_sets: 3,
+            sets_us: 2,
+            sets_them: 1,
+            current_set: 4,
+            set_closed: true,
+            sets_scoreboard: [
+                { number: 1, score_us: 25, score_them: 20 },
+                { number: 2, score_us: 22, score_them: 25 },
+                { number: 3, score_us: 25, score_them: 18 },
+            ],
+        }
+    }
     return {
         // Crests: the app's own icon from `public/` (same-origin, so it passes
         // `safeLogoUrl`) stands in for both teams — placement in OBS has to be
@@ -409,21 +429,18 @@ const between = computed(() => {
     return currentDone.value
 })
 
-// Sets won: `sets_*` counts only sets *before* the current one, so when the
-// current set has just finished we add it back in for the displayed tally.
-const effUs = computed(
-    () => (match.value?.sets_us ?? 0) + (between.value && cur.value.score_us > cur.value.score_them ? 1 : 0)
-)
-const effThem = computed(
-    () => (match.value?.sets_them ?? 0) + (between.value && cur.value.score_them > cur.value.score_us ? 1 : 0)
-)
+// Sets won (see `overlaySetsWon`): adds the set that just closed while playing,
+// adds nothing for a finished match (`current_set` is one past the last set).
+const effUs = computed(() => (match.value ? overlaySetsWon(match.value, between.value).us : 0))
+const effThem = computed(() => (match.value ? overlaySetsWon(match.value, between.value).them : 0))
 
 const majority = computed(() => Math.floor(nSets.value / 2) + 1)
 const matchOver = computed(() => between.value && (effUs.value >= majority.value || effThem.value >= majority.value))
 
 // playing: compact bar during a set. between: big breakdown once a set ends.
 const phase = computed<"playing" | "between">(() => (between.value ? "between" : "playing"))
-const headline = computed(() => (matchOver.value ? t("overlay.matchEnd") : t("overlay.setEnd", { n: currentSet.value })))
+// Only the set-end card uses it: the match-end panel has no score card.
+const headline = computed(() => t("overlay.setEnd", { n: currentSet.value }))
 
 // --- Stats subcollection: momentary banners (timeout/substitution), the
 // serving-team indicator and the "set stats" block of the expanded panel.
@@ -652,9 +669,14 @@ function stopStatsSubscription() {
 //    our ace, dig/block -> our attack, else their error).
 // `currentSet` still points at the set that just ended until the app starts
 // the next one.
-const finishedSetGameStats = computed(() =>
-    allStats.value.filter((s) => Number(s?.set?.number) === currentSet.value && !ADMIN_IDS.includes(aid(s)))
-)
+// At match end the block aggregates the WHOLE match (every set, chronological
+// so `deriveCredits` sees real rallies); otherwise just the set that closed.
+const finishedSetGameStats = computed(() => {
+    const game = allStats.value.filter((s) => !ADMIN_IDS.includes(aid(s)))
+    return matchOver.value
+        ? sortChronological(game)
+        : game.filter((s) => Number(s?.set?.number) === currentSet.value)
+})
 const finishedSetPointEnders = computed(() => finishedSetGameStats.value.filter((s) => s.to !== 0))
 
 interface SetStatRow {
@@ -682,10 +704,11 @@ const hasSetStats = computed(() => finishedSetPointEnders.value.length > 0)
 
 // ?demo=between: a plausible set 3 (25-18), with rival actions and our errors, so the
 // set statistics block can be previewed and placed without a live match.
-function demoSetStats(): any[] {
+// ?demo=matchend: the same sample in sets 1..3 (scaled), for the match block.
+function demoSetStats(setNumber = 3, k = 1): any[] {
     let order = 0
     const stat = (to: number, rival: boolean, id: string, extra: object = {}) => ({
-        set: { number: 3 },
+        set: { number: setNumber },
         order: (order += 1),
         to,
         player: { id: rival ? "0" : "demo", name: rival ? "" : "Demo" },
@@ -693,7 +716,8 @@ function demoSetStats(): any[] {
         action: { id },
         ...extra,
     })
-    const rep = (n: number, to: number, rival: boolean, id: string) => Array.from({ length: n }, () => stat(to, rival, id))
+    const rep = (n: number, to: number, rival: boolean, id: string) =>
+        Array.from({ length: Math.max(1, Math.round(n * k)) }, () => stat(to, rival, id))
     // A rally we won logged the Rally Map way: our swing (6, rally goes on) and the
     // rival's reception error closing it -> the engine credits our kill.
     const derivedKill = () => [stat(0, false, "6"), stat(1, true, "23")]
@@ -792,7 +816,7 @@ watch(demo, (isDemo) => {
 watch(
     demo,
     (d) => {
-        if (d) allStats.value = d === "between" ? demoSetStats() : []
+        if (d) allStats.value = d === "between" ? demoSetStats() : d === "matchend" ? [3, 1, 2].flatMap((n, i) => demoSetStats(n, [1, 0.8, 1.2][i])) : []
     },
     { immediate: true }
 )
@@ -907,7 +931,7 @@ onUnmounted(() => {
                         </div>
 
                         <!-- Marcador del set que acaba de terminar -->
-                        <div class="card score-card">
+                        <div v-if="!matchOver" class="card score-card">
                             <div class="headline">{{ headline }}</div>
                             <div class="set-score">
                                 <span class="spts"><span class="spts-flag" :style="{ background: usColor }"></span>{{ cur.score_us || 0 }}</span>
@@ -919,7 +943,14 @@ onUnmounted(() => {
 
                         <!-- Estadísticas del set: los dos equipos, fila contra fila -->
                         <div v-if="hasSetStats" class="card">
-                            <div class="stats-title">{{ t("overlay.setStatsTitle") }} · Set {{ currentSet }}</div>
+                            <div class="stats-head">
+                                <div class="stats-title">
+                                    {{ matchOver ? t("overlay.matchStatsTitle") : `${t("overlay.setStatsTitle")} · Set ${currentSet}` }}
+                                </div>
+                                <!-- Fin de partido: la marca cierra la cabecera de las estadísticas
+                                     (no hay tarjeta de marcador del set donde ponerla). -->
+                                <span v-if="matchOver" class="brand"><img src="/logo.png" alt="" aria-hidden="true" />Clipeo</span>
+                            </div>
                             <div class="cmp-row" v-for="row in setStatRows" :key="row.key">
                                 <div class="cmp-label">{{ row.label }}</div>
                                 <div class="cmp-lines">
@@ -1556,6 +1587,16 @@ onUnmounted(() => {
 }
 
 /* ---------- SET STATS (expanded panel): both teams, row against row ---------- */
+.stats-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    margin-bottom: 4px;
+}
+.stats-head .brand {
+    font-size: 18px;
+}
 .stats-title {
     font-size: 16px;
     font-weight: 700;
@@ -1563,7 +1604,6 @@ onUnmounted(() => {
     text-transform: uppercase;
     text-align: left;
     color: var(--c-slate-400);
-    margin-bottom: 4px;
 }
 .cmp-row {
     display: grid;
