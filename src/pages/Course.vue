@@ -142,6 +142,17 @@
                           <i :class="['bi', showPassword ? 'bi-eye-slash' : 'bi-eye']"></i>
                         </button>
                       </div>
+                      <!-- Como en las apps (Login.swift / AuthManager.sendPasswordReset): bajo la contraseña, a la derecha. -->
+                      <div class="flex justify-end">
+                        <button
+                          type="button"
+                          class="pressable text-sm font-medium text-volt-300 hover:text-volt-200 disabled:opacity-40"
+                          :disabled="busy"
+                          @click="forgotPassword"
+                        >
+                          {{ t('course.step2.forgot') }}
+                        </button>
+                      </div>
 
                       <p v-if="formError" class="text-sm text-red-400" role="alert">{{ formError }}</p>
                       <p v-else-if="resetSentTo" class="text-sm text-slate-300" role="status">
@@ -154,14 +165,6 @@
                         :disabled="busy || !email || !password"
                       >
                         {{ t(busy ? 'course.step2.submitting' : 'course.step2.submit') }}
-                      </button>
-                      <button
-                        type="button"
-                        class="block mx-auto text-xs text-slate-500 hover:text-slate-300 transition"
-                        :disabled="busy"
-                        @click="forgotPassword"
-                      >
-                        {{ t('course.step2.forgot') }}
                       </button>
                     </form>
                   </template>
@@ -394,7 +397,8 @@ async function forgotPassword() {
     return;
   }
   try {
-    await sendPasswordResetEmail(courseAuth(), email.value);
+    // En minúsculas, como las apps (las cuentas se crean así).
+    await sendPasswordResetEmail(courseAuth(), email.value.toLowerCase());
   } catch (err) {
     // Un email que no existe no se distingue de uno que sí: es lo que hace
     // Firebase con la protección de enumeración activada, y aquí igual.
