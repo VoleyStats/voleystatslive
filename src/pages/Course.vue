@@ -55,7 +55,7 @@
                   </div>
                   <!-- Marcar como hecho: acción secundaria del paso, abajo a la
                        derecha y más pequeña, para que el peso lo lleven las tiendas. -->
-                  <div v-if="!done[1]" class="mt-5 flex justify-end border-t border-white/10 pt-4">
+                  <div v-if="!done[1]" class="mt-4 flex justify-end">
                     <button type="button" class="btn-primary !px-4 !py-2 text-xs" @click="complete(1)">
                       <i class="bi bi-check-lg"></i>
                       {{ t('course.step1.done') }}

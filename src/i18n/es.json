@@ -877,8 +877,8 @@
       "forgotSent": "Si {email} tiene cuenta, te hemos enviado un correo para cambiar la contraseña.",
       "success": {
         "title": "¡Listo!",
-        "text": "{plan} activo hasta el {date}. Abre tu perfil en la app para verlo.",
-        "already": "Ya lo tenías activado: {plan} hasta el {date}. Abre tu perfil en la app para verlo."
+        "text": "{plan} activo hasta el {date}. Vuelve a la app y abre tu perfil para verlo; si todavía no aparece, cierra la app del todo y vuelve a abrirla.",
+        "already": "Ya lo tenías activado: {plan} hasta el {date}. Si en la app todavía no aparece, ciérrala del todo y vuelve a abrirla."
       },
       "errors": {
         "credentials": "Email o contraseña incorrectos. Usa la misma cuenta con la que entras en la app.",

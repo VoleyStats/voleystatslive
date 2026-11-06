@@ -877,8 +877,8 @@
       "forgotSent": "If {email} has an account, we've sent you an email to reset the password.",
       "success": {
         "title": "All set!",
-        "text": "{plan} active until {date}. Open your profile in the app to see it.",
-        "already": "You had already activated it: {plan} until {date}. Open your profile in the app to see it."
+        "text": "{plan} active until {date}. Go back to the app and open your profile to see it; if it still doesn't show, fully close the app and open it again.",
+        "already": "You had already activated it: {plan} until {date}. If it still doesn't show in the app, fully close it and open it again."
       },
       "errors": {
         "credentials": "Wrong email or password. Use the same account you sign in with in the app.",
