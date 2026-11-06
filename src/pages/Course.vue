@@ -53,10 +53,14 @@
                   <div class="mt-4 flex flex-wrap gap-2">
                     <StoreButtons variant="ghost" size="sm" />
                   </div>
-                  <button v-if="!done[1]" type="button" class="btn-primary mt-4 text-sm" @click="complete(1)">
-                    <i class="bi bi-check-lg"></i>
-                    {{ t('course.step1.done') }}
-                  </button>
+                  <!-- Marcar como hecho: acción secundaria del paso, abajo a la
+                       derecha y más pequeña, para que el peso lo lleven las tiendas. -->
+                  <div v-if="!done[1]" class="mt-5 flex justify-end border-t border-white/10 pt-4">
+                    <button type="button" class="btn-primary !px-4 !py-2 text-xs" @click="complete(1)">
+                      <i class="bi bi-check-lg"></i>
+                      {{ t('course.step1.done') }}
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -183,17 +187,16 @@
               <div>
                 <div class="step-body">
                   <p class="text-sm leading-relaxed text-slate-400">{{ t('course.step3.text') }}</p>
-                  <div class="mt-4 flex flex-wrap items-center gap-3">
+                  <div class="mt-4 flex flex-wrap gap-2">
                     <a :href="info.download_url" download class="btn-ghost text-sm" @click="complete(3)">
                       <i class="bi bi-download"></i>
                       {{ t('course.step3.button') }}
                     </a>
-                    <button
-                      v-if="!done[3]"
-                      type="button"
-                      class="text-sm text-slate-400 hover:text-white transition"
-                      @click="complete(3)"
-                    >
+                  </div>
+                  <!-- Mismo pie que el paso 1. -->
+                  <div v-if="!done[3]" class="mt-5 flex justify-end border-t border-white/10 pt-4">
+                    <button type="button" class="btn-primary !px-4 !py-2 text-xs" @click="complete(3)">
+                      <i class="bi bi-check-lg"></i>
                       {{ t('course.step3.markDone') }}
                     </button>
                   </div>
