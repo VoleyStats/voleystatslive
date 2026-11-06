@@ -153,10 +153,10 @@
       "f12Text": "Anota cada balón tocando la pista: origen, destino, bloqueo y faltas. La calidad de recepción y defensa se deduce de dónde cae. Disponible con el plan Análisis.",
       "f13Title": "Overlay para retransmisiones",
       "f13Text": "Superpón el marcador en directo sobre tu emisión de YouTube o Twitch con OBS, con los colores y los rótulos de tu equipo. Función del plan Análisis Live.",
-      "f14Title": "Equipo compartido",
-      "f14Text": "Invita a tu cuerpo técnico con un QR y reparte permisos: quien puede anotar, quien solo consulta. La plantilla y las fotos se comparten entre todas las cuentas.",
-      "f15Title": "Sincronización y copia de seguridad",
-      "f15Text": "Tus equipos y partidos viajan entre tus dispositivos y quedan respaldados en la nube. Puedes restaurarlos en cualquier momento, también entre iPad y Android.",
+      "f14Title": "Equipo compartido y sincronización",
+      "f14Text": "Invita a tu cuerpo técnico con un QR y reparte permisos: quien puede anotar, quien solo consulta. La plantilla y las fotos se comparten entre todas las cuentas y se sincronizan entre tus dispositivos.",
+      "f15Title": "Copia de seguridad en la nube",
+      "f15Text": "Tus equipos y partidos quedan respaldados en la nube. Puedes restaurarlos en cualquier momento, también entre iPad y Android.",
       "f16Title": "Atajos a tu medida",
       "f16Text": "Desliza o haz doble toque sobre la tarjeta de una jugadora para anotar tus acciones más frecuentes de un solo gesto, y elige qué hace cada uno.",
       "f17Title": "Plantilla y convocatorias",
@@ -180,7 +180,7 @@
       "q3": "¿Qué estadísticas de voleibol registra y analiza?",
       "a3": "Todo lo que pasa en la pista: recepción valorada en 4 niveles, calidad de saque, ataque por fase K1/K2 y por calidad de pase, bloqueo, defensa, cambios y tiempos muertos. Al terminar tienes el informe del partido con side-out y break, origen de los puntos, rotaciones, conexiones colocadora-atacante, errores no forzados y los mapas de ataque si capturaste con Rally Map.",
       "q4": "¿Funciona sin conexión a internet?",
-      "a4": "Sí. La captura y las estadísticas funcionan completamente sin conexión, con la base de datos en el propio dispositivo, así que puedes anotar en cualquier pabellón. Internet solo hace falta para compartir el partido en directo, el overlay para OBS y la página pública del equipo (plan Análisis Live), y para la sincronización y la copia de seguridad en la nube (plan Análisis).",
+      "a4": "Sí. La captura y las estadísticas funcionan completamente sin conexión, con la base de datos en el propio dispositivo, así que puedes anotar en cualquier pabellón. Internet solo hace falta para compartir el partido en directo, el overlay para OBS, la página pública del equipo, la sincronización entre dispositivos y compartir el equipo (plan Análisis Live), y para la copia de seguridad en la nube (plan Análisis).",
       "q5": "¿Cuánto cuesta Clipeo? ¿Hay versión gratis?",
       "a5": "Descargar la app y anotar tus partidos —captura completa y estadísticas de cada partido y set— es gratis, sin límite de partidos ni de equipos. El plan Análisis (19,99 €/año o 3,99 €/mes) añade el Rally Map, el análisis de temporada, los informes en PDF y la copia en la nube. El plan Análisis Live (34,99 €/año o 6,99 €/mes) suma el directo, el overlay para OBS y la página pública del equipo. Y hay un match pass de 2,99 € para desbloquear un solo partido, sin suscripción. Tienes el desglose función a función en la página de planes.",
       "q6": "¿En qué dispositivos funciona? ¿Hay app para Android?",
@@ -192,7 +192,7 @@
       "q9": "¿Puedo exportar el informe del partido en PDF?",
       "a9": "Sí. Con el plan Análisis exportas en PDF el informe de partido, el de temporada y las fichas de jugadora, para revisarlos con el cuerpo técnico o repartirlos a la plantilla. Si solo quieres el informe de un partido concreto, el match pass de 2,99 € también lo desbloquea.",
       "q10": "¿Puedo compartir el equipo con mi cuerpo técnico?",
-      "a10": "Sí, con el plan Análisis. Invitas a tu cuerpo técnico con un QR y repartes permisos: quién puede anotar y quién solo consulta. La plantilla, las fotos y los partidos se comparten entre todas las cuentas, y la sincronización multi-dispositivo mantiene todo al día en cada iPad o Android del equipo.",
+      "a10": "Sí, con el plan Análisis Live. Invitas a tu cuerpo técnico con un QR y repartes permisos: quién puede anotar y quién solo consulta. La plantilla, las fotos y los partidos se comparten entre todas las cuentas, y la sincronización multi-dispositivo mantiene todo al día en cada iPad o Android del equipo.",
       "q11": "¿Sirve para hacer scouting del rival?",
       "a11": "Sí. El informe de rival —el que sale de tus propios partidos contra él— está incluido gratis: sus rotaciones, cómo recibe frente a tus sacadoras, sus corredores de ataque y sus zonas de peligro. Con el plan Análisis puedes además scoutear sus partidos contra terceros y montar su perfil jugadora a jugadora. Y durante el partido tienes las alertas inteligentes y el resumen entre sets, un panel para los 3 minutos de descanso con las claves del siguiente set en lenguaje claro.",
       "q12": "¿Qué datos de las jugadoras se publican en la web?",
@@ -221,10 +221,10 @@
     "plansFreeText": "Captura completa del partido con la rejilla rápida y las estadísticas de cada partido y set: fases, rotaciones, curva de puntos, alertas durante el juego y resumen entre sets. Sin límite de partidos ni de equipos.",
     "plansAnalysisName": "Análisis",
     "plansAnalysisTagline": "La temporada entera, no solo el partido de hoy",
-    "plansAnalysisText": "Todo lo gratuito, más Rally Map, el histórico y las estadísticas de temporada, las fichas de jugadora, los informes en PDF, la sincronización entre dispositivos, la copia de seguridad en la nube y compartir el equipo con tu cuerpo técnico.",
+    "plansAnalysisText": "Todo lo gratuito, más Rally Map, el histórico y las estadísticas de temporada, las fichas de jugadora, los informes en PDF y la copia de seguridad en la nube.",
     "plansAnalysisLiveName": "Análisis Live",
     "plansAnalysisLiveTagline": "Para equipos que retransmiten",
-    "plansAnalysisLiveText": "Todo lo del plan Análisis, más compartir el partido en directo con un código, el overlay para OBS con el que superpones el marcador a tu emisión de YouTube o Twitch, y la página pública del equipo.",
+    "plansAnalysisLiveText": "Todo lo del plan Análisis, más compartir el partido en directo con un código, el overlay para OBS con el que superpones el marcador a tu emisión de YouTube o Twitch, la página pública del equipo, la sincronización entre dispositivos y compartir el equipo con tu cuerpo técnico.",
     "matchPassName": "Match pass",
     "matchPassPrice": "{price} · pago único",
     "matchPassText": "¿Solo quieres desbloquear un partido concreto? El match pass le activa el directo, el Rally Map y el informe en PDF a ESE partido, sin suscripción y sin renovación.",
@@ -246,7 +246,7 @@
     "q2": "¿Qué pasa con mis datos si cancelo?",
     "a2": "No se borra nada. Tus partidos siguen en el dispositivo y las funciones gratuitas siguen funcionando igual; lo que se cierra son las de pago. Si vuelves a suscribirte, lo recuperas todo tal y como estaba.",
     "q3": "Si comparto el equipo, ¿mi plan cubre a todo el cuerpo técnico?",
-    "a3": "No. Compartir un equipo reparte el acceso a los datos según el rol de cada persona, pero el plan es siempre de la cuenta: cada miembro necesita el suyo para usar las funciones de pago. Unirse a un equipo compartido requiere plan Análisis.",
+    "a3": "No. Compartir un equipo reparte el acceso a los datos según el rol de cada persona, pero el plan es siempre de la cuenta: cada miembro necesita el suyo para usar las funciones de pago. Unirse a un equipo compartido requiere plan Análisis Live.",
     "q4": "¿Se paga por equipo o por cuenta?",
     "a4": "Por cuenta. Con un solo plan gestionas todos los equipos y todas las temporadas que quieras, sin coste por equipo ni por jugadora."
   },
@@ -851,18 +851,21 @@
       "title": "Este enlace no es válido",
       "text": "Comprueba que has escaneado el QR de la formación o pide el enlace a quien la imparte."
     },
-    "title": "Tres pasos y listo",
+    "title": "Actívalo en un momento",
     "plans": {
       "normal": "Análisis",
       "pro": "Análisis Live"
     },
     "step1": {
       "title": "Instala Clipeo y crea tu cuenta",
-      "text": "Descárgala y crea la cuenta desde la propia app, con tu email y una contraseña."
+      "text": "Descárgala y crea la cuenta desde la propia app, con tu email y una contraseña.",
+      "done": "Ya la tengo"
     },
     "step2": {
       "title": "Activa {days} días de {plan}",
       "text": "Entra con la misma cuenta que acabas de crear en la app.",
+      "summary": "{plan} activo hasta el {date}",
+      "summaryBefore": "Plan ya activado",
       "email": "Email",
       "password": "Contraseña",
       "showPassword": "Mostrar contraseña",
@@ -892,7 +895,8 @@
     "step3": {
       "title": "Descarga el partido del curso",
       "text": "Ábrelo con Clipeo: en iPad, desde Archivos › Descargas; en Android, desde la notificación de la descarga.",
-      "button": "Descargar partido"
+      "button": "Descargar partido",
+      "markDone": "Marcar como hecho"
     }
   },
   "common": {

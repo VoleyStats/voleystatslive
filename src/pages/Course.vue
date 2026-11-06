@@ -35,120 +35,169 @@
 
         <ol class="mt-8 space-y-4">
           <!-- 1 · La app y la cuenta: se crean en la app, no aquí. -->
-          <li class="card p-6">
-            <div class="flex items-start gap-4">
-              <span class="step-num">1</span>
-              <div class="min-w-0">
-                <h2 class="font-semibold">{{ t('course.step1.title') }}</h2>
-                <p class="mt-1 text-sm leading-relaxed text-slate-400">{{ t('course.step1.text') }}</p>
-                <div class="mt-4 flex flex-wrap gap-2">
-                  <StoreButtons variant="ghost" size="sm" />
+          <li class="card">
+            <h2>
+              <button type="button" class="step-head" :aria-expanded="open[1]" aria-controls="course-step-1" @click="toggle(1)">
+                <span class="step-num" :class="done[1] && 'is-done'">
+                  <i v-if="done[1]" class="bi bi-check-lg"></i>
+                  <template v-else>1</template>
+                </span>
+                <span class="min-w-0 flex-1 font-semibold">{{ t('course.step1.title') }}</span>
+                <i class="bi bi-chevron-down step-chevron" :class="open[1] && 'is-open'" aria-hidden="true"></i>
+              </button>
+            </h2>
+            <div id="course-step-1" class="faq-answer" :class="{ 'is-open': open[1] }" :inert="open[1] ? undefined : true">
+              <div>
+                <div class="step-body">
+                  <p class="text-sm leading-relaxed text-slate-400">{{ t('course.step1.text') }}</p>
+                  <div class="mt-4 flex flex-wrap gap-2">
+                    <StoreButtons variant="ghost" size="sm" />
+                  </div>
+                  <button v-if="!done[1]" type="button" class="btn-primary mt-4 text-sm" @click="complete(1)">
+                    <i class="bi bi-check-lg"></i>
+                    {{ t('course.step1.done') }}
+                  </button>
                 </div>
               </div>
             </div>
           </li>
 
           <!-- 2 · Activar el plan con la cuenta de la app. -->
-          <li class="card p-6">
-            <div class="flex items-start gap-4">
-              <span class="step-num" :class="redeemed && 'is-done'">
-                <i v-if="redeemed" class="bi bi-check-lg"></i>
-                <template v-else>2</template>
-              </span>
-              <div class="min-w-0 flex-1">
-                <h2 class="font-semibold">{{ t('course.step2.title', { days: info.days, plan: planName(info.tier) }) }}</h2>
+          <li class="card">
+            <h2>
+              <button type="button" class="step-head" :aria-expanded="open[2]" aria-controls="course-step-2" @click="toggle(2)">
+                <span class="step-num" :class="done[2] && 'is-done'">
+                  <i v-if="done[2]" class="bi bi-check-lg"></i>
+                  <template v-else>2</template>
+                </span>
+                <span class="min-w-0 flex-1">
+                  <span class="block font-semibold">{{ t('course.step2.title', { days: info.days, plan: planName(info.tier) }) }}</span>
+                  <span v-if="done[2] && !open[2]" class="mt-0.5 block text-sm text-volt-300">
+                    {{ redeemed
+                      ? t('course.step2.summary', { plan: planName(redeemed.tier), date: formatDate(redeemed.expires_at) })
+                      : t('course.step2.summaryBefore') }}
+                  </span>
+                </span>
+                <i class="bi bi-chevron-down step-chevron" :class="open[2] && 'is-open'" aria-hidden="true"></i>
+              </button>
+            </h2>
+            <div id="course-step-2" class="faq-answer" :class="{ 'is-open': open[2] }" :inert="open[2] ? undefined : true">
+              <div>
+                <div class="step-body">
+                  <div v-if="redeemed" class="rounded-xl border border-volt-400/30 bg-volt-400/[0.07] p-4" role="status">
+                    <p class="text-sm font-semibold text-volt-300">{{ t('course.step2.success.title') }}</p>
+                    <p class="mt-1 text-sm leading-relaxed text-slate-300">
+                      {{ t(redeemed.status === 'already' ? 'course.step2.success.already' : 'course.step2.success.text', {
+                        plan: planName(redeemed.tier),
+                        date: formatDate(redeemed.expires_at),
+                      }) }}
+                    </p>
+                  </div>
 
-                <div v-if="redeemed" class="mt-3 rounded-xl border border-volt-400/30 bg-volt-400/[0.07] p-4" role="status">
-                  <p class="text-sm font-semibold text-volt-300">{{ t('course.step2.success.title') }}</p>
-                  <p class="mt-1 text-sm leading-relaxed text-slate-300">
-                    {{ t(redeemed.status === 'already' ? 'course.step2.success.already' : 'course.step2.success.text', {
-                      plan: planName(redeemed.tier),
-                      date: formatDate(redeemed.expires_at),
-                    }) }}
+                  <p v-else-if="done[2]" class="text-sm leading-relaxed text-slate-300">{{ t('course.step2.summaryBefore') }}</p>
+
+                  <p v-else-if="info.status !== 'open'" class="text-sm leading-relaxed text-slate-400">
+                    {{ t(`course.closed.${info.status}`) }}
                   </p>
-                </div>
 
-                <p v-else-if="info.status !== 'open'" class="mt-2 text-sm leading-relaxed text-slate-400">
-                  {{ t(`course.closed.${info.status}`) }}
-                </p>
+                  <template v-else>
+                    <p class="text-sm leading-relaxed text-slate-400">{{ t('course.step2.text') }}</p>
+                    <form class="mt-4 space-y-3" @submit.prevent="activate" novalidate>
+                      <div>
+                        <label for="course-email" class="sr-only">{{ t('course.step2.email') }}</label>
+                        <input
+                          id="course-email"
+                          v-model.trim="email"
+                          type="email"
+                          inputmode="email"
+                          autocomplete="username"
+                          autocapitalize="off"
+                          spellcheck="false"
+                          required
+                          :placeholder="t('course.step2.email')"
+                          class="field"
+                        />
+                      </div>
+                      <div class="relative">
+                        <label for="course-password" class="sr-only">{{ t('course.step2.password') }}</label>
+                        <input
+                          id="course-password"
+                          v-model="password"
+                          :type="showPassword ? 'text' : 'password'"
+                          autocomplete="current-password"
+                          required
+                          :placeholder="t('course.step2.password')"
+                          class="field pr-11"
+                        />
+                        <button
+                          type="button"
+                          class="pressable absolute inset-y-0 right-0 flex items-center px-3 text-slate-400 hover:text-white"
+                          :aria-label="t(showPassword ? 'course.step2.hidePassword' : 'course.step2.showPassword')"
+                          @click="showPassword = !showPassword"
+                        >
+                          <i :class="['bi', showPassword ? 'bi-eye-slash' : 'bi-eye']"></i>
+                        </button>
+                      </div>
 
-                <template v-else>
-                  <p class="mt-1 text-sm leading-relaxed text-slate-400">{{ t('course.step2.text') }}</p>
-                  <form class="mt-4 space-y-3" @submit.prevent="activate" novalidate>
-                    <div>
-                      <label for="course-email" class="sr-only">{{ t('course.step2.email') }}</label>
-                      <input
-                        id="course-email"
-                        v-model.trim="email"
-                        type="email"
-                        inputmode="email"
-                        autocomplete="username"
-                        autocapitalize="off"
-                        spellcheck="false"
-                        required
-                        :placeholder="t('course.step2.email')"
-                        class="field"
-                      />
-                    </div>
-                    <div class="relative">
-                      <label for="course-password" class="sr-only">{{ t('course.step2.password') }}</label>
-                      <input
-                        id="course-password"
-                        v-model="password"
-                        :type="showPassword ? 'text' : 'password'"
-                        autocomplete="current-password"
-                        required
-                        :placeholder="t('course.step2.password')"
-                        class="field pr-11"
-                      />
+                      <p v-if="formError" class="text-sm text-red-400" role="alert">{{ formError }}</p>
+                      <p v-else-if="resetSentTo" class="text-sm text-slate-300" role="status">
+                        {{ t('course.step2.forgotSent', { email: resetSentTo }) }}
+                      </p>
+
+                      <button
+                        type="submit"
+                        class="btn-primary w-full text-base disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none"
+                        :disabled="busy || !email || !password"
+                      >
+                        {{ t(busy ? 'course.step2.submitting' : 'course.step2.submit') }}
+                      </button>
                       <button
                         type="button"
-                        class="pressable absolute inset-y-0 right-0 flex items-center px-3 text-slate-400 hover:text-white"
-                        :aria-label="t(showPassword ? 'course.step2.hidePassword' : 'course.step2.showPassword')"
-                        @click="showPassword = !showPassword"
+                        class="block mx-auto text-xs text-slate-500 hover:text-slate-300 transition"
+                        :disabled="busy"
+                        @click="forgotPassword"
                       >
-                        <i :class="['bi', showPassword ? 'bi-eye-slash' : 'bi-eye']"></i>
+                        {{ t('course.step2.forgot') }}
                       </button>
-                    </div>
-
-                    <p v-if="formError" class="text-sm text-red-400" role="alert">{{ formError }}</p>
-                    <p v-else-if="resetSentTo" class="text-sm text-slate-300" role="status">
-                      {{ t('course.step2.forgotSent', { email: resetSentTo }) }}
-                    </p>
-
-                    <button
-                      type="submit"
-                      class="btn-primary w-full text-base disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none"
-                      :disabled="busy || !email || !password"
-                    >
-                      {{ t(busy ? 'course.step2.submitting' : 'course.step2.submit') }}
-                    </button>
-                    <button
-                      type="button"
-                      class="block mx-auto text-xs text-slate-500 hover:text-slate-300 transition"
-                      :disabled="busy"
-                      @click="forgotPassword"
-                    >
-                      {{ t('course.step2.forgot') }}
-                    </button>
-                  </form>
-                </template>
+                    </form>
+                  </template>
+                </div>
               </div>
             </div>
           </li>
 
           <!-- 3 · El partido del curso. Independiente del paso 2: también
                sirve a quien no ha podido activar el plan. -->
-          <li v-if="info.download_url" class="card p-6">
-            <div class="flex items-start gap-4">
-              <span class="step-num">3</span>
-              <div class="min-w-0">
-                <h2 class="font-semibold">{{ t('course.step3.title') }}</h2>
-                <p class="mt-1 text-sm leading-relaxed text-slate-400">{{ t('course.step3.text') }}</p>
-                <a :href="info.download_url" download class="btn-ghost mt-4 text-sm">
-                  <i class="bi bi-download"></i>
-                  {{ t('course.step3.button') }}
-                </a>
+          <li v-if="info.download_url" class="card">
+            <h2>
+              <button type="button" class="step-head" :aria-expanded="open[3]" aria-controls="course-step-3" @click="toggle(3)">
+                <span class="step-num" :class="done[3] && 'is-done'">
+                  <i v-if="done[3]" class="bi bi-check-lg"></i>
+                  <template v-else>3</template>
+                </span>
+                <span class="min-w-0 flex-1 font-semibold">{{ t('course.step3.title') }}</span>
+                <i class="bi bi-chevron-down step-chevron" :class="open[3] && 'is-open'" aria-hidden="true"></i>
+              </button>
+            </h2>
+            <div id="course-step-3" class="faq-answer" :class="{ 'is-open': open[3] }" :inert="open[3] ? undefined : true">
+              <div>
+                <div class="step-body">
+                  <p class="text-sm leading-relaxed text-slate-400">{{ t('course.step3.text') }}</p>
+                  <div class="mt-4 flex flex-wrap items-center gap-3">
+                    <a :href="info.download_url" download class="btn-ghost text-sm" @click="complete(3)">
+                      <i class="bi bi-download"></i>
+                      {{ t('course.step3.button') }}
+                    </a>
+                    <button
+                      v-if="!done[3]"
+                      type="button"
+                      class="text-sm text-slate-400 hover:text-white transition"
+                      @click="complete(3)"
+                    >
+                      {{ t('course.step3.markDone') }}
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
           </li>
@@ -159,7 +208,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from "vue";
+import { onMounted, reactive, ref } from "vue";
 import { useRoute } from "vue-router";
 import { useI18n } from "vue-i18n";
 import { initializeApp, getApps } from "firebase/app";
@@ -216,6 +265,52 @@ const formError = ref("");
 const resetSentTo = ref("");
 const redeemed = ref<{ status: "ok" | "already"; tier: PromoTier; expires_at: string } | null>(null);
 
+// Pasos completables y plegables. Lo completado se recuerda por código en
+// localStorage (si no hay, la página funciona igual, solo que sin memoria).
+type StepId = 1 | 2 | 3;
+const STORAGE_KEY = `vsl-course-done:${code}`;
+
+function loadDone(): StepId[] {
+  try {
+    const raw = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? "[]");
+    return Array.isArray(raw) ? raw.filter((n): n is StepId => n === 1 || n === 2 || n === 3) : [];
+  } catch {
+    return [];
+  }
+}
+function saveDone() {
+  try {
+    const ids = ([1, 2, 3] as StepId[]).filter((n) => done[n]);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(ids));
+  } catch {
+    // Sin almacenamiento (modo privado, cuota…): se sigue sin recordar.
+  }
+}
+
+const done = reactive<Record<StepId, boolean>>({ 1: false, 2: false, 3: false });
+const open = reactive<Record<StepId, boolean>>({ 1: false, 2: false, 3: false });
+
+function visibleSteps(): StepId[] {
+  return info.value?.download_url ? [1, 2, 3] : [1, 2];
+}
+
+// Abre solo el primer paso pendiente (al cargar y al completar uno).
+function openNextPending() {
+  const next = visibleSteps().find((n) => !done[n]);
+  for (const n of [1, 2, 3] as StepId[]) open[n] = n === next;
+}
+
+function complete(n: StepId) {
+  if (done[n]) return;
+  done[n] = true;
+  saveDone();
+  openNextPending();
+}
+
+function toggle(n: StepId) {
+  open[n] = !open[n];
+}
+
 function planName(tier: PromoTier): string {
   return t(`course.plans.${tier}`);
 }
@@ -234,6 +329,8 @@ async function loadInfo() {
     }
     info.value = res;
     state.value = "ready";
+    for (const n of loadDone()) done[n] = true;
+    openNextPending();
   } catch {
     state.value = "network";
   }
@@ -270,6 +367,7 @@ async function activate() {
       if (res.status === "ok" || res.status === "already") {
         redeemed.value = res;
         password.value = "";
+        complete(2);
       } else if (res.status === "not_found") {
         state.value = "invalid";
       } else {
@@ -322,6 +420,40 @@ onMounted(loadInfo);
   color: #9cb8ff;
   font-size: 0.85rem;
   font-weight: 700;
+}
+.step-head {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.5rem;
+  text-align: left;
+  border-radius: inherit;
+}
+.step-head:focus-visible {
+  outline: 2px solid #6e93ff;
+  outline-offset: -2px;
+}
+.step-chevron {
+  flex: none;
+  color: rgb(148 163 184);
+  transition: transform 220ms var(--ease-out);
+}
+.step-chevron.is-open {
+  transform: rotate(180deg);
+}
+.step-body {
+  padding: 0 1.5rem 1.5rem 4.5rem;
+}
+@media (max-width: 400px) {
+  .step-body {
+    padding-left: 1.5rem;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .step-chevron {
+    transition-duration: 0.01ms;
+  }
 }
 .step-num.is-done {
   background: rgb(203 251 69 / 0.15);

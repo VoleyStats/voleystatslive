@@ -153,10 +153,10 @@
       "f12Text": "Log every ball by tapping the court: origin, landing, block and faults. Reception and dig quality follow from where it drops. Available with the Analysis plan.",
       "f13Title": "Broadcast overlay",
       "f13Text": "Overlay the live score on your YouTube or Twitch stream with OBS, in your team's colours and with your own banners. An Analysis Live feature.",
-      "f14Title": "Shared team",
-      "f14Text": "Invite your staff with a QR code and set permissions: who can track, who can only view. The squad and its photos are shared across every account.",
-      "f15Title": "Sync and cloud backup",
-      "f15Text": "Your teams and matches travel between your devices and stay backed up in the cloud. You can restore them at any time, including across iPad and Android.",
+      "f14Title": "Shared team and sync",
+      "f14Text": "Invite your staff with a QR code and set permissions: who can track, who can only view. The squad and its photos are shared across every account and synced across your devices.",
+      "f15Title": "Cloud backup",
+      "f15Text": "Your teams and matches stay backed up in the cloud. You can restore them at any time, including across iPad and Android.",
       "f16Title": "Shortcuts your way",
       "f16Text": "Swipe or double-tap a player's card to log your most frequent actions in a single gesture, and choose what each one does.",
       "f17Title": "Squad and call-ups",
@@ -180,7 +180,7 @@
       "q3": "Which volleyball statistics does it record and analyse?",
       "a3": "Everything that happens on court: reception graded on 4 levels, serve quality, attack by K1/K2 phase and by pass quality, block, defence, substitutions and timeouts. When the match ends you get the report with side-out and break, where the points came from, rotations, setter-attacker connections, unforced errors and the attack maps if you captured with Rally Map.",
       "q4": "Does it work without an internet connection?",
-      "a4": "Yes. Capture and statistics work fully offline, with the database on the device itself, so you can log in any gym. You only need internet to share the match live, for the OBS overlay and the public team page (Analysis Live plan), and for multi-device sync and cloud backup (Analysis plan).",
+      "a4": "Yes. Capture and statistics work fully offline, with the database on the device itself, so you can log in any gym. You only need internet to share the match live, for the OBS overlay, the public team page, multi-device sync and sharing the team (Analysis Live plan), and for cloud backup (Analysis plan).",
       "q5": "How much does Clipeo cost? Is there a free version?",
       "a5": "Downloading the app and logging your matches —full capture and stats for every match and set— is free, with no limit on matches or teams. The Analysis plan (€19.99/year or €3.99/month) adds Rally Map, season analysis, PDF reports and cloud backup. The Analysis Live plan (€34.99/year or €6.99/month) adds the live feed, the OBS overlay and the public team page. And there is a €2.99 match pass to unlock a single match, with no subscription. The feature-by-feature breakdown is on the plans page.",
       "q6": "Which devices does it work on? Is there an Android app?",
@@ -192,7 +192,7 @@
       "q9": "Can I export the match report as a PDF?",
       "a9": "Yes. With the Analysis plan you export the match report, the season report and the player profiles as PDFs, to review with your staff or hand out to the squad. If you only want the report for one specific match, the €2.99 match pass unlocks it too.",
       "q10": "Can I share the team with my coaching staff?",
-      "a10": "Yes, with the Analysis plan. You invite your staff with a QR and hand out permissions: who can log and who only reads. Squad, photos and matches are shared across every account, and multi-device sync keeps it all up to date on each iPad or Android in the team.",
+      "a10": "Yes, with the Analysis Live plan. You invite your staff with a QR and hand out permissions: who can log and who only reads. Squad, photos and matches are shared across every account, and multi-device sync keeps it all up to date on each iPad or Android in the team.",
       "q11": "Is it useful for scouting opponents?",
       "a11": "Yes. The rival report —the one built from your own matches against them— is included for free: their rotations, how they receive against your servers, their attack corridors and their danger zones. With the Analysis plan you can also scout their matches against third parties and build their profile player by player. And during the match you get the smart alerts and the between-sets summary, a panel for the 3-minute break with the keys to the next set in plain language.",
       "q12": "Which player data is published on the website?",
@@ -221,10 +221,10 @@
     "plansFreeText": "Full match capture with the quick grid and the stats for every match and set: phases, rotations, points curve, in-game alerts and the between-sets summary. No limit on matches or teams.",
     "plansAnalysisName": "Analysis",
     "plansAnalysisTagline": "The whole season, not just today's match",
-    "plansAnalysisText": "Everything in Free, plus Rally Map, team history and season stats, player profiles, PDF reports, multi-device sync, cloud backup and sharing the team with your coaching staff.",
+    "plansAnalysisText": "Everything in Free, plus Rally Map, team history and season stats, player profiles, PDF reports and cloud backup.",
     "plansAnalysisLiveName": "Analysis Live",
     "plansAnalysisLiveTagline": "For teams that broadcast",
-    "plansAnalysisLiveText": "Everything in Analysis, plus sharing the match live with a code, the OBS overlay that puts the scoreboard on top of your YouTube or Twitch stream, and the public team page.",
+    "plansAnalysisLiveText": "Everything in Analysis, plus sharing the match live with a code, the OBS overlay that puts the scoreboard on top of your YouTube or Twitch stream, the public team page, multi-device sync and sharing the team with your coaching staff.",
     "matchPassName": "Match pass",
     "matchPassPrice": "{price} · one-off",
     "matchPassText": "Only want to unlock one specific match? The match pass turns on the live feed, Rally Map and the PDF report for THAT match, with no subscription and no renewal.",
@@ -246,7 +246,7 @@
     "q2": "What happens to my data if I cancel?",
     "a2": "Nothing is deleted. Your matches stay on the device and the free features keep working exactly the same; what closes are the paid ones. Subscribe again and you get it all back as it was.",
     "q3": "If I share the team, does my plan cover my whole staff?",
-    "a3": "No. Sharing a team hands out access to the data according to each person's role, but the plan always belongs to the account: every member needs their own for the paid features. Joining a shared team requires the Analysis plan.",
+    "a3": "No. Sharing a team hands out access to the data according to each person's role, but the plan always belongs to the account: every member needs their own for the paid features. Joining a shared team requires the Analysis Live plan.",
     "q4": "Is it billed per team or per account?",
     "a4": "Per account. One plan covers every team and every season you want, with no per-team or per-player cost."
   },
@@ -851,18 +851,21 @@
       "title": "This link isn't valid",
       "text": "Make sure you scanned the workshop QR code, or ask the instructor for the link."
     },
-    "title": "Three steps and you're in",
+    "title": "Get set up in a moment",
     "plans": {
       "normal": "Analysis",
       "pro": "Analysis Live"
     },
     "step1": {
       "title": "Install Clipeo and create your account",
-      "text": "Download it and create the account from the app itself, with your email and a password."
+      "text": "Download it and create the account from the app itself, with your email and a password.",
+      "done": "I've got it"
     },
     "step2": {
       "title": "Activate {days} days of {plan}",
       "text": "Sign in with the same account you just created in the app.",
+      "summary": "{plan} active until {date}",
+      "summaryBefore": "Plan already activated",
       "email": "Email",
       "password": "Password",
       "showPassword": "Show password",
@@ -892,7 +895,8 @@
     "step3": {
       "title": "Download the workshop match",
       "text": "Open it with Clipeo: on iPad, from Files › Downloads; on Android, from the download notification.",
-      "button": "Download match"
+      "button": "Download match",
+      "markDone": "Mark as done"
     }
   },
   "common": {

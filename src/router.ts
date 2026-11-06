@@ -70,7 +70,9 @@ const routes = [
     // Activa el mes de prueba (Edge Function `promo`) y ofrece el .clipeo del
     // curso. Como /auth/action: destino técnico, nunca indexable ni en el
     // sitemap/prerender — cada código vive unos días.
-    path: '/curso/:code',
+    // Antes `/curso/:code`: los QR ya impresos siguen apuntando ahi, ver los
+    // redirects de `legacyRoutes`.
+    path: '/codigo/:code',
     name: 'course',
     component: () => import('./pages/Course.vue'),
     meta: { seo: 'course', noindex: true },
@@ -162,7 +164,19 @@ const englishRoutes = routes
     meta: { ...(r.meta ?? {}), locale: 'en' },
   })) as RouteRecordRaw[]
 
-const allRoutes = [...routes, ...englishRoutes]
+// `/curso/:code` -> `/codigo/:code` (QR impresos). Por ruta y no por nombre:
+// el redirect del gemelo inglés ha de acabar en `/en/codigo/...`, no saltar al
+// castellano. Se añaden aparte para no heredar el clonado automático de arriba.
+const legacyRoutes = ['', '/en'].map((prefix) => ({
+  path: `${prefix}/curso/:code`,
+  redirect: (to: any) => ({
+    path: `${prefix}/codigo/${to.params.code}`,
+    query: to.query,
+    hash: to.hash,
+  }),
+})) as RouteRecordRaw[]
+
+const allRoutes = [...routes, ...englishRoutes, ...legacyRoutes]
 
 const router = createRouter({
   history: createWebHistory(),

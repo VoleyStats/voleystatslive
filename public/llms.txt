@@ -34,8 +34,8 @@ anterior ("Volley Stats", "VolleyStats").
 - Marcador, rotación y sacador automáticos.
 - Directo en la web (plan Análisis Live o match pass para emitir; ver es siempre gratis y sin registro): marcador, punto a punto, momentum y estadísticas por jugadora.
 - Informe post-partido: side-out/break, origen de los puntos, rotaciones, ataque por fase y por calidad de pase, conexiones colocadora-atacante, errores no forzados y mapas de ataque (si se capturó con Rally Map).
-- Plan Análisis: dashboard de temporada con filtros, histórico del equipo, rotaciones 360°, informes de partido y temporada en PDF, sincronización multi-dispositivo, copia de seguridad en la nube, exportación de equipo/torneo (.clipeo), zonas de recepción personalizadas y compartir el equipo con otros entrenadores (roles editor/visor).
-- Plan Análisis Live: compartir partidos en directo (código de partido), overlay para OBS y página pública del equipo.
+- Plan Análisis: dashboard de temporada con filtros, histórico del equipo, rotaciones 360°, informes de partido y temporada en PDF, copia de seguridad en la nube, exportación de equipo/torneo (.clipeo) y zonas de recepción personalizadas.
+- Plan Análisis Live (incluye todo lo de Análisis): compartir partidos en directo (código de partido), overlay para OBS, página pública del equipo, sincronización multi-dispositivo y compartir el equipo con otros entrenadores (roles editor/visor; unirse a un equipo compartido también requiere este plan).
 - Scouting de rivales: el informe de rival a partir de tus propios partidos contra él —sus rotaciones, recepción frente a tus sacadoras, corredores de ataque y zonas de peligro— está incluido siempre, sin plan. Capturar los partidos del rival contra terceros y montar su perfil jugadora a jugadora requiere el plan Análisis.
 - Comparador de partidos (sin plan, incluido siempre): compara dos partidos cara a cara con métricas clave, side-out por rotación y anotadoras.
 - Alertas inteligentes (sin plan, incluido siempre): avisos automáticos durante el partido sobre rachas del rival, jugadora en racha, punto de set, rotación atascada o ataque predecible.
@@ -54,8 +54,8 @@ anterior ("Volley Stats", "VolleyStats").
 - Plataformas: iPad (iPadOS), en el App Store: https://apps.apple.com/us/app/voley-stats/id6737778450 — y Android, en Google Play: https://play.google.com/store/apps/details?id=com.voleystats. Ambas comparten datos: un equipo capturado en una se sincroniza y se restaura en la otra.
 - Web en directo: gratuita para los espectadores, sin registro.
 - Idiomas: español e inglés.
-- Precio: descargar y anotar partidos es gratis. Plan Análisis: 19,99 €/año o 3,99 €/mes (Rally Map, histórico, temporada, PDF, sync, nube, exportación de equipo/torneo, compartir equipo). Plan Análisis Live: 34,99 €/año o 6,99 €/mes (todo lo de Análisis + directo, overlay OBS, página pública del equipo). Match pass: 2,99 € de compra única por partido (desbloquea directo, Rally Map e informe PDF para ese partido, sin suscripción). Compras gestionadas vía App Store (StoreKit) en iPad y vía Google Play Billing en Android.
-- Sin conexión: sí, la captura y las estadísticas funcionan totalmente offline; internet solo hace falta para el directo, el overlay de OBS, la página pública del equipo, la sincronización y la copia de seguridad en la nube.
+- Precio: descargar y anotar partidos es gratis. Plan Análisis: 19,99 €/año o 3,99 €/mes (Rally Map, histórico, temporada, PDF, copia en la nube, exportación de equipo/torneo). Plan Análisis Live: 34,99 €/año o 6,99 €/mes (todo lo de Análisis + directo, overlay OBS, página pública del equipo, sincronización multi-dispositivo, compartir equipo). Match pass: 2,99 € de compra única por partido (desbloquea directo, Rally Map e informe PDF para ese partido, sin suscripción). Compras gestionadas vía App Store (StoreKit) en iPad y vía Google Play Billing en Android.
+- Sin conexión: sí, la captura y las estadísticas funcionan totalmente offline; internet solo hace falta para el directo, el overlay de OBS, la página pública del equipo, la sincronización y compartir el equipo (plan Análisis Live) y la copia de seguridad en la nube (plan Análisis).
 
 ## Enlaces
 

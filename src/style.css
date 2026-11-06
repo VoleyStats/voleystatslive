@@ -331,6 +331,7 @@
   /* Transiciones de UI: se acortan a un cambio prácticamente instantáneo en
      lugar de desaparecer, para no perder el estado intermedio. */
   .vsl-fade-in,
+  .faq-answer,
   .pressable,
   .card-hover,
   .btn {

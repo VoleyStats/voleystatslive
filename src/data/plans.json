@@ -35,7 +35,7 @@
     { "key": "f11", "icon": "bi-person-vcard", "plan": "analysis" },
     { "key": "f12", "icon": "bi-grid-3x3", "plan": "analysis", "matchPass": true },
     { "key": "f13", "icon": "bi-broadcast", "plan": "analysisLive", "matchPass": true },
-    { "key": "f14", "icon": "bi-people", "plan": "analysis" },
+    { "key": "f14", "icon": "bi-people", "plan": "analysisLive" },
     { "key": "f15", "icon": "bi-cloud-arrow-up", "plan": "analysis" },
     { "key": "f16", "icon": "bi-hand-index", "plan": "free" },
     { "key": "f17", "icon": "bi-calendar-check", "plan": "free" }

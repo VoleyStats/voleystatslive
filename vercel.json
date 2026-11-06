@@ -12,6 +12,16 @@
       "permanent": true
     },
     {
+      "source": "/curso/:code",
+      "destination": "/codigo/:code",
+      "permanent": false
+    },
+    {
+      "source": "/en/curso/:code",
+      "destination": "/en/codigo/:code",
+      "permanent": false
+    },
+    {
       "source": "/(team-code|pricing|privacy|terms|delete-account|contact).html",
       "destination": "/$1",
       "permanent": true
@@ -86,7 +96,7 @@
       ]
     },
     {
-      "source": "/curso/(.*)",
+      "source": "/(en/)?(curso|codigo)/(.*)",
       "headers": [
         {
           "key": "X-Robots-Tag",
